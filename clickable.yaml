@@ -23,4 +23,4 @@ image_setup:
 
 
 # docker_image: terrorjack/asterius
-ignore_review_warnings: true
+restrict_arch: all
