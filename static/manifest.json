@@ -6,11 +6,10 @@
     "hooks": {
         "appname": {
             "apparmor": "appname.apparmor",
-            "desktop":  "appname.desktop"
+            "desktop": "appname.desktop"
         }
     },
     "version": "1.0.0",
     "maintainer": "Your FullName <email@domain.org>",
-    "framework" : "@CLICK_FRAMEWORK@"
-
+    "framework": "@CLICK_FRAMEWORK@"
 }

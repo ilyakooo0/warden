@@ -4,10 +4,23 @@ build: $SRC_DIR/build.sh
 kill: webapp-container*
 image_setup:
   env: {}
+    # DEB_URL: http://archive.ubuntu.com/ubuntu
+    # HOST_ARCH: amd64
+
     # PATH: /opt/someprogram/bin:$PATH
   run:
-  - apt-get update && apt-get install -y software-properties-common
-  - add-apt-repository ppa:bhdouglass/clickable
-  - apt-get update && apt-get install -y click click-reviewers-tools
+
+  # Elm
+
   - (cd /tmp && curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && gunzip elm.gz && chmod +x elm && mv elm /usr/local/bin/)
-docker_image: terrorjack/asterius
+
+  # Asterius
+
+  # - apt-get update && apt-get install -y git binaryen automake autoconf nodejs npm python3
+
+  # - curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | sh
+
+
+
+# docker_image: terrorjack/asterius
+ignore_review_warnings: true
