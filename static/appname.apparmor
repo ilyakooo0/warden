@@ -1,0 +1,9 @@
+{
+    "template": "ubuntu-webapp",
+    "policy_groups": [
+        "webview",
+        "audio",
+        "networking"
+    ],
+    "policy_version": 16.04
+}

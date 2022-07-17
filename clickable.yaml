@@ -1,0 +1,13 @@
+clickable_minimum_required: 7.1.2
+builder: custom
+build: $SRC_DIR/build.sh
+kill: webapp-container*
+image_setup:
+  env: {}
+    # PATH: /opt/someprogram/bin:$PATH
+  run:
+  - apt-get update && apt-get install -y software-properties-common
+  - add-apt-repository ppa:bhdouglass/clickable
+  - apt-get update && apt-get install -y click click-reviewers-tools
+  - (cd /tmp && curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && gunzip elm.gz && chmod +x elm && mv elm /usr/local/bin/)
+docker_image: terrorjack/asterius

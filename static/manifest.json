@@ -1,0 +1,16 @@
+{
+    "name": "appname.yourname",
+    "description": "A short description of your app",
+    "architecture": "@CLICK_ARCH@",
+    "title": "App Title",
+    "hooks": {
+        "appname": {
+            "apparmor": "appname.apparmor",
+            "desktop":  "appname.desktop"
+        }
+    },
+    "version": "1.0.0",
+    "maintainer": "Your FullName <email@domain.org>",
+    "framework" : "@CLICK_FRAMEWORK@"
+
+}
