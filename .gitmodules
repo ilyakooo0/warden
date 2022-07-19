@@ -1,0 +1,3 @@
+[submodule "static/vanilla"]
+	path = static/vanilla
+	url = https://github.com/ilyakooo0/vanilla-compiled.git
