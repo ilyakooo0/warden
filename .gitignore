@@ -1,3 +1,6 @@
 build
 .clickable
 static/elm.js
+dist-newstyle
+result
+static/backend.js

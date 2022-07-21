@@ -1,0 +1,5 @@
+{
+  "nixEnvSelector.nixFile": "${workspaceRoot}/shell.nix",
+  "haskell.serverExecutablePath": "haskell-language-server",
+  "editor.formatOnSave": true
+}
