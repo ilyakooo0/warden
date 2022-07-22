@@ -4,3 +4,7 @@ static/elm.js
 dist-newstyle
 result
 static/backend.js
+.spago
+output
+.psc-ide-port
+backend.js
