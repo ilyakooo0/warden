@@ -104,3 +104,26 @@ let upstream =
 
 in  upstream
     with bw = ./bw/spago.dhall as Location
+    with argonaut-aeson-generic =
+      { dependencies =
+        [ "argonaut-codecs"
+        , "argonaut-core"
+        , "argonaut-generic"
+        , "arrays"
+        , "bifunctors"
+        , "control"
+        , "effect"
+        , "either"
+        , "foldable-traversable"
+        , "foreign-object"
+        , "maybe"
+        , "partial"
+        , "prelude"
+        , "psci-support"
+        , "record"
+        , "test-unit"
+        , "typelevel-prelude"
+        ]
+      , repo = "https://github.com/ilyakooo0/purescript-argonaut-aeson-generic.git"
+      , version = "purescript-0.14"
+      }

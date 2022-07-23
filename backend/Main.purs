@@ -2,6 +2,7 @@ module Main where
 
 import Prelude
 
+import BW as WB
 import Bridge (Sub(..))
 import Effect (Effect)
 import Effect.Console (log)
@@ -11,6 +12,7 @@ import FFI as FFI
 
 main :: Effect Unit
 main = do
+  bwAPI <- WB.getAPI
   app <- FFI.startElm "elm"
   Elm.subscribe app \c -> log $ "Got cmd"
   Elm.send app Hello
