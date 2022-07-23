@@ -7,7 +7,7 @@ import { EnvironmentService } from "../../deps/bw/libs/shared/dist/src/services/
 import { StateMigrationService } from "../../deps/bw/libs/shared/dist/src/services/stateMigration.service";
 import { TokenService } from "../../deps/bw/libs/shared/dist/src/services/token.service";
 import { WebCryptoFunctionService } from "../../deps/bw/libs/shared/dist/src/services/webCryptoFunction.service";
-import { Account, AccountSettings } from "../../deps/bw/libs/shared/dist/src/models/domain/account";
+import { Account } from "../../deps/bw/libs/shared/dist/src/models/domain/account";
 
 // import BrowserStorageService from "../../deps/bw/libs/shared/dist/src/services/browserStorage.service";
 import { CryptoService } from "../../deps/bw/libs/shared/dist/src/abstractions/crypto.service";

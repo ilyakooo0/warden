@@ -3,7 +3,6 @@ module BW where
 import Prelude
 
 import Control.Promise (Promise)
-import Data.Argonaut.Core (Json)
 import Data.Date (Date)
 import Data.List (List)
 import Data.Nullable (Nullable)
@@ -55,7 +54,7 @@ type ProfileOrganizationResponse = {
   "UsersGetPremium" :: Boolean,
   "Seats" :: Int,
   "MaxCollections" :: Int,
-  "MaxStorageGb" :: Int,
+  "MaxStorageGb" :: Nullable Int,
   "Key" :: String,
   "HasPublicAndPrivateKeys" :: Boolean,
   "Status" :: OrganizationUserStatusType,
@@ -73,9 +72,9 @@ type ProfileOrganizationResponse = {
   "PlanProductType" :: ProductType,
   "KeyConnectorEnabled" :: Boolean,
   "KeyConnectorUrl" :: String,
-  "FamilySponsorshipLastSyncDate" :: Date,
-  "FamilySponsorshipValidUntil" :: Date,
-  "FamilySponsorshipToDelete" :: Boolean
+  "FamilySponsorshipLastSyncDate" :: Nullable Date,
+  "FamilySponsorshipValidUntil" :: Nullable Date,
+  "FamilySponsorshipToDelete" :: Nullable Boolean
   }
 
 organizationUserStatusTypeInvited = 0 :: OrganizationUserStatusType
