@@ -6,6 +6,7 @@ import Control.Promise (Promise)
 import Data.Argonaut.Core (Json)
 import Data.Date (Date)
 import Data.List (List)
+import Data.Nullable (Nullable)
 import Effect (Effect)
 
 type PreloginResponse = {
@@ -137,9 +138,20 @@ type ProviderUserType = Int
 
 type ProfileProviderOrganizationResponse = {}
 
+type Urls = {
+  base :: Nullable String,
+  webVault :: Nullable String,
+  api :: Nullable String,
+  identity :: Nullable String,
+  icons :: Nullable String,
+  notifications :: Nullable String,
+  events :: Nullable String,
+  keyConnector :: Nullable String
+}
+
 type ApiService = {
   postPrelogin :: PreloginRequest -> Promise PreloginResponse,
   getProfile :: Unit -> Promise ProfileResponse
   }
 
-foreign import getAPI :: Effect ApiService
+foreign import getAPI :: Urls -> Effect ApiService

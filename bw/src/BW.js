@@ -7,15 +7,18 @@ import { EnvironmentService } from "../../deps/bw/libs/shared/dist/src/services/
 import { StateMigrationService } from "../../deps/bw/libs/shared/dist/src/services/stateMigration.service";
 import { TokenService } from "../../deps/bw/libs/shared/dist/src/services/token.service";
 import { WebCryptoFunctionService } from "../../deps/bw/libs/shared/dist/src/services/webCryptoFunction.service";
+import { Account, AccountSettings } from "../../deps/bw/libs/shared/dist/src/models/domain/account";
 
 // import BrowserStorageService from "../../deps/bw/libs/shared/dist/src/services/browserStorage.service";
 import { CryptoService } from "../../deps/bw/libs/shared/dist/src/abstractions/crypto.service";
 import { I18nService } from "../../deps/bw/libs/shared/dist/src/services/i18n.service";
 import { StateService } from "../../deps/bw/libs/shared/dist/src/services/state.service";
 
-export function getAPI() {
+export function getAPI(urls) {
   return function () {
     const bg = new MainBackground()
+
+    bg.environmentService.setUrls(urls)
 
     return bg.apiService
   }
@@ -38,11 +41,9 @@ class MainBackground {
   stateMigrationService; //: StateMigrationService;
 
 
-  constructor(isPrivateMode = false) {
+  constructor() {
 
-    this.messagingService = isPrivateMode
-      ? new BrowserMessagingPrivateModeBackgroundService()
-      : new BrowserMessagingService();
+    this.messagingService = new BrowserMessagingService();
     this.storageService = new BrowserStorageService();
     this.logService = new ConsoleLogService(false);
     this.stateMigrationService = new StateMigrationService(
@@ -79,7 +80,7 @@ class MainBackground {
         }
       }
     );
-    this.i18nService = new I18nService(BrowserApi.getUILanguage(window));
+    this.i18nService = new I18nService("en");
     this.cryptoFunctionService = new WebCryptoFunctionService(window);
     this.cryptoService = new BrowserCryptoService(
       this.cryptoFunctionService,
@@ -135,7 +136,7 @@ class BrowserStorageService {
   }
 
   async get(key) {
-    return resolve(JSON.parse(this.storage.getItem(key)));
+    return JSON.parse(this.storage.getItem(key));
   }
 
   async has(key) {
@@ -175,13 +176,6 @@ class BrowserMessagingService {
   }
 }
 
-class BrowserMessagingPrivateModeBackgroundService {
-  send(subscriber, arg = {}) {
-    const message = Object.assign({}, { command: subscriber }, arg);
-    window.bitwardenPopupMainMessageListener(message);
-  }
-}
-
 class BrowserPlatformUtilsService {
   constructor(messagingService, stateService, clipboardWriteCallback, biometricCallback) {
     this.messagingService = messagingService;
@@ -194,31 +188,7 @@ class BrowserPlatformUtilsService {
     this.prefersColorSchemeDark = window.matchMedia("(prefers-color-scheme: dark)");
   }
   getDevice() {
-    if (this.deviceCache) {
-      return this.deviceCache;
-    }
-    if (navigator.userAgent.indexOf(" Firefox/") !== -1 ||
-      navigator.userAgent.indexOf(" Gecko/") !== -1) {
-      this.deviceCache = DeviceType.FirefoxExtension;
-    }
-    else if ((!!window.opr && !!opr.addons) ||
-      !!window.opera ||
-      navigator.userAgent.indexOf(" OPR/") >= 0) {
-      this.deviceCache = DeviceType.OperaExtension;
-    }
-    else if (navigator.userAgent.indexOf(" Edg/") !== -1) {
-      this.deviceCache = DeviceType.EdgeExtension;
-    }
-    else if (navigator.userAgent.indexOf(" Vivaldi/") !== -1) {
-      this.deviceCache = DeviceType.VivaldiExtension;
-    }
-    else if (window.chrome && navigator.userAgent.indexOf(" Chrome/") !== -1) {
-      this.deviceCache = DeviceType.ChromeExtension;
-    }
-    else if (navigator.userAgent.indexOf(" Safari/") !== -1) {
-      this.deviceCache = DeviceType.SafariExtension;
-    }
-    return this.deviceCache;
+    return 9; // Chrome
   }
   getDeviceString() {
     const device = DeviceType[this.getDevice()].toLowerCase();
@@ -252,33 +222,19 @@ class BrowserPlatformUtilsService {
     return false;
   }
   isViewOpen() {
-    return __awaiter(this, void 0, void 0, function* () {
-      if (yield BrowserApi.isPopupOpen()) {
-        return true;
-      }
-      if (this.isSafari()) {
-        return false;
-      }
-      const sidebarView = this.sidebarViewName();
-      const sidebarOpen = sidebarView != null && chrome.extension.getViews({ type: sidebarView }).length > 0;
-      if (sidebarOpen) {
-        return true;
-      }
-      const tabOpen = chrome.extension.getViews({ type: "tab" }).length > 0;
-      return tabOpen;
-    });
+    return true;
   }
   lockTimeout() {
     return null;
   }
   launchUri(uri, options) {
-    BrowserApi.createNewTab(uri, options && options.extensionPage === true);
+    // BrowserApi.createNewTab(uri, options && options.extensionPage === true);
   }
   saveFile(win, blobData, blobOptions, fileName) {
-    BrowserApi.downloadFile(win, blobData, blobOptions, fileName);
+    // BrowserApi.downloadFile(win, blobData, blobOptions, fileName);
   }
   getApplicationVersion() {
-    return Promise.resolve(BrowserApi.getApplicationVersion());
+    // return Promise.resolve(BrowserApi.getApplicationVersion());
   }
   supportsWebAuthn(win) {
     return typeof PublicKeyCredential !== "undefined";
@@ -452,16 +408,7 @@ class BrowserPlatformUtilsService {
     });
   }
   supportsBiometric() {
-    return __awaiter(this, void 0, void 0, function* () {
-      const platformInfo = yield BrowserApi.getPlatformInfo();
-      if (platformInfo.os === "android") {
-        return false;
-      }
-      if (this.isFirefox()) {
-        return parseInt((yield browser.runtime.getBrowserInfo()).version.split(".")[0], 10) >= 87;
-      }
-      return true;
-    });
+    return false;
   }
   authenticateBiometric() {
     return this.biometricCallback();
