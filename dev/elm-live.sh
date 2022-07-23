@@ -1,6 +1,3 @@
 #!/bin/sh
 
-(
-  cd static &&
-    elm-live ../frontend/Main.elm --start-page=index.html --proxy-prefix=/api --proxy-host=http://localhost:6009 --pushstate -- --debug --output=elm.js
-)
+elm-live frontend/Main.elm --start-page=index.html --proxy-prefix=/api --proxy-host=http://localhost:6009 --pushstate -- --debug --output=elm.js

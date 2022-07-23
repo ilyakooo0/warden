@@ -1,2 +1,7 @@
 Sub:
 - Hello
+
+Cmd:
+- Login:
+    email: String
+    server: String

@@ -10,7 +10,7 @@ export function createElmSubscription(elm) {
   return function (name) {
     return function (callback) {
       return function () {
-        elm.ports[name].subscribe(callback)
+        elm.ports[name].subscribe(function (message) { callback(message)() })
       }
     }
   }

@@ -1,14 +1,23 @@
 module Elm
-  ( sendEvent
+  ( send
+  , subscribe
   )
   where
 
+import Data.Either
 import Prelude
 
 import Bridge as Bridge
-import Data.Argonaut.Encode.Generic (genericEncodeJson)
+import Data.Argonaut (decodeJson, encodeJson)
 import Effect (Effect)
+import Effect.Class.Console (log)
 import FFI as FFI
 
-sendEvent ∷ FFI.Elm → Bridge.Sub → Effect Unit
-sendEvent elm a = FFI.sendElmEvent elm "bridge" (genericEncodeJson a)
+send ∷ FFI.Elm → Bridge.Sub → Effect Unit
+send elm a = FFI.sendElmEvent elm "bridgeSub" (encodeJson a)
+
+subscribe :: FFI.Elm → (Bridge.Cmd → Effect Unit) -> Effect Unit
+subscribe elm f = FFI.createElmSubscription elm "bridgeCmd" $ \a → do
+  case decodeJson a of
+    Right (cmd :: Bridge.Cmd) ->  f cmd
+    Left err -> log $ show err

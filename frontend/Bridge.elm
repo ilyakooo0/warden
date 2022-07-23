@@ -8,6 +8,40 @@ import Dict exposing (Dict)
 import Set exposing (Set)
 
 
+type alias Cmd_Login  =
+   { email: String
+   , server: String
+   }
+
+jsonDecCmd_Login : Json.Decode.Decoder ( Cmd_Login )
+jsonDecCmd_Login =
+   Json.Decode.succeed (\pemail pserver -> {email = pemail, server = pserver})
+   |> required "email" (Json.Decode.string)
+   |> required "server" (Json.Decode.string)
+
+jsonEncCmd_Login : Cmd_Login -> Value
+jsonEncCmd_Login  val =
+   Json.Encode.object
+   [ ("email", Json.Encode.string val.email)
+   , ("server", Json.Encode.string val.server)
+   ]
+
+
+
+type Cmd  =
+    Login Cmd_Login
+
+jsonDecCmd : Json.Decode.Decoder ( Cmd )
+jsonDecCmd =
+    Json.Decode.lazy (\_ -> Json.Decode.map Login (jsonDecCmd_Login))
+
+
+jsonEncCmd : Cmd -> Value
+jsonEncCmd (Login v1) =
+    jsonEncCmd_Login v1
+
+
+
 type Sub  =
     Hello 
 

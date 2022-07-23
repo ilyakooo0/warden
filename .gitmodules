@@ -1,3 +1,6 @@
-[submodule "static/vanilla"]
-	path = static/vanilla
+[submodule "vanilla"]
+	path = vanilla
 	url = https://github.com/ilyakooo0/vanilla-compiled.git
+[submodule "deps/bw"]
+	path = deps/bw
+	url = https://github.com/bitwarden/clients.git

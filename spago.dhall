@@ -12,11 +12,15 @@ to generate this file without the comments in this block.
 -}
 { name = "backend"
 , dependencies =
-  [ "argonaut"
+  [ "aff"
+  , "aff-promise"
+  , "argonaut"
+  , "argonaut-codecs"
   , "argonaut-generic"
+  , "bw"
   , "console"
   , "effect"
-  , "foreign"
+  , "either"
   , "maybe"
   , "newtype"
   , "prelude"
