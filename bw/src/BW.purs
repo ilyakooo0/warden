@@ -135,7 +135,45 @@ providerUserTypeProviderAdmin = 0 :: ProviderUserType
 providerUserTypeServiceUser = 1 :: ProviderUserType
 type ProviderUserType = Int
 
-type ProfileProviderOrganizationResponse = {}
+type ProfileProviderOrganizationResponse = {
+  id :: String,
+  name :: String,
+  usePolicies :: Boolean,
+  useGroups :: Boolean,
+  useDirectory :: Boolean,
+  useEvents :: Boolean,
+  useTotp :: Boolean,
+  use2fa :: Boolean,
+  useApi :: Boolean,
+  useSso :: Boolean,
+  useKeyConnector :: Boolean,
+  useResetPassword :: Boolean,
+  selfHost :: Boolean,
+  usersGetPremium :: Boolean,
+  seats :: Int,
+  maxCollections :: Int,
+  maxStorageGb :: Nullable Int,
+  key :: String,
+  hasPublicAndPrivateKeys :: Boolean,
+  status :: OrganizationUserStatusType,
+  type :: OrganizationUserType,
+  enabled :: Boolean,
+  ssoBound :: Boolean,
+  identifier :: String,
+  permissions :: PermissionsApi,
+  resetPasswordEnrolled :: Boolean,
+  userId :: String,
+  providerId :: String,
+  providerName :: String,
+  familySponsorshipFriendlyName :: String,
+  familySponsorshipAvailable :: Boolean,
+  planProductType :: ProductType,
+  keyConnectorEnabled :: Boolean,
+  keyConnectorUrl :: String,
+  familySponsorshipLastSyncDate :: Nullable Date,
+  familySponsorshipValidUntil :: Nullable Date,
+  familySponsorshipToDelete :: Nullable Boolean,
+}
 
 type Urls = {
   base :: Nullable String,
