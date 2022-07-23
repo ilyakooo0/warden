@@ -8,8 +8,11 @@ import Data.List (List)
 import Data.Nullable (Nullable)
 import Effect (Effect)
 
+kdfPBKDF2_SHA256 = 0 :: KDF
+type KDF = Int
+
 type PreloginResponse = {
-  kdf :: Int, -- seems to be always PBKDF2_SHA256
+  kdf :: KDF,
   kdfIterations :: Int
 }
 
@@ -172,7 +175,7 @@ type ProfileProviderOrganizationResponse = {
   keyConnectorUrl :: String,
   familySponsorshipLastSyncDate :: Nullable Date,
   familySponsorshipValidUntil :: Nullable Date,
-  familySponsorshipToDelete :: Nullable Boolean,
+  familySponsorshipToDelete :: Nullable Boolean
 }
 
 type Urls = {
