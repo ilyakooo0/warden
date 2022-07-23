@@ -9,8 +9,8 @@ import Data.Nullable (Nullable)
 import Effect (Effect)
 
 type PreloginResponse = {
-  "Kdf" :: Int, -- seems to be always PBKDF2_SHA256
-  "KdfIterations" :: Int
+  kdf :: Int, -- seems to be always PBKDF2_SHA256
+  kdfIterations :: Int
 }
 
 type PreloginRequest = {
@@ -18,63 +18,63 @@ type PreloginRequest = {
 }
 
 type ProfileResponse = {
-  "Id" :: String,
-  "Name" :: String,
-  "Email" :: String,
-  "EmailVerified" :: Boolean,
-  "MasterPasswordHint" :: String,
-  "Premium" :: Boolean,
-  "PremiumFromOrganization" :: Boolean,
-  "Culture" :: String,
-  "TwoFactorEnabled" :: Boolean,
-  "Key" :: String,
-  "PrivateKey" :: String,
-  "SecurityStamp" :: String,
-  "ForcePasswordReset" :: Boolean,
-  "UsesKeyConnector" :: Boolean,
-  "Organizations" :: List ProfileOrganizationResponse,
-  "Providers" :: List ProfileProviderResponse,
-  "ProviderOrganizations" :: List ProfileProviderOrganizationResponse
+  id :: String,
+  name :: String,
+  email :: String,
+  emailVerified :: Boolean,
+  masterPasswordHint :: String,
+  premiumPersonally :: Boolean,
+  premiumFromOrganization :: Boolean,
+  culture :: String,
+  twoFactorEnabled :: Boolean,
+  key :: String,
+  privateKey :: String,
+  securityStamp :: String,
+  forcePasswordReset :: Boolean,
+  usesKeyConnector :: Boolean,
+  organizations :: List ProfileOrganizationResponse,
+  providers :: List ProfileProviderResponse,
+  providerOrganizations :: List ProfileProviderOrganizationResponse
 }
 
 type ProfileOrganizationResponse = {
-  "Id" :: String,
-  "Name" :: String,
-  "UsePolicies" :: Boolean,
-  "UseGroups" :: Boolean,
-  "UseDirectory" :: Boolean,
-  "UseEvents" :: Boolean,
-  "UseTotp" :: Boolean,
-  "Use2fa" :: Boolean,
-  "UseApi" :: Boolean,
-  "UseSso" :: Boolean,
-  "UseKeyConnector" :: Boolean,
-  "UseResetPassword" :: Boolean,
-  "SelfHost" :: Boolean,
-  "UsersGetPremium" :: Boolean,
-  "Seats" :: Int,
-  "MaxCollections" :: Int,
-  "MaxStorageGb" :: Nullable Int,
-  "Key" :: String,
-  "HasPublicAndPrivateKeys" :: Boolean,
-  "Status" :: OrganizationUserStatusType,
-  "Type" :: OrganizationUserType,
-  "Enabled" :: Boolean,
-  "SsoBound" :: Boolean,
-  "Identifier" :: String,
-  "permissions" :: PermissionsApi,
-  "ResetPasswordEnrolled" :: Boolean,
-  "UserId" :: String,
-  "ProviderId" :: String,
-  "ProviderName" :: String,
-  "FamilySponsorshipFriendlyName" :: String,
-  "FamilySponsorshipAvailable" :: Boolean,
-  "PlanProductType" :: ProductType,
-  "KeyConnectorEnabled" :: Boolean,
-  "KeyConnectorUrl" :: String,
-  "FamilySponsorshipLastSyncDate" :: Nullable Date,
-  "FamilySponsorshipValidUntil" :: Nullable Date,
-  "FamilySponsorshipToDelete" :: Nullable Boolean
+  id :: String,
+  name :: String,
+  usePolicies :: Boolean,
+  useGroups :: Boolean,
+  useDirectory :: Boolean,
+  useEvents :: Boolean,
+  useTotp :: Boolean,
+  use2fa :: Boolean,
+  useApi :: Boolean,
+  useSso :: Boolean,
+  useKeyConnector :: Boolean,
+  useResetPassword :: Boolean,
+  selfHost :: Boolean,
+  usersGetPremium :: Boolean,
+  seats :: Int,
+  maxCollections :: Int,
+  maxStorageGb :: Nullable Int,
+  key :: String,
+  hasPublicAndPrivateKeys :: Boolean,
+  status :: OrganizationUserStatusType,
+  type :: OrganizationUserType,
+  enabled :: Boolean,
+  ssoBound :: Boolean,
+  identifier :: String,
+  permissions :: PermissionsApi,
+  resetPasswordEnrolled :: Boolean,
+  userId :: String,
+  providerId :: String,
+  providerName :: String,
+  familySponsorshipFriendlyName :: String,
+  familySponsorshipAvailable :: Boolean,
+  planProductType :: ProductType,
+  keyConnectorEnabled :: Boolean,
+  keyConnectorUrl :: String,
+  familySponsorshipLastSyncDate :: Nullable Date,
+  familySponsorshipValidUntil :: Nullable Date,
+  familySponsorshipToDelete :: Nullable Boolean
   }
 
 organizationUserStatusTypeInvited = 0 :: OrganizationUserStatusType
@@ -90,22 +90,22 @@ organizationUserTypeCustom = 4 :: OrganizationUserType
 type OrganizationUserType = Int
 
 type PermissionsApi = {
-  "AccessEventLogs" :: Boolean,
-  "AccessImportExport" :: Boolean,
-  "AccessReports" :: Boolean,
-  "ManageAllCollections" :: Boolean,
-  "ManageAssignedCollections" :: Boolean,
-  "CreateNewCollections" :: Boolean,
-  "EditAnyCollection" :: Boolean,
-  "DeleteAnyCollection" :: Boolean,
-  "EditAssignedCollections" :: Boolean,
-  "DeleteAssignedCollections" :: Boolean,
-  "ManageCiphers" :: Boolean,
-  "ManageGroups" :: Boolean,
-  "ManageSso" :: Boolean,
-  "ManagePolicies" :: Boolean,
-  "ManageUsers" :: Boolean,
-  "ManageResetPassword" :: Boolean
+  accessEventLogs :: Boolean,
+  accessImportExport :: Boolean,
+  accessReports :: Boolean,
+  manageAllCollections :: Boolean,
+  createNewCollections :: Boolean,
+  editAnyCollection :: Boolean,
+  deleteAnyCollection :: Boolean,
+  manageAssignedCollections :: Boolean,
+  editAssignedCollections :: Boolean,
+  deleteAssignedCollections :: Boolean,
+  manageCiphers :: Boolean,
+  manageGroups :: Boolean,
+  manageSso :: Boolean,
+  managePolicies :: Boolean,
+  manageUsers :: Boolean,
+  manageResetPassword :: Boolean
 }
 
 productTypeFree = 0 :: ProductType
@@ -151,6 +151,6 @@ type Urls = {
 type ApiService = {
   postPrelogin :: PreloginRequest -> Promise PreloginResponse,
   getProfile :: Unit -> Promise ProfileResponse
-  }
+}
 
 foreign import getAPI :: Urls -> Effect ApiService

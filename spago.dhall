@@ -21,6 +21,7 @@ to generate this file without the comments in this block.
   , "console"
   , "effect"
   , "either"
+  , "foreign"
   , "maybe"
   , "newtype"
   , "nullable"

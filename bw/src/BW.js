@@ -195,7 +195,7 @@ class BrowserPlatformUtilsService {
     return device.replace("extension", "");
   }
   getClientType() {
-    return ClientType.Browser;
+    return "browser";
   }
   isFirefox() {
     return this.getDevice() === DeviceType.FirefoxExtension;
@@ -266,7 +266,7 @@ class BrowserPlatformUtilsService {
     });
   }
   isDev() {
-    return process.env.ENV === "development";
+    return false;
   }
   isSelfHost() {
     return false;
