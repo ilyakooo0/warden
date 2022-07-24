@@ -104,6 +104,7 @@ let upstream =
 
 in  upstream
     with bw = ./bw/spago.dhall as Location
+    with ell = ./ell/spago.dhall as Location
     with argonaut-aeson-generic =
       { dependencies =
         [ "argonaut-codecs"

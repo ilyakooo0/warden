@@ -10,6 +10,7 @@
   , "maybe"
   , "newtype"
   , "prelude"
+  , "ell"
   ]
 , packages = ../packages.dhall
 , sources = [ "src/**/*.purs" ]
