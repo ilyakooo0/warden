@@ -15,6 +15,7 @@ import Prelude
 newtype Cmd_Login =
     Cmd_Login {
       email :: String
+    , password :: String
     , server :: String
     }
 
@@ -47,4 +48,3 @@ instance decodeJsonSub :: DecodeJson Sub where
 derive instance genericSub :: Generic Sub _
 derive instance eqSub :: Eq Sub
 derive instance ordSub :: Ord Sub
-

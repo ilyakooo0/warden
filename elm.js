@@ -10590,7 +10590,7 @@ var $author$project$FFI$getBridge = F2(
 					}
 				}));
 	});
-var $author$project$Main$init = {email: '', error: $elm$core$Maybe$Nothing, messages: _List_Nil, server: ''};
+var $author$project$Main$init = {email: '', error: $elm$core$Maybe$Nothing, messages: _List_Nil, password: '', server: ''};
 var $author$project$Bridge$Login = function (a) {
 	return {$: 'Login', a: a};
 };
@@ -10602,6 +10602,9 @@ var $author$project$Bridge$jsonEncCmd_Login = function (val) {
 				_Utils_Tuple2(
 				'email',
 				$elm$json$Json$Encode$string(val.email)),
+				_Utils_Tuple2(
+				'password',
+				$elm$json$Json$Encode$string(val.password)),
 				_Utils_Tuple2(
 				'server',
 				$elm$json$Json$Encode$string(val.server))
@@ -10650,17 +10653,27 @@ var $author$project$Main$update = F2(
 						model,
 						{server: server}),
 					$elm$core$Platform$Cmd$none);
+			case 'UpdatePassword':
+				var password = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{password: password}),
+					$elm$core$Platform$Cmd$none);
 			default:
 				return _Utils_Tuple2(
 					model,
 					$author$project$FFI$sendBridge(
 						$author$project$Bridge$Login(
-							{email: model.email, server: model.server})));
+							{email: model.email, password: model.password, server: model.server})));
 		}
 	});
 var $author$project$Main$Submit = {$: 'Submit'};
 var $author$project$Main$UpdateEmail = function (a) {
 	return {$: 'UpdateEmail', a: a};
+};
+var $author$project$Main$UpdatePassword = function (a) {
+	return {$: 'UpdatePassword', a: a};
 };
 var $author$project$Main$UpdateServer = function (a) {
 	return {$: 'UpdateServer', a: a};
@@ -10767,6 +10780,22 @@ var $author$project$Main$view = function (model) {
 					_List_Nil,
 					_List_fromArray(
 						[
+							$elm$html$Html$text('Password')
+						])),
+					A2(
+					$elm$html$Html$input,
+					_List_fromArray(
+						[
+							$elm$html$Html$Attributes$type_('text'),
+							$elm$html$Html$Attributes$value(model.password),
+							$elm$html$Html$Events$onInput($author$project$Main$UpdatePassword)
+						]),
+					_List_Nil),
+					A2(
+					$elm$html$Html$h4,
+					_List_Nil,
+					_List_fromArray(
+						[
 							$elm$html$Html$text('Server')
 						])),
 					A2(
@@ -10831,4 +10860,4 @@ var $author$project$Main$main = $elm$browser$Browser$element(
 		view: $author$project$Main$view
 	});
 _Platform_export({'Main':{'init':$author$project$Main$main(
-	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"RecieveMessage":["String.String"],"Error":["String.String"],"UpdateEmail":["String.String"],"UpdateServer":["String.String"],"Submit":[]}},"String.String":{"args":[],"tags":{"String":[]}}}}})}});}(this));
+	$elm$json$Json$Decode$succeed(_Utils_Tuple0))({"versions":{"elm":"0.19.1"},"types":{"message":"Main.Msg","aliases":{},"unions":{"Main.Msg":{"args":[],"tags":{"RecieveMessage":["String.String"],"Error":["String.String"],"UpdateEmail":["String.String"],"UpdateServer":["String.String"],"UpdatePassword":["String.String"],"Submit":[]}},"String.String":{"args":[],"tags":{"String":[]}}}}})}});}(this));

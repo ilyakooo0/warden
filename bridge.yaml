@@ -5,3 +5,4 @@ Cmd:
 - Login:
     email: String
     server: String
+    password: String

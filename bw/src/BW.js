@@ -10,17 +10,35 @@ import { WebCryptoFunctionService } from "../../deps/bw/libs/shared/dist/src/ser
 import { Account } from "../../deps/bw/libs/shared/dist/src/models/domain/account";
 
 // import BrowserStorageService from "../../deps/bw/libs/shared/dist/src/services/browserStorage.service";
-import { CryptoService } from "../../deps/bw/libs/shared/dist/src/abstractions/crypto.service";
+import { CryptoService } from "../../deps/bw/libs/shared/dist/src/services/crypto.service";
+
 import { I18nService } from "../../deps/bw/libs/shared/dist/src/services/i18n.service";
 import { StateService } from "../../deps/bw/libs/shared/dist/src/services/state.service";
+import { PasswordTokenRequest } from "../../deps/bw/libs/shared/dist/src/models/request/identityToken/passwordTokenRequest";
+import { TokenRequestTwoFactor } from "../../deps/bw/libs/common/src/models/request/identityToken/tokenRequestTwoFactor.ts";
 
-export function getAPI(urls) {
+export function getServices(urls) {
   return function () {
     const bg = new MainBackground()
 
     bg.environmentService.setUrls(urls)
 
-    return bg.apiService
+    return {
+      api: {
+        postPrelogin: (req) => bg.apiService.postPrelogin(req),
+        getProfile: (req) => bg.apiService.getProfile(req),
+        postIdentityToken: (req) => bg.apiService.postIdentityToken(
+          new PasswordTokenRequest(
+            email = req.email,
+            masterPasswordHash = req.masterPasswordHash,
+            captchaResponse = req.captchaResponse,
+            twoFactor = new TokenRequestTwoFactor(req.twoFactor),
+            device = req.device
+          )
+        )
+      },
+      crypto: bg.cryptoService
+    }
   }
 }
 

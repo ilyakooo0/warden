@@ -26,6 +26,7 @@ to generate this file without the comments in this block.
   , "newtype"
   , "nullable"
   , "prelude"
+  , "transformers"
   ]
 , packages = ./packages.dhall
 , sources = [ "backend/**/*.purs" ]

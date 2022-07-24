@@ -10,19 +10,22 @@ import Set exposing (Set)
 
 type alias Cmd_Login  =
    { email: String
+   , password: String
    , server: String
    }
 
 jsonDecCmd_Login : Json.Decode.Decoder ( Cmd_Login )
 jsonDecCmd_Login =
-   Json.Decode.succeed (\pemail pserver -> {email = pemail, server = pserver})
+   Json.Decode.succeed (\pemail ppassword pserver -> {email = pemail, password = ppassword, server = pserver})
    |> required "email" (Json.Decode.string)
+   |> required "password" (Json.Decode.string)
    |> required "server" (Json.Decode.string)
 
 jsonEncCmd_Login : Cmd_Login -> Value
 jsonEncCmd_Login  val =
    Json.Encode.object
    [ ("email", Json.Encode.string val.email)
+   , ("password", Json.Encode.string val.password)
    , ("server", Json.Encode.string val.server)
    ]
 

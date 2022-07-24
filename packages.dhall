@@ -103,28 +103,29 @@ let upstream =
         sha256:7a24ebdbacb2bfa27b2fc6ce3da96f048093d64e54369965a2a7b5d9892b6031
 
 in  upstream
-    with bw = ./bw/spago.dhall as Location
-    with ell = ./ell/spago.dhall as Location
-    with argonaut-aeson-generic =
-      { dependencies =
-        [ "argonaut-codecs"
-        , "argonaut-core"
-        , "argonaut-generic"
-        , "arrays"
-        , "bifunctors"
-        , "control"
-        , "effect"
-        , "either"
-        , "foldable-traversable"
-        , "foreign-object"
-        , "maybe"
-        , "partial"
-        , "prelude"
-        , "psci-support"
-        , "record"
-        , "test-unit"
-        , "typelevel-prelude"
-        ]
-      , repo = "https://github.com/ilyakooo0/purescript-argonaut-aeson-generic.git"
-      , version = "purescript-0.14"
-      }
+  with bw = ./bw/spago.dhall as Location
+  with el = ./el/spago.dhall as Location
+  with argonaut-aeson-generic =
+    { dependencies =
+      [ "argonaut-codecs"
+      , "argonaut-core"
+      , "argonaut-generic"
+      , "arrays"
+      , "bifunctors"
+      , "control"
+      , "effect"
+      , "either"
+      , "foldable-traversable"
+      , "foreign-object"
+      , "maybe"
+      , "partial"
+      , "prelude"
+      , "psci-support"
+      , "record"
+      , "test-unit"
+      , "typelevel-prelude"
+      ]
+    , repo =
+        "https://github.com/ilyakooo0/purescript-argonaut-aeson-generic.git"
+    , version = "purescript-0.14"
+    }

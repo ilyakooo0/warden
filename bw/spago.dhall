@@ -10,7 +10,8 @@
   , "maybe"
   , "newtype"
   , "prelude"
-  , "ell"
+  , "el"
+  , "arraybuffer-types"
   ]
 , packages = ../packages.dhall
 , sources = [ "src/**/*.purs" ]

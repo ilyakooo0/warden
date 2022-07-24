@@ -14,6 +14,7 @@ type Msg
     | Error String
     | UpdateEmail String
     | UpdateServer String
+    | UpdatePassword String
     | Submit
 
 
@@ -22,6 +23,7 @@ type alias Model =
     , error : Maybe String
     , server : String
     , email : String
+    , password : String
     }
 
 
@@ -41,6 +43,7 @@ init =
     , error = Nothing
     , server = ""
     , email = ""
+    , password = ""
     }
 
 
@@ -52,6 +55,8 @@ view model =
                , ul [] (model.messages |> List.map (text >> List.singleton >> li []))
                , h4 [] [ text "Email" ]
                , input [ Attr.type_ "text", Attr.value model.email, Ev.onInput UpdateEmail ] []
+               , h4 [] [ text "Password" ]
+               , input [ Attr.type_ "text", Attr.value model.password, Ev.onInput UpdatePassword ] []
                , h4 [] [ text "Server" ]
                , input [ Attr.type_ "text", Attr.value model.server, Ev.onInput UpdateServer ] []
                , button [ Ev.onClick Submit ] [ text "Submit" ]
@@ -80,5 +85,16 @@ update msg model =
         UpdateServer server ->
             ( { model | server = server }, Cmd.none )
 
+        UpdatePassword password ->
+            ( { model | password = password }, Cmd.none )
+
         Submit ->
-            ( model, FFI.sendBridge (Bridge.Login { email = model.email, server = model.server }) )
+            ( model
+            , FFI.sendBridge
+                (Bridge.Login
+                    { email = model.email
+                    , server = model.server
+                    , password = model.password
+                    }
+                )
+            )

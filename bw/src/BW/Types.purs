@@ -2,6 +2,7 @@ module BW.Types where
 
 import Prelude
 
+import Data.ArrayBuffer.Types (ArrayBuffer)
 import Data.Date (Date)
 import Data.List (List)
 import Data.Nullable (Nullable)
@@ -188,12 +189,42 @@ type Urls = {
 }
 
 type PasswordTokenRequest = {
-  email :: String,
+  email :: Email,
   masterPasswordHash :: String,
   captchaResponse :: String,
   twoFactor :: TokenRequestTwoFactor,
-  device :: Nullable Unit -- we won't use this, so leave this null
+  device :: DeviceRequest
 }
+
+type DeviceRequest = {
+  type :: DeviceType,
+  name :: String,
+  identifier :: String,
+  pushToken :: Nullable String
+}
+
+deviceTypeAndroid = 0 :: DeviceType
+deviceTypeiOS = 1 :: DeviceType
+deviceTypeChromeExtension = 2 :: DeviceType
+deviceTypeFirefoxExtension = 3 :: DeviceType
+deviceTypeOperaExtension = 4 :: DeviceType
+deviceTypeEdgeExtension = 5 :: DeviceType
+deviceTypeWindowsDesktop = 6 :: DeviceType
+deviceTypeMacOsDesktop = 7 :: DeviceType
+deviceTypeLinuxDesktop = 8 :: DeviceType
+deviceTypeChromeBrowser = 9 :: DeviceType
+deviceTypeFirefoxBrowser = 10 :: DeviceType
+deviceTypeOperaBrowser = 11 :: DeviceType
+deviceTypeEdgeBrowser = 12 :: DeviceType
+deviceTypeIEBrowser = 13 :: DeviceType
+deviceTypeUnknownBrowser = 14 :: DeviceType
+deviceTypeAndroidAmazon = 15 :: DeviceType
+deviceTypeUWP = 16 :: DeviceType
+deviceTypeSafariBrowser = 17 :: DeviceType
+deviceTypeVivaldiBrowser = 18 :: DeviceType
+deviceTypeVivaldiExtension = 19 :: DeviceType
+deviceTypeSafariExtension = 20 :: DeviceType
+type DeviceType = Int
 
 type TokenRequestTwoFactor = {
   provider :: TwoFactorProviderType,
@@ -210,3 +241,49 @@ twoFactorProviderTypeRemember = 5 :: TwoFactorProviderType
 twoFactorProviderTypeOrganizationDuo = 6 :: TwoFactorProviderType
 twoFactorProviderTypeWebAuthn = 7 :: TwoFactorProviderType
 type TwoFactorProviderType = Int
+
+
+type SymmetricCryptoKey = {
+  key :: ArrayBuffer,
+  encKey :: Nullable ArrayBuffer,
+  macKey :: Nullable ArrayBuffer,
+  encType :: EncryptionType,
+  keyB64 :: String,
+  encKeyB64 :: String,
+  macKeyB64 :: String
+}
+
+encryptionTypeAesCbc256_B64 = 0 :: EncryptionType
+encryptionTypeAesCbc128_HmacSha256_B64 = 1 :: EncryptionType
+encryptionTypeAesCbc256_HmacSha256_B64 = 2 :: EncryptionType
+encryptionTypeRsa2048_OaepSha256_B64 = 3 :: EncryptionType
+encryptionTypeRsa2048_OaepSha1_B64 = 4 :: EncryptionType
+encryptionTypeRsa2048_OaepSha256_HmacSha256_B64 = 5 :: EncryptionType
+encryptionTypeRsa2048_OaepSha1_HmacSha256_B64 = 6 :: EncryptionType
+type EncryptionType = Int
+
+newtype Password = Password String
+
+hashPurposeServerAuthorization = 1 :: HashPurpose
+hashPurposeLocalAuthorization = 2 :: HashPurpose
+type HashPurpose = Int
+
+newtype Hash = Hash String
+
+type IdentityTokenResponse = {
+  accessToken :: String,
+  expiresIn :: Int,
+  refreshToken :: String,
+  tokenType :: String,
+  resetMasterPassword :: Boolean,
+  privateKey :: String,
+  key :: String,
+  twoFactorToken :: Nullable String,
+  kdf :: KDF,
+  kdfIterations :: Int,
+  forcePasswordReset :: Nullable Boolean,
+  apiUseKeyConnector :: Nullable Boolean,
+  keyConnectorUrl :: Nullable String
+}
+
+newtype Email = Email String
