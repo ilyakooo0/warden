@@ -99,7 +99,7 @@ class MainBackground {
   constructor() {
 
     this.messagingService = new BrowserMessagingService();
-    this.storageService = new BrowserStorageService();
+    this.storageService = new MemoryStorageService();
     this.logService = new ConsoleLogService(false);
     this.stateMigrationService = new StateMigrationService(
       this.storageService,
@@ -172,34 +172,28 @@ class MainBackground {
   }
 }
 
-
-class BrowserStorageService {
-  storage;
-
-  constructor() {
-    this.storage = window.localStorage;
-  }
+class MemoryStorageService {
+  storage = {};
 
   async get(key) {
-    return JSON.parse(this.storage.getItem(key))
+    return this.storage[key]
   }
 
   async has(key) {
-    return this.storage.getItem(key) != null;
+    return key in this.storage;
   }
 
   async save(key, obj) {
     if (obj == null) {
-      // Fix safari not liking null in set
-      this.storage.removeItem(key)
+      this.remove(key)
       return
     }
 
-    this.storage.setItem(key, JSON.stringify(obj));
+    this.storage[key] = obj
   }
 
   async remove(key) {
-    this.storage.removeItem(key)
+    delete this.storage[key]
   }
 }
 
