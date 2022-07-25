@@ -18,12 +18,13 @@ type ApiService = {
   getProfile :: Unit -> Promise ProfileResponse,
 
   -- TODO: There can really be more request and response types. Maybe handle this later.
-  postIdentityToken :: PasswordTokenRequest -> Promise IdentityTokenResponse
+  postIdentityToken :: PasswordTokenRequest -> Promise IdentityTokenResponse,
+  getSync :: Unit -> Promise SyncResponse
 }
 
 type Services = {
   crypto :: CryptoService,
-  api :: ApiService
+  getApi :: Urls -> Nullable IdentityTokenResponse -> Promise ApiService
 }
 
-foreign import getServices :: Urls -> Effect Services
+foreign import getServices :: Effect Services

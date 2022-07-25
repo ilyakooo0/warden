@@ -4,14 +4,15 @@
   , "aff-promise"
   , "argonaut"
   , "argonaut-generic"
+  , "arraybuffer-types"
   , "console"
   , "effect"
+  , "el"
   , "foreign"
   , "maybe"
   , "newtype"
   , "prelude"
-  , "el"
-  , "arraybuffer-types"
+  , "undefined-is-not-a-problem"
   ]
 , packages = ../packages.dhall
 , sources = [ "src/**/*.purs" ]

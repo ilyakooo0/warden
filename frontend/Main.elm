@@ -41,8 +41,8 @@ init : Model
 init =
     { messages = []
     , error = Nothing
-    , server = ""
-    , email = ""
+    , server = "bitwarden.iko.soy"
+    , email = "mail@iko.soy"
     , password = ""
     }
 

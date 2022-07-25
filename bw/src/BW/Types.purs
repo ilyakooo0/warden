@@ -4,8 +4,9 @@ import Prelude
 
 import Data.ArrayBuffer.Types (ArrayBuffer)
 import Data.Date (Date)
-import Data.List (List)
 import Data.Nullable (Nullable)
+import Data.ShowableJson (ShowableJson)
+import Data.Undefined.NoProblem (Opt)
 
 kdfPBKDF2_SHA256 = 0 :: KDF
 type KDF = Int
@@ -34,9 +35,9 @@ type ProfileResponse = {
   securityStamp :: String,
   forcePasswordReset :: Boolean,
   usesKeyConnector :: Boolean,
-  organizations :: List ProfileOrganizationResponse,
-  providers :: List ProfileProviderResponse,
-  providerOrganizations :: List ProfileProviderOrganizationResponse
+  organizations :: Array ProfileOrganizationResponse,
+  providers :: Array ProfileProviderResponse,
+  providerOrganizations :: Array ProfileProviderOrganizationResponse
 }
 
 type ProfileOrganizationResponse = {
@@ -270,10 +271,13 @@ type HashPurpose = Int
 
 newtype Hash = Hash String
 
+newtype AccessToken = AccessToken String
+newtype RefreshToken = RefreshToken String
+
 type IdentityTokenResponse = {
-  accessToken :: String,
+  accessToken :: AccessToken,
   expiresIn :: Int,
-  refreshToken :: String,
+  refreshToken :: RefreshToken,
   tokenType :: String,
   resetMasterPassword :: Boolean,
   privateKey :: String,
@@ -287,3 +291,240 @@ type IdentityTokenResponse = {
 }
 
 newtype Email = Email String
+
+type SyncResponse = {
+  profile :: Nullable ProfileResponse,
+  folders :: Array FolderResponse,
+  collections :: Array CollectionDetailsResponse,
+  ciphers :: Array CipherResponse,
+  domains :: Nullable DomainsResponse,
+  policies :: Nullable (Array PolicyResponse),
+  sends :: Array SendResponse
+}
+
+type FolderResponse = {
+  id :: String,
+  name :: String,
+  revisionDate :: String
+}
+
+type CollectionDetailsResponse = {
+  id :: String,
+  organizationId :: Nullable String,
+  name :: String,
+  externalId :: Nullable String,
+  readOnly :: Boolean
+}
+
+type CipherResponse = {
+  id :: String,
+  organizationId :: Nullable String,
+  folderId :: Nullable String,
+  type :: CipherType,
+  name :: String,
+  notes :: Nullable String,
+  fields :: Nullable (Array FieldApi),
+  login :: Nullable LoginApi,
+  card :: Nullable CardApi,
+  identity :: Nullable IdentityApi,
+  secureNote :: Nullable SecureNoteApi,
+  favorite :: Boolean,
+  edit :: Boolean,
+  viewPassword :: Boolean,
+  organizationUseTotp :: Boolean,
+  revisionDate :: String,
+  attachments :: Nullable (Array AttachmentResponse),
+  passwordHistory :: Nullable (Array PasswordHistoryResponse),
+  collectionIds :: Nullable (Array String),
+  deletedDate :: Nullable String,
+  reprompt :: CipherRepromptType
+}
+
+cipherTypeLogin = 1 :: CipherType
+cipherTypeSecureNote = 2 :: CipherType
+cipherTypeCard = 3 :: CipherType
+cipherTypeIdentity = 4 :: CipherType
+type CipherType = Int
+
+type FieldApi = {
+  name :: String,
+  value :: String,
+  type :: FieldType,
+  linkedId :: Nullable LinkedIdType
+}
+
+fieldTypeText = 0 :: FieldType
+fieldTypeHidden = 1 :: FieldType
+fieldTypeBoolean = 2 :: FieldType
+fieldTypeLinked = 3 :: FieldType
+type FieldType = Int
+
+linkedIdTypeLoginLinkedIdUsername = 100 :: LinkedIdType
+linkedIdTypeLoginLinkedIdPassword = 101 :: LinkedIdType
+linkedIdTypeCardLinkedIdCardholderName = 300 :: LinkedIdType
+linkedIdTypeCardLinkedIdExpMonth = 301 :: LinkedIdType
+linkedIdTypeCardLinkedIdExpYear = 302 :: LinkedIdType
+linkedIdTypeCardLinkedIdCode = 303 :: LinkedIdType
+linkedIdTypeCardLinkedIdBrand = 304 :: LinkedIdType
+linkedIdTypeCardLinkedIdNumber = 305 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdTitle = 400 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdMiddleName = 401 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdAddress1 = 402 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdAddress2 = 403 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdAddress3 = 404 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdCity = 405 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdState = 406 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdPostalCode = 407 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdCountry = 408 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdCompany = 409 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdEmail = 410 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdPhone = 411 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdSsn = 412 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdUsername = 413 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdPassportNumber = 414 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdLicenseNumber = 415 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdFirstName = 416 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdLastName = 417 :: LinkedIdType
+linkedIdTypeIdentityLinkedIdFullName = 418 :: LinkedIdType
+type LinkedIdType = Int
+
+type LoginApi = {
+  uris :: Opt (Array LoginUriApi),
+  username :: Nullable String,
+  password :: Nullable String,
+  passwordRevisionDate :: Nullable String,
+  totp :: Nullable String,
+  -- This thig is undefined in some cases for some reson. Just ignoring it
+  autofillOnPageLoad :: Opt (Nullable Boolean)
+}
+
+type LoginUriApi = {
+  uri :: String,
+  match :: Nullable UriMatchType
+}
+
+uriMatchTypeDomain = 0 :: UriMatchType
+uriMatchTypeHost = 1 :: UriMatchType
+uriMatchTypeStartsWith = 2 :: UriMatchType
+uriMatchTypeExact = 3 :: UriMatchType
+uriMatchTypeRegularExpression = 4 :: UriMatchType
+uriMatchTypeNever = 5 :: UriMatchType
+type UriMatchType = Int
+
+type CardApi = {
+  cardholderName :: Nullable String,
+  brand :: Nullable String,
+  number :: Nullable String,
+  expMonth :: Nullable String,
+  expYear :: Nullable String,
+  code :: Nullable String
+}
+
+type IdentityApi = {
+  title :: String,
+  firstName :: String,
+  middleName :: String,
+  lastName :: String,
+  address1 :: String,
+  address2 :: String,
+  address3 :: String,
+  city :: String,
+  state :: String,
+  postalCode :: String,
+  country :: String,
+  company :: String,
+  email :: String,
+  phone :: String,
+  ssn :: String,
+  username :: String,
+  passportNumber :: String,
+  licenseNumber :: String
+}
+
+secureNoteApiGeneric = 0 :: SecureNoteApi
+type SecureNoteApi = Int
+
+type AttachmentResponse = {
+  id :: String,
+  url :: String,
+  fileName :: String,
+  key :: String,
+  size :: String,
+  sizeName :: String
+}
+
+type PasswordHistoryResponse = {
+  password :: String,
+  lastUsedDate :: String
+}
+
+cipherRepromptTypeNone = 0 :: CipherRepromptType
+cipherRepromptTypePassword = 1 :: CipherRepromptType
+type CipherRepromptType = Int
+
+type DomainsResponse = {
+  equivalentDomains :: Array (Array String),
+  globalEquivalentDomains :: Array GlobalDomainResponse
+}
+
+type GlobalDomainResponse = {
+  type :: Int,
+  domains :: Array String,
+  excluded :: Boolean
+}
+
+type PolicyResponse = {
+  id :: String,
+  organizationId :: Nullable String,
+  type :: PolicyType,
+  data :: ShowableJson,
+  enabled :: Boolean
+}
+
+policyTypeTwoFactorAuthentication = 0 :: PolicyType -- Requires users to have 2fa enabled
+policyTypeMasterPassword = 1 :: PolicyType -- Sets minimum requirements for master password complexity
+policyTypePasswordGenerator = 2 :: PolicyType -- Sets minimum requirements/default type for generated passwords/passphrases
+policyTypeSingleOrg = 3 :: PolicyType -- Allows users to only be apart of one organization
+policyTypeRequireSso = 4 :: PolicyType -- Requires users to authenticate with SSO
+policyTypePersonalOwnership = 5 :: PolicyType -- Disables personal vault ownership for adding/cloning items
+policyTypeDisableSend = 6 :: PolicyType -- Disables the ability to create and edit Bitwarden Sends
+policyTypeSendOptions = 7 :: PolicyType -- Sets restrictions or defaults for Bitwarden Sends
+policyTypeResetPassword = 8 :: PolicyType -- Allows orgs to use reset password : also can enable auto-enrollment during invite flow
+policyTypeMaximumVaultTimeout = 9 :: PolicyType -- Sets the maximum allowed vault timeout
+policyTypeDisablePersonalVaultExport = 10 :: PolicyType -- Disable personal vault export
+type PolicyType = Int
+
+type SendResponse = {
+  id :: String,
+  accessId :: String,
+  type :: SendType,
+  name :: String,
+  notes :: Nullable String,
+  file :: Nullable SendFileApi,
+  text :: Nullable SendTextApi,
+  key :: String,
+  maxAccessCount :: Nullable Int,
+  accessCount :: Int,
+  revisionDate :: String,
+  expirationDate :: String,
+  deletionDate :: Nullable String,
+  password :: String,
+  disable :: Boolean,
+  hideEmail :: Boolean
+}
+
+sendTypeText = 0 :: SendType
+sendTypeFile = 1 :: SendType
+type SendType = Int
+
+type SendFileApi = {
+  id :: String,
+  fileName :: String,
+  size :: String,
+  sizeName :: String
+}
+
+type SendTextApi = {
+  text :: String,
+  hidden :: Boolean
+}

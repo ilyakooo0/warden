@@ -8,11 +8,14 @@ import BW.Types (Email(..), Password(..))
 import Bridge (Sub(..))
 import Bridge as Bridge
 import Control.Monad.Reader (runReaderT)
+import Control.Promise as Promise
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Nullable (null, toNullable)
 import Effect (Effect)
 import Effect.Aff (runAff_)
+import Effect.Aff.Class as Aff
+import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Elm as Elm
 import FFI as FFI
@@ -24,23 +27,43 @@ main = do
   Elm.subscribe app \(Bridge.Login (Bridge.Cmd_Login {email, server, password})) -> do
     log $ "Got cmd"
     services <- WB.getServices
-      { base : toNullable $ Just server,
-        webVault : null,
-        api : null,
-        identity : null,
-        icons : null,
-        notifications : null,
-        events : null,
-        keyConnector : null
-      }
     runAff_ (\res -> case res of
-        Left e -> log $ show e
-        Right x -> log $ show x
-      ) $ runReaderT (Logic.getLogInRequestToken (Email email) (Password password)) {
-          api: services.api,
-          crypto : services.crypto
+          Left e -> log $ show e
+          Right x -> log $ show x
+        ) do
+      unauthedApi <- Aff.liftAff $ Promise.toAff $ services.getApi
+        { base : toNullable $ Just server,
+          webVault : null,
+          api : null,
+          identity : null,
+          icons : null,
+          notifications : null,
+          events : null,
+          keyConnector : null
         }
-    pure unit
+        null
+
+      runReaderT (do
+          tokens <- Logic.getLogInRequestToken (Email email) (Password password)
+
+          api <- Aff.liftAff $ Promise.toAff $ services.getApi
+            { base : toNullable $ Just server,
+              webVault : null,
+              api : null,
+              identity : null,
+              icons : null,
+              notifications : null,
+              events : null,
+              keyConnector : null
+            }
+            (toNullable $ Just tokens)
+
+
+          Aff.liftAff $ Promise.toAff $ api.getSync unit
+          ) {
+            api: unauthedApi,
+            crypto : services.crypto
+          }
 
   Elm.send app Hello
 

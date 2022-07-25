@@ -7,27 +7,63 @@ import { EnvironmentService } from "../../deps/bw/libs/shared/dist/src/services/
 import { StateMigrationService } from "../../deps/bw/libs/shared/dist/src/services/stateMigration.service";
 import { TokenService } from "../../deps/bw/libs/shared/dist/src/services/token.service";
 import { WebCryptoFunctionService } from "../../deps/bw/libs/shared/dist/src/services/webCryptoFunction.service";
-import { Account } from "../../deps/bw/libs/shared/dist/src/models/domain/account";
+import { Account, AccountProfile, AccountTokens } from "../../deps/bw/libs/shared/dist/src/models/domain/account";
 
 // import BrowserStorageService from "../../deps/bw/libs/shared/dist/src/services/browserStorage.service";
 import { CryptoService } from "../../deps/bw/libs/shared/dist/src/services/crypto.service";
 
 import { I18nService } from "../../deps/bw/libs/shared/dist/src/services/i18n.service";
-import { StateService } from "../../deps/bw/libs/shared/dist/src/services/state.service";
+import { StateService as BaseStateService } from "../../deps/bw/libs/shared/dist/src/services/state.service";
 import { PasswordTokenRequest } from "../../deps/bw/libs/shared/dist/src/models/request/identityToken/passwordTokenRequest";
 import { TokenRequestTwoFactor } from "../../deps/bw/libs/common/src/models/request/identityToken/tokenRequestTwoFactor.ts";
 
-export function getServices(urls) {
-  return function () {
-    const bg = new MainBackground()
 
-    bg.environmentService.setUrls(urls)
+function sanitize(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
 
-    return {
-      api: {
-        postPrelogin: (req) => bg.apiService.postPrelogin(req),
-        getProfile: (req) => bg.apiService.getProfile(req),
-        postIdentityToken: (req) => bg.apiService.postIdentityToken(
+export function getServices() {
+  const bg = new MainBackground()
+
+  return {
+    getApi: (urls) => async (tokenResponse) => {
+      const bg = new MainBackground()
+
+      await bg.bootstrap()
+
+      bg.environmentService.setUrls(urls)
+
+      if (tokenResponse != null) {
+        const accountInformation = await bg.tokenService.decodeToken(tokenResponse.accessToken);
+        await bg.stateService.addAccount(
+          new Account({
+            profile: {
+              ...new AccountProfile(),
+              ...{
+                userId: accountInformation.sub,
+                email: accountInformation.email,
+                hasPremiumPersonally: accountInformation.premium,
+                kdfIterations: tokenResponse.kdfIterations,
+                kdfType: tokenResponse.kdf,
+              },
+            },
+            tokens: {
+              ...new AccountTokens(),
+              ...{
+                accessToken: tokenResponse.accessToken,
+                refreshToken: tokenResponse.refreshToken,
+              },
+            },
+          })
+        );
+      }
+
+      const api = bg.apiService
+
+      return {
+        postPrelogin: (req) => api.postPrelogin(req),
+        getProfile: (req) => api.getProfile(req),
+        postIdentityToken: (req) => api.postIdentityToken(
           new PasswordTokenRequest(
             email = req.email,
             masterPasswordHash = req.masterPasswordHash,
@@ -35,10 +71,11 @@ export function getServices(urls) {
             twoFactor = new TokenRequestTwoFactor(req.twoFactor),
             device = req.device
           )
-        )
-      },
-      crypto: bg.cryptoService
-    }
+        ),
+        getSync: () => api.getSync().then(sanitize),
+      }
+    },
+    crypto: bg.cryptoService
   }
 }
 
@@ -119,19 +156,9 @@ class MainBackground {
   }
 
   async bootstrap() {
-    this.containerService.attachToWindow(window);
-
     await this.stateService.init();
 
     await (this.i18nService).init();
-
-    return new Promise((resolve) => {
-      setTimeout(async () => {
-        await this.environmentService.setUrlsFromStorage();
-        this.fullSync(true);
-        resolve();
-      }, 500);
-    });
   }
 
   async logout(expired, userId) {
@@ -154,7 +181,7 @@ class BrowserStorageService {
   }
 
   async get(key) {
-    return JSON.parse(this.storage.getItem(key));
+    return JSON.parse(this.storage.getItem(key))
   }
 
   async has(key) {
@@ -287,7 +314,7 @@ class BrowserPlatformUtilsService {
     return false;
   }
   isSelfHost() {
-    return false;
+    return true;
   }
   copyToClipboard(text, options) {
     let win = window;
@@ -461,5 +488,73 @@ class BrowserPlatformUtilsService {
         return theme;
       }
     });
+  }
+}
+
+class StateService extends BaseStateService {
+  async addAccount(account) {
+    // Apply browser overrides to default account values
+    account = new Account(account);
+    await super.addAccount(account);
+  }
+
+  async getIsAuthenticated(options) {
+    // Firefox Private Mode can clash with non-Private Mode because they both read from the same onDiskOptions
+    // Check that there is an account in memory before considering the user authenticated
+    return (
+      (await super.getIsAuthenticated(options)) &&
+      (await this.getAccount(this.defaultInMemoryOptions)) != null
+    );
+  }
+
+  async getBrowserGroupingComponentState(options) {
+    return (await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions)))
+      ?.groupings;
+  }
+
+  async setBrowserGroupingComponentState(value, options) {
+    const account = await this.getAccount(
+      this.reconcileOptions(options, this.defaultInMemoryOptions)
+    );
+    account.groupings = value;
+    await this.saveAccount(account, this.reconcileOptions(options, this.defaultInMemoryOptions));
+  }
+
+  async getBrowserCipherComponentState(options) {
+    return (await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions)))
+      ?.ciphers;
+  }
+
+  async setBrowserCipherComponentState(value, options) {
+    const account = await this.getAccount(
+      this.reconcileOptions(options, this.defaultInMemoryOptions)
+    );
+    account.ciphers = value;
+    await this.saveAccount(account, this.reconcileOptions(options, this.defaultInMemoryOptions));
+  }
+
+  async getBrowserSendComponentState(options) {
+    return (await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions)))
+      ?.send;
+  }
+
+  async setBrowserSendComponentState(value, options) {
+    const account = await this.getAccount(
+      this.reconcileOptions(options, this.defaultInMemoryOptions)
+    );
+    account.send = value;
+    await this.saveAccount(account, this.reconcileOptions(options, this.defaultInMemoryOptions));
+  }
+  async getBrowserSendTypeComponentState(options) {
+    return (await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions)))
+      ?.sendType;
+  }
+
+  async setBrowserSendTypeComponentState(value, options) {
+    const account = await this.getAccount(
+      this.reconcileOptions(options, this.defaultInMemoryOptions)
+    );
+    account.sendType = value;
+    await this.saveAccount(account, this.reconcileOptions(options, this.defaultInMemoryOptions));
   }
 }
