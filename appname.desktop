@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=App Title
-Exec=webapp-container --app-id="appname.iko" $@ index.html
-Icon=assets/logo.svg
+Exec=webapp-container --inspector=9223 --app-id="appname.iko" $@ index.html
+Icon=logo.svg
 Terminal=false
 Type=Application
 X-Ubuntu-Touch=true

@@ -17,7 +17,6 @@ import { StateService as BaseStateService } from "../../deps/bw/libs/shared/dist
 import { PasswordTokenRequest } from "../../deps/bw/libs/shared/dist/src/models/request/identityToken/passwordTokenRequest";
 import { TokenRequestTwoFactor } from "../../deps/bw/libs/common/src/models/request/identityToken/tokenRequestTwoFactor.ts";
 
-
 function sanitize(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
@@ -201,7 +200,12 @@ class BrowserCryptoService extends CryptoService {
   async retrieveKeyFromStorage(keySuffix) {
     if (keySuffix === "biometric") {
       await this.platformUtilService.authenticateBiometric();
-      return (await this.getKey())?.keyB64;
+      const k = await this.getKey()
+      if (k == null) {
+        return null
+      } else {
+        return k.keyB64
+      }
     }
 
     return await super.retrieveKeyFromStorage(keySuffix);
@@ -502,8 +506,8 @@ class StateService extends BaseStateService {
   }
 
   async getBrowserGroupingComponentState(options) {
-    return (await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions)))
-      ?.groupings;
+    const x = await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions))
+    return x == null ? null : x.groupings;
   }
 
   async setBrowserGroupingComponentState(value, options) {
@@ -515,8 +519,8 @@ class StateService extends BaseStateService {
   }
 
   async getBrowserCipherComponentState(options) {
-    return (await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions)))
-      ?.ciphers;
+    const x = await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions))
+    return x == null ? null : x.ciphers;
   }
 
   async setBrowserCipherComponentState(value, options) {
@@ -528,8 +532,8 @@ class StateService extends BaseStateService {
   }
 
   async getBrowserSendComponentState(options) {
-    return (await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions)))
-      ?.send;
+    const x = await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions))
+    return x == null ? null : x.send;
   }
 
   async setBrowserSendComponentState(value, options) {
@@ -540,8 +544,8 @@ class StateService extends BaseStateService {
     await this.saveAccount(account, this.reconcileOptions(options, this.defaultInMemoryOptions));
   }
   async getBrowserSendTypeComponentState(options) {
-    return (await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions)))
-      ?.sendType;
+    const x = await this.getAccount(this.reconcileOptions(options, this.defaultInMemoryOptions))
+    return x == null ? null : x.sendType;
   }
 
   async setBrowserSendTypeComponentState(value, options) {

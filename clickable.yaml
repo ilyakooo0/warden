@@ -12,5 +12,6 @@ image_setup:
 
   - (cd /tmp && curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && gunzip elm.gz && chmod +x elm && mv elm /usr/local/bin/)
   - npm install -g spago esbuild purescript --unsafe-perm=true
+  - (cd / && curl https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.37.1.tar.xz >git.tar.gz && tar -xvf git.tar.gz && cd git-2.37.1 && ./configure --without-curl && make)
 
 restrict_arch: all
