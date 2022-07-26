@@ -4,8 +4,6 @@ import Bridge
 import Browser
 import FFI exposing (getBridge)
 import Html exposing (..)
-import Html.Attributes as Attr
-import Html.Events as Ev
 import Notification
 import Pages.Loader exposing (loader)
 import Pages.Login as Login
@@ -22,10 +20,14 @@ type Msg
 
 
 type alias Model =
-    { messages : List String
-    , notification : Maybe Notification.Config
+    { notifications : List Notification.Config
     , page : PageModel
     }
+
+
+appendNotification : Notification.Config -> Model -> Model
+appendNotification cfg model =
+    { model | notifications = cfg :: model.notifications }
 
 
 type PageModel
@@ -58,19 +60,21 @@ main =
                 getBridge ShowError
                     (\msg ->
                         case msg of
-                            Bridge.Hello ->
-                                RecieveMessage "Got it!"
+                            Bridge.Hello { first, second } ->
+                                RecieveMessage ("Got it! " ++ first ++ second)
 
                             Bridge.GotEverything everything ->
                                 RecieveMessage everything
+
+                            Bridge.Empty ->
+                                RecieveMessage "Empty"
                     )
         }
 
 
 init : Model
 init =
-    { messages = []
-    , notification = Nothing
+    { notifications = []
     , page = LoadingPage
     }
 
@@ -84,7 +88,7 @@ view model =
     div []
         [ Navigation.navigation { back = False, title = title }
         , main_ []
-            (maybeList model.notification (Notification.notification CloseNotification)
+            (maybeList (List.head model.notifications) (Notification.notification CloseNotification)
                 ++ body
             )
         ]
@@ -100,37 +104,38 @@ update msg model =
                     ( { model | page = liftModel mdl }, cmd )
 
                 Err err ->
-                    ( { model
-                        | notification =
-                            Just
-                                { title = "An error had occured"
-                                , message = err
-                                , severity = Notification.Error
-                                }
-                      }
+                    ( appendNotification
+                        { title = "An error had occured"
+                        , message = err
+                        , severity = Notification.Error
+                        }
+                        model
                     , cmd
                     )
     in
     case msg of
         RecieveMessage x ->
-            ( { model | messages = x :: model.messages }
+            ( appendNotification
+                { title = "Got a message!"
+                , message = x
+                , severity = Notification.Info
+                }
+                model
             , Cmd.none
             )
 
         ShowError err ->
-            ( { model
-                | notification =
-                    Just
-                        { title = "Something went wrong"
-                        , message = err
-                        , severity = Notification.Error
-                        }
-              }
+            ( appendNotification
+                { title = "Something went wrong"
+                , message = err
+                , severity = Notification.Error
+                }
+                model
             , Cmd.none
             )
 
         CloseNotification ->
-            ( { model | notification = Nothing }
+            ( { model | notifications = tailEmpty model.notifications }
             , Cmd.none
             )
 

@@ -38,9 +38,24 @@ derive instance genericCmd :: Generic Cmd _
 derive instance eqCmd :: Eq Cmd
 derive instance ordCmd :: Ord Cmd
 
+newtype Sub_Hello =
+    Sub_Hello {
+      first :: String
+    , second :: String
+    }
+
+instance encodeJsonSub_Hello :: EncodeJson Sub_Hello where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_Hello :: DecodeJson Sub_Hello where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_Hello :: Generic Sub_Hello _
+derive instance eqSub_Hello :: Eq Sub_Hello
+derive instance ordSub_Hello :: Ord Sub_Hello
+
 data Sub =
-    GotEverything String
-  | Hello
+    Empty
+  | GotEverything String
+  | Hello Sub_Hello
 
 instance encodeJsonSub :: EncodeJson Sub where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions

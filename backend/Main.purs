@@ -10,6 +10,7 @@ import Bridge as Bridge
 import Control.Monad.Reader (runReaderT)
 import Control.Promise as Promise
 import Data.Either (Either(..))
+import Data.Interval (second)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (null, toNullable)
 import Effect (Effect)
@@ -69,6 +70,8 @@ main = do
             crypto : services.crypto
           }
 
-  Elm.send app Hello
+  Elm.send app (Bridge.Hello (Bridge.Sub_Hello {first: "f", second: "u"}))
+
+  Elm.send app (Bridge.Empty)
 
   log "🍝"

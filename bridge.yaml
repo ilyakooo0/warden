@@ -1,6 +1,10 @@
 Sub:
-- Hello
+- Hello:
+    first: String
+    second: String
+
 - GotEverything: String
+- Empty
 
 Cmd:
 - Login:

@@ -71,3 +71,13 @@ alignRight inner =
 flexCenter : List (Html msg) -> Html msg
 flexCenter =
     div [ Attr.class "simple-flex-center" ]
+
+
+tailEmpty : List a -> List a
+tailEmpty x =
+    case x of
+        [] ->
+            []
+
+        _ :: xs ->
+            xs

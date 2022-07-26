@@ -45,15 +45,37 @@ jsonEncCmd (Login v1) =
 
 
 
+type alias Sub_Hello  =
+   { first: String
+   , second: String
+   }
+
+jsonDecSub_Hello : Json.Decode.Decoder ( Sub_Hello )
+jsonDecSub_Hello =
+   Json.Decode.succeed (\pfirst psecond -> {first = pfirst, second = psecond})
+   |> required "first" (Json.Decode.string)
+   |> required "second" (Json.Decode.string)
+
+jsonEncSub_Hello : Sub_Hello -> Value
+jsonEncSub_Hello  val =
+   Json.Encode.object
+   [ ("first", Json.Encode.string val.first)
+   , ("second", Json.Encode.string val.second)
+   ]
+
+
+
 type Sub  =
-    GotEverything String
-    | Hello 
+    Empty 
+    | GotEverything String
+    | Hello Sub_Hello
 
 jsonDecSub : Json.Decode.Decoder ( Sub )
 jsonDecSub =
     let jsonDecDictSub = Dict.fromList
-            [ ("GotEverything", Json.Decode.lazy (\_ -> Json.Decode.map GotEverything (Json.Decode.string)))
-            , ("Hello", Json.Decode.lazy (\_ -> Json.Decode.succeed Hello))
+            [ ("Empty", Json.Decode.lazy (\_ -> Json.Decode.succeed Empty))
+            , ("GotEverything", Json.Decode.lazy (\_ -> Json.Decode.map GotEverything (Json.Decode.string)))
+            , ("Hello", Json.Decode.lazy (\_ -> Json.Decode.map Hello (jsonDecSub_Hello)))
             ]
         jsonDecObjectSetSub = Set.fromList []
     in  decodeSumTaggedObject "Sub" "tag" "contents" jsonDecDictSub jsonDecObjectSetSub
@@ -61,7 +83,8 @@ jsonDecSub =
 jsonEncSub : Sub -> Value
 jsonEncSub  val =
     let keyval v = case v of
+                    Empty  -> ("Empty", encodeValue (Json.Encode.list identity []))
                     GotEverything v1 -> ("GotEverything", encodeValue (Json.Encode.string v1))
-                    Hello  -> ("Hello", encodeValue (Json.Encode.list identity []))
+                    Hello v1 -> ("Hello", encodeValue (jsonEncSub_Hello v1))
     in encodeSumTaggedObject "tag" "contents" keyval val
 
