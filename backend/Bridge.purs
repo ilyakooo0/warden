@@ -39,7 +39,8 @@ derive instance eqCmd :: Eq Cmd
 derive instance ordCmd :: Ord Cmd
 
 data Sub =
-    Hello
+    GotEverything String
+  | Hello
 
 instance encodeJsonSub :: EncodeJson Sub where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions

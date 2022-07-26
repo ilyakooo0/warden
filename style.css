@@ -1,0 +1,42 @@
+
+:root {
+  --color-light: #F7F7F7;
+}
+
+main {
+  margin: 1rem;
+}
+
+
+nav.p-tabs__list {
+  top: 0;
+  position: sticky;
+  background-color: white;
+  padding-bottom: 1rem;
+  padding-bottom: 0;
+}
+
+.ninety-counter {
+  transform: rotate(90deg);
+}
+
+.floating-notifications {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  left: 1rem;
+  z-index: 9999;
+}
+
+.simple-flex-center {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+}
+
+.spinner{
+  padding: 1rem;
+}

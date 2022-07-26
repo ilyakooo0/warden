@@ -46,14 +46,22 @@ jsonEncCmd (Login v1) =
 
 
 type Sub  =
-    Hello 
+    GotEverything String
+    | Hello 
 
 jsonDecSub : Json.Decode.Decoder ( Sub )
 jsonDecSub =
-    Json.Decode.lazy (\_ -> Json.Decode.succeed Hello)
-
+    let jsonDecDictSub = Dict.fromList
+            [ ("GotEverything", Json.Decode.lazy (\_ -> Json.Decode.map GotEverything (Json.Decode.string)))
+            , ("Hello", Json.Decode.lazy (\_ -> Json.Decode.succeed Hello))
+            ]
+        jsonDecObjectSetSub = Set.fromList []
+    in  decodeSumTaggedObject "Sub" "tag" "contents" jsonDecDictSub jsonDecObjectSetSub
 
 jsonEncSub : Sub -> Value
-jsonEncSub (Hello ) =
-    Json.Encode.list identity []
+jsonEncSub  val =
+    let keyval v = case v of
+                    GotEverything v1 -> ("GotEverything", encodeValue (Json.Encode.string v1))
+                    Hello  -> ("Hello", encodeValue (Json.Encode.list identity []))
+    in encodeSumTaggedObject "tag" "contents" keyval val
 

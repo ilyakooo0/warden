@@ -1,5 +1,7 @@
 module Utils exposing (..)
 
+import Html exposing (..)
+import Html.Attributes as Attr
 import Task
 
 
@@ -33,10 +35,19 @@ result err ok r =
             err e
 
 
-optionals : Bool -> a -> List a
-optionals b a =
+optional : Bool -> a -> List a
+optional b a =
     if b then
         [ a ]
+
+    else
+        []
+
+
+optionals : Bool -> List a -> List a
+optionals b a =
+    if b then
+        a
 
     else
         []
@@ -50,3 +61,13 @@ maybeList m f =
 
         Nothing ->
             []
+
+
+alignRight : List (Html msg) -> Html msg
+alignRight inner =
+    div [ Attr.class "u-align--right" ] inner
+
+
+flexCenter : List (Html msg) -> Html msg
+flexCenter =
+    div [ Attr.class "simple-flex-center" ]

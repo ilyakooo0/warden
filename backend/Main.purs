@@ -24,12 +24,16 @@ import FFI as FFI
 main :: Effect Unit
 main = do
   app <- FFI.startElm "elm"
+  let
+    processResult res = do
+      log res
+      Elm.send app (GotEverything res)
   Elm.subscribe app \(Bridge.Login (Bridge.Cmd_Login {email, server, password})) -> do
     log $ "Got cmd"
     services <- WB.getServices
     runAff_ (\res -> case res of
-          Left e -> log $ show e
-          Right x -> log $ show x
+          Left e -> processResult $ show e
+          Right x -> processResult $ show x
         ) do
       unauthedApi <- Aff.liftAff $ Promise.toAff $ services.getApi
         { base : toNullable $ Just server,

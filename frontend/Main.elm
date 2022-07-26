@@ -6,25 +6,45 @@ import FFI exposing (getBridge)
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
+import Notification
+import Pages.Loader exposing (loader)
+import Pages.Login as Login
+import Pages.Navigation as Navigation
 import Utils exposing (..)
 
 
 type Msg
     = RecieveMessage String
-    | Error String
-    | UpdateEmail String
-    | UpdateServer String
-    | UpdatePassword String
-    | Submit
+    | ShowError String
+    | CloseNotification
+    | Submit { email : String, password : String, server : String }
+    | LoginMsg Login.Msg
 
 
 type alias Model =
     { messages : List String
-    , error : Maybe String
-    , server : String
-    , email : String
-    , password : String
+    , notification : Maybe Notification.Config
+    , page : PageModel
     }
+
+
+type PageModel
+    = LoginModel Login.Model
+    | LoadingPage
+
+
+showPage : PageModel -> ( String, List (Html Msg) )
+showPage page =
+    case page of
+        LoginModel model ->
+            let
+                p =
+                    Login.page loginCallbacks LoginMsg
+            in
+            ( p.title model, p.view model )
+
+        LoadingPage ->
+            ( "", [ loader ] )
 
 
 main : Program () Model Msg
@@ -33,68 +53,101 @@ main =
         { init = \_ -> ( init, Cmd.none )
         , view = view
         , update = update
-        , subscriptions = \_ -> getBridge Error (always (RecieveMessage "Got it!"))
+        , subscriptions =
+            \_ ->
+                getBridge ShowError
+                    (\msg ->
+                        case msg of
+                            Bridge.Hello ->
+                                RecieveMessage "Got it!"
+
+                            Bridge.GotEverything everything ->
+                                RecieveMessage everything
+                    )
         }
 
 
 init : Model
 init =
     { messages = []
-    , error = Nothing
-    , server = "bitwarden.iko.soy"
-    , email = "mail@iko.soy"
-    , password = ""
+    , notification = Nothing
+    , page = LoadingPage
     }
 
 
 view : Model -> Html Msg
 view model =
+    let
+        ( title, body ) =
+            showPage model.page
+    in
     div []
-        (maybeList model.error (text >> List.singleton >> h2 [])
-            ++ [ h1 [] [ text "HELLO" ]
-               , ul [] (model.messages |> List.map (text >> List.singleton >> li []))
-               , h4 [] [ text "Email" ]
-               , input [ Attr.type_ "text", Attr.value model.email, Ev.onInput UpdateEmail ] []
-               , h4 [] [ text "Password" ]
-               , input [ Attr.type_ "text", Attr.value model.password, Ev.onInput UpdatePassword ] []
-               , h4 [] [ text "Server" ]
-               , input [ Attr.type_ "text", Attr.value model.server, Ev.onInput UpdateServer ] []
-               , button [ Ev.onClick Submit ] [ text "Submit" ]
-               , table []
-                    [ tbody []
-                        (List.repeat 10 (tr [] [ td [] [ text "test" ] ]))
-                    ]
-               ]
-        )
+        [ Navigation.navigation { back = False, title = title }
+        , main_ []
+            (maybeList model.notification (Notification.notification CloseNotification)
+                ++ body
+            )
+        ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        processPage : (pageModel -> PageModel) -> ( Result String pageModel, Cmd Msg ) -> ( Model, Cmd Msg )
+        processPage liftModel ( resultModel, cmd ) =
+            case resultModel of
+                Ok mdl ->
+                    ( { model | page = liftModel mdl }, cmd )
+
+                Err err ->
+                    ( { model
+                        | notification =
+                            Just
+                                { title = "An error had occured"
+                                , message = err
+                                , severity = Notification.Error
+                                }
+                      }
+                    , cmd
+                    )
+    in
     case msg of
         RecieveMessage x ->
             ( { model | messages = x :: model.messages }
             , Cmd.none
             )
 
-        Error err ->
-            ( { model | error = Just err }, Cmd.none )
-
-        UpdateEmail email ->
-            ( { model | email = email }, Cmd.none )
-
-        UpdateServer server ->
-            ( { model | server = server }, Cmd.none )
-
-        UpdatePassword password ->
-            ( { model | password = password }, Cmd.none )
-
-        Submit ->
-            ( model
-            , FFI.sendBridge
-                (Bridge.Login
-                    { email = model.email
-                    , server = model.server
-                    , password = model.password
-                    }
-                )
+        ShowError err ->
+            ( { model
+                | notification =
+                    Just
+                        { title = "Something went wrong"
+                        , message = err
+                        , severity = Notification.Error
+                        }
+              }
+            , Cmd.none
             )
+
+        CloseNotification ->
+            ( { model | notification = Nothing }
+            , Cmd.none
+            )
+
+        Submit data ->
+            ( model
+            , FFI.sendBridge (Bridge.Login data)
+            )
+
+        LoginMsg imsg ->
+            case model.page of
+                LoginModel page ->
+                    (Login.page loginCallbacks LoginMsg).update imsg page |> processPage LoginModel
+
+                _ ->
+                    ( model, Cmd.none )
+
+
+loginCallbacks : Login.Callbacks Msg
+loginCallbacks =
+    { submit = Submit }
