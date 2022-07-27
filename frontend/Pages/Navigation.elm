@@ -22,3 +22,34 @@ navigation { back, title } =
             , text title
             ]
         ]
+
+
+type alias MenuConfig msg =
+    { title : String
+    , items : List { icon : String, name : String, trigger : msg }
+    , close : msg
+    }
+
+
+menu : MenuConfig msg -> Html msg
+menu { title, items, close } =
+    div [ Attr.class "p-side-navigation--icons is-drawer-expanded" ]
+        [ div [ Attr.class "p-side-navigation__overlay" ] []
+        , nav [ Attr.class "p-side-navigation__drawer" ]
+            [ div [ Attr.class "p-side-navigation__drawer-header" ]
+                [ a [ Attr.class "p-side-navigation__toggle--in-drawer" ] [ text title ]
+                ]
+            , ul [ Attr.class "p-side-navigation__list" ]
+                (items
+                    |> List.map
+                        (\{ icon, name, trigger } ->
+                            li [ Attr.class "p-side-navigation__item" ]
+                                [ a [ Attr.class "p-side-navigation__link" ]
+                                    [ i [ Attr.class "p-side-navigation__icon", Attr.class ("p-icon--" ++ icon) ] []
+                                    , text name
+                                    ]
+                                ]
+                        )
+                )
+            ]
+        ]

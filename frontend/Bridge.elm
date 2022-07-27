@@ -53,40 +53,47 @@ jsonEncCmd  val =
 
 
 
-type alias Sub_Hello  =
-   { first: String
-   , second: String
+type alias Sub_LoadCiphers  =
+   { date: String
+   , name: String
    }
 
-jsonDecSub_Hello : Json.Decode.Decoder ( Sub_Hello )
-jsonDecSub_Hello =
-   Json.Decode.succeed (\pfirst psecond -> {first = pfirst, second = psecond})
-   |> required "first" (Json.Decode.string)
-   |> required "second" (Json.Decode.string)
+jsonDecSub_LoadCiphers : Json.Decode.Decoder ( Sub_LoadCiphers )
+jsonDecSub_LoadCiphers =
+   Json.Decode.succeed (\pdate pname -> {date = pdate, name = pname})
+   |> required "date" (Json.Decode.string)
+   |> required "name" (Json.Decode.string)
 
-jsonEncSub_Hello : Sub_Hello -> Value
-jsonEncSub_Hello  val =
+jsonEncSub_LoadCiphers : Sub_LoadCiphers -> Value
+jsonEncSub_LoadCiphers  val =
    Json.Encode.object
-   [ ("first", Json.Encode.string val.first)
-   , ("second", Json.Encode.string val.second)
+   [ ("date", Json.Encode.string val.date)
+   , ("name", Json.Encode.string val.name)
    ]
 
 
 
+type alias Sub_LoadCiphers_List  = (List Sub_LoadCiphers)
+
+jsonDecSub_LoadCiphers_List : Json.Decode.Decoder ( Sub_LoadCiphers_List )
+jsonDecSub_LoadCiphers_List =
+    Json.Decode.list (jsonDecSub_LoadCiphers)
+
+jsonEncSub_LoadCiphers_List : Sub_LoadCiphers_List -> Value
+jsonEncSub_LoadCiphers_List  val = (Json.Encode.list jsonEncSub_LoadCiphers) val
+
+
+
 type Sub  =
-    Empty 
-    | Error String
-    | GotEverything String
-    | Hello Sub_Hello
+    Error String
+    | LoadCiphers Sub_LoadCiphers_List
     | NeedsLogin 
 
 jsonDecSub : Json.Decode.Decoder ( Sub )
 jsonDecSub =
     let jsonDecDictSub = Dict.fromList
-            [ ("Empty", Json.Decode.lazy (\_ -> Json.Decode.succeed Empty))
-            , ("Error", Json.Decode.lazy (\_ -> Json.Decode.map Error (Json.Decode.string)))
-            , ("GotEverything", Json.Decode.lazy (\_ -> Json.Decode.map GotEverything (Json.Decode.string)))
-            , ("Hello", Json.Decode.lazy (\_ -> Json.Decode.map Hello (jsonDecSub_Hello)))
+            [ ("Error", Json.Decode.lazy (\_ -> Json.Decode.map Error (Json.Decode.string)))
+            , ("LoadCiphers", Json.Decode.lazy (\_ -> Json.Decode.map LoadCiphers (jsonDecSub_LoadCiphers_List)))
             , ("NeedsLogin", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedsLogin))
             ]
         jsonDecObjectSetSub = Set.fromList []
@@ -95,10 +102,8 @@ jsonDecSub =
 jsonEncSub : Sub -> Value
 jsonEncSub  val =
     let keyval v = case v of
-                    Empty  -> ("Empty", encodeValue (Json.Encode.list identity []))
                     Error v1 -> ("Error", encodeValue (Json.Encode.string v1))
-                    GotEverything v1 -> ("GotEverything", encodeValue (Json.Encode.string v1))
-                    Hello v1 -> ("Hello", encodeValue (jsonEncSub_Hello v1))
+                    LoadCiphers v1 -> ("LoadCiphers", encodeValue (jsonEncSub_LoadCiphers_List v1))
                     NeedsLogin  -> ("NeedsLogin", encodeValue (Json.Encode.list identity []))
     in encodeSumTaggedObject "tag" "contents" keyval val
 

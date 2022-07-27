@@ -4,7 +4,9 @@ import Bridge
 import Browser
 import FFI exposing (getBridge)
 import Html exposing (..)
+import Html.Attributes as Attr
 import Notification
+import Pages.Ciphers as Ciphers
 import Pages.Loader exposing (loader)
 import Pages.Login as Login
 import Pages.Navigation as Navigation
@@ -18,6 +20,8 @@ type Msg
     | CloseNotification
     | SubmitLogin { email : String, password : String, server : String }
     | LoginMsg Login.Msg
+    | CiphersMsg Ciphers.Msg
+    | LoadCiphers Bridge.Sub_LoadCiphers_List
 
 
 type alias Model =
@@ -34,6 +38,7 @@ appendNotification cfg model =
 type PageModel
     = LoginModel Login.Model
     | LoadingPage
+    | CiphersModel Ciphers.Model
 
 
 showPage : PageModel -> ( String, List (Html Msg) )
@@ -43,6 +48,13 @@ showPage page =
             let
                 p =
                     Login.page loginCallbacks LoginMsg
+            in
+            ( p.title model, p.view model )
+
+        CiphersModel model ->
+            let
+                p =
+                    Ciphers.page {} CiphersMsg
             in
             ( p.title model, p.view model )
 
@@ -61,20 +73,14 @@ main =
                 getBridge ShowError
                     (\msg ->
                         case msg of
-                            Bridge.Hello { first, second } ->
-                                RecieveMessage ("Got it! " ++ first ++ second)
-
-                            Bridge.GotEverything everything ->
-                                RecieveMessage everything
-
-                            Bridge.Empty ->
-                                RecieveMessage "Empty"
-
                             Bridge.NeedsLogin ->
                                 ShowLoginPage
 
                             Bridge.Error err ->
                                 ShowError err
+
+                            Bridge.LoadCiphers ciphers ->
+                                LoadCiphers ciphers
                     )
         }
 
@@ -98,6 +104,25 @@ view model =
         [ Navigation.navigation { back = False, title = title }
         , main_ []
             (maybeList (List.head model.notifications) (Notification.notification CloseNotification)
+                ++ [ div [ Attr.class "p-side-navigation--icons is-drawer-expanded" ]
+                        [ div [ Attr.class "p-side-navigation__overlay" ] []
+                        , nav [ Attr.class "p-side-navigation__drawer" ]
+                            [ div [ Attr.class "p-side-navigation__drawer-header" ]
+                                [ a [ Attr.class "p-side-navigation__toggle--in-drawer" ] [ text "mail@iko.soy" ]
+                                ]
+                            , ul [ Attr.class "p-side-navigation__list" ]
+                                (List.repeat 6
+                                    (li [ Attr.class "p-side-navigation__item" ]
+                                        [ a [ Attr.class "p-side-navigation__link" ]
+                                            [ i [ Attr.class "p-icon--help p-side-navigation__icon" ] []
+                                            , text "Users"
+                                            ]
+                                        ]
+                                    )
+                                )
+                            ]
+                        ]
+                   ]
                 ++ body
             )
         ]
@@ -161,11 +186,28 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        CiphersMsg imsg ->
+            case model.page of
+                CiphersModel page ->
+                    (Ciphers.page ciphersCallbacks CiphersMsg).update imsg page |> processPage CiphersModel
+
+                _ ->
+                    ( model, Cmd.none )
+
         ShowLoginPage ->
             (Login.page loginCallbacks LoginMsg).init ()
                 |> Tuple.mapFirst (\pageModel -> { model | page = LoginModel pageModel })
+
+        LoadCiphers ciphers ->
+            (Ciphers.page ciphersCallbacks CiphersMsg).init ciphers
+                |> Tuple.mapFirst (\pageModel -> { model | page = CiphersModel pageModel })
 
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
     { submit = SubmitLogin }
+
+
+ciphersCallbacks : Ciphers.Callbacks
+ciphersCallbacks =
+    {}

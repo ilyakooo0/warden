@@ -14,6 +14,7 @@ nav.p-tabs__list {
   background-color: white;
   padding-bottom: 1rem;
   padding-bottom: 0;
+  z-index: 10;
 }
 
 .ninety-counter {
@@ -39,4 +40,21 @@ nav.p-tabs__list {
 
 .spinner{
   padding: 1rem;
+}
+
+.cipher-row-container {
+    display: flex;
+    width: 100%;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.cipher-row p {
+  margin-bottom: 0.5rem;
+}
+
+.cipher-row .p-text--small {
+  margin-bottom: 0.5rem;
 }

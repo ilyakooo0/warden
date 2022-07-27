@@ -1,11 +1,10 @@
 Sub:
-- Hello:
-    first: String
-    second: String
-- GotEverything: String
-- Empty
 - NeedsLogin
 - Error: String
+- LoadCiphers:
+    List:
+        name: String
+        date: String
 
 Cmd:
 - Init

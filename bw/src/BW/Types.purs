@@ -1,10 +1,12 @@
 module BW.Types where
 
 import Prelude
+
 import Data.ArrayBuffer.Types (ArrayBuffer)
 import Data.Date (Date)
 import Data.Nullable (Nullable)
 import Data.ShowableJson (ShowableJson)
+import Data.Timestamp (Timestamp(..))
 import Data.Undefined.NoProblem (Opt)
 
 newtype EncryptedString
@@ -385,7 +387,7 @@ type CipherResponse
     , edit :: Boolean
     , viewPassword :: Boolean
     , organizationUseTotp :: Boolean
-    , revisionDate :: String
+    , revisionDate :: Timestamp
     , attachments :: Nullable (Array AttachmentResponse)
     , passwordHistory :: Nullable (Array PasswordHistoryResponse)
     , collectionIds :: Nullable (Array String)

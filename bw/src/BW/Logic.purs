@@ -5,6 +5,7 @@ import BW.Types
 import Control.El
 import Prelude
 import Control.Monad.Error.Class (throwError)
+import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.EncString as EncString
 import Data.Function.Uncurried (runFn2, runFn3, runFn4)
@@ -13,7 +14,7 @@ import Data.Nullable (null, toNullable)
 import Data.String as String
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.SymmetricCryptoKey as SymmetricCryptoKey
-import Effect.Aff.Class (liftAff)
+import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Exception (error)
@@ -87,11 +88,13 @@ getLogInRequestToken email password = do
 decrypt ::
   forall r.
   HasL "crypto" CryptoService r =>
-  SymmetricCryptoKey ->
+  HasL "key" SymmetricCryptoKey r =>
   EncryptedString ->
   Al r String
-decrypt key input = do
+decrypt input = do
   crypto <- l (L :: L "crypto")
+  key <- l (L :: L "key")
   liftPromise $ runFn2 crypto.decryptToUtf8 (EncString.fromString input) key
 
+liftPromise ∷ forall m a. MonadAff m ⇒ Promise a → m a
 liftPromise = liftAff <<< Promise.toAff

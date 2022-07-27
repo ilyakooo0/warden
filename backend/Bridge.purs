@@ -39,25 +39,34 @@ derive instance genericCmd :: Generic Cmd _
 derive instance eqCmd :: Eq Cmd
 derive instance ordCmd :: Ord Cmd
 
-newtype Sub_Hello =
-    Sub_Hello {
-      first :: String
-    , second :: String
+newtype Sub_LoadCiphers =
+    Sub_LoadCiphers {
+      date :: String
+    , name :: String
     }
 
-instance encodeJsonSub_Hello :: EncodeJson Sub_Hello where
+instance encodeJsonSub_LoadCiphers :: EncodeJson Sub_LoadCiphers where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_Hello :: DecodeJson Sub_Hello where
+instance decodeJsonSub_LoadCiphers :: DecodeJson Sub_LoadCiphers where
   decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_Hello :: Generic Sub_Hello _
-derive instance eqSub_Hello :: Eq Sub_Hello
-derive instance ordSub_Hello :: Ord Sub_Hello
+derive instance genericSub_LoadCiphers :: Generic Sub_LoadCiphers _
+derive instance eqSub_LoadCiphers :: Eq Sub_LoadCiphers
+derive instance ordSub_LoadCiphers :: Ord Sub_LoadCiphers
+
+newtype Sub_LoadCiphers_List =
+    Sub_LoadCiphers_List (Array Sub_LoadCiphers)
+
+instance encodeJsonSub_LoadCiphers_List :: EncodeJson Sub_LoadCiphers_List where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_LoadCiphers_List :: DecodeJson Sub_LoadCiphers_List where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_LoadCiphers_List :: Generic Sub_LoadCiphers_List _
+derive instance eqSub_LoadCiphers_List :: Eq Sub_LoadCiphers_List
+derive instance ordSub_LoadCiphers_List :: Ord Sub_LoadCiphers_List
 
 data Sub =
-    Empty
-  | Error String
-  | GotEverything String
-  | Hello Sub_Hello
+    Error String
+  | LoadCiphers Sub_LoadCiphers_List
   | NeedsLogin
 
 instance encodeJsonSub :: EncodeJson Sub where

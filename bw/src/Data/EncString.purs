@@ -1,7 +1,7 @@
 module Data.EncString where
 
 import Prelude
-import BW.Types (EncryptedString(..))
+import BW.Types (EncryptedString)
 
 foreign import data EncString :: Type
 

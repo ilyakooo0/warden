@@ -6,6 +6,7 @@
   , "argonaut-generic"
   , "arraybuffer-types"
   , "console"
+  , "datetime-parsing"
   , "effect"
   , "el"
   , "foreign"
