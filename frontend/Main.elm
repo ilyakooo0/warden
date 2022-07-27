@@ -103,28 +103,7 @@ view model =
     div []
         [ Navigation.navigation { back = False, title = title }
         , main_ []
-            (maybeList (List.head model.notifications) (Notification.notification CloseNotification)
-                ++ [ div [ Attr.class "p-side-navigation--icons is-drawer-expanded" ]
-                        [ div [ Attr.class "p-side-navigation__overlay" ] []
-                        , nav [ Attr.class "p-side-navigation__drawer" ]
-                            [ div [ Attr.class "p-side-navigation__drawer-header" ]
-                                [ a [ Attr.class "p-side-navigation__toggle--in-drawer" ] [ text "mail@iko.soy" ]
-                                ]
-                            , ul [ Attr.class "p-side-navigation__list" ]
-                                (List.repeat 6
-                                    (li [ Attr.class "p-side-navigation__item" ]
-                                        [ a [ Attr.class "p-side-navigation__link" ]
-                                            [ i [ Attr.class "p-icon--help p-side-navigation__icon" ] []
-                                            , text "Users"
-                                            ]
-                                        ]
-                                    )
-                                )
-                            ]
-                        ]
-                   ]
-                ++ body
-            )
+            (maybeList (List.head model.notifications) (Notification.notification CloseNotification) ++ body)
         ]
 
 

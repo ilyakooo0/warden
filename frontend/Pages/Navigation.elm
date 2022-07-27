@@ -1,7 +1,8 @@
-module Pages.Navigation exposing (Config, navigation)
+module Pages.Navigation exposing (Config, menu, navigation)
 
 import Html exposing (..)
 import Html.Attributes as Attr
+import Html.Events as Ev
 import Utils exposing (..)
 
 
@@ -37,14 +38,14 @@ menu { title, items, close } =
         [ div [ Attr.class "p-side-navigation__overlay" ] []
         , nav [ Attr.class "p-side-navigation__drawer" ]
             [ div [ Attr.class "p-side-navigation__drawer-header" ]
-                [ a [ Attr.class "p-side-navigation__toggle--in-drawer" ] [ text title ]
+                [ a [ Attr.class "p-side-navigation__toggle--in-drawer", Ev.onClick close ] [ text title ]
                 ]
             , ul [ Attr.class "p-side-navigation__list" ]
                 (items
                     |> List.map
                         (\{ icon, name, trigger } ->
                             li [ Attr.class "p-side-navigation__item" ]
-                                [ a [ Attr.class "p-side-navigation__link" ]
+                                [ a [ Attr.class "p-side-navigation__link", Ev.onClick trigger ]
                                     [ i [ Attr.class "p-side-navigation__icon", Attr.class ("p-icon--" ++ icon) ] []
                                     , text name
                                     ]
