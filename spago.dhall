@@ -22,12 +22,16 @@ to generate this file without the comments in this block.
   , "datetime"
   , "effect"
   , "either"
+  , "exceptions"
+  , "foldable-traversable"
   , "foreign"
+  , "lists"
   , "maybe"
   , "newtype"
   , "nullable"
   , "prelude"
   , "transformers"
+  , "unsafe-coerce"
   ]
 , packages = ./packages.dhall
 , sources = [ "backend/**/*.purs" ]

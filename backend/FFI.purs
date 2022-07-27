@@ -3,11 +3,9 @@ module FFI
   , createElmSubscription
   , sendElmEvent
   , startElm
-  )
-  where
+  ) where
 
 import Prelude
-
 import Data.Argonaut (Json)
 import Effect (Effect)
 

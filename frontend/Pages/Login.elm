@@ -32,7 +32,7 @@ page callbacks liftMsg =
     , view = \model -> view model |> List.map (Html.map liftMsg)
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title = always "Log into your bitwarden account"
+    , title = always "Log into bitwarden"
     }
 
 
@@ -76,6 +76,6 @@ view model =
         , input [ Attr.type_ "email", Attr.value model.email, Ev.onInput UpdateEmail ] []
         , label [] [ text "Password" ]
         , input [ Attr.type_ "password", Attr.value model.password, Ev.onInput UpdatePassword ] []
-        , alignRight [ button [ Ev.onClick Submit ] [ text "Log in" ] ]
         ]
+    , alignRight [ button [ Ev.onClick Submit ] [ text "Log in" ] ]
     ]

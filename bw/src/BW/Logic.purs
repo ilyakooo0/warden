@@ -4,13 +4,20 @@ import BW
 import BW.Types
 import Control.El
 import Prelude
-
+import Control.Monad.Error.Class (throwError)
 import Control.Promise as Promise
-import Data.Function.Uncurried (runFn3, runFn4)
+import Data.EncString as EncString
+import Data.Function.Uncurried (runFn2, runFn3, runFn4)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (null, toNullable)
 import Data.String as String
+import Data.SymmetricCryptoKey (SymmetricCryptoKey)
+import Data.SymmetricCryptoKey as SymmetricCryptoKey
 import Effect.Aff.Class (liftAff)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
+import Effect.Exception (error)
+import Effect.Exception as Exc
 
 makePreloginKey ::
   forall r.
@@ -20,11 +27,31 @@ makePreloginKey ::
 makePreloginKey (Email email') (Password password) = do
   api :: ApiService <- l (L :: L "api")
   crypto <- l (L :: L "crypto")
+  let
+    email = (String.trim >>> String.toLower) email'
+  { kdf, kdfIterations } <- liftPromise $ api.postPrelogin { email }
+  liftPromise $ runFn4 crypto.makeKey (Password password) email kdf kdfIterations
 
-  let email = (String.trim >>> String.toLower) email'
+makeDecryptionKey ::
+  forall r.
+  HasL "crypto" CryptoService r =>
+  -- | Matser key (prelogin key)
+  SymmetricCryptoKey -> EncryptedString -> Al r SymmetricCryptoKey
+makeDecryptionKey masterKey str = do
+  crypto <- l (L :: L "crypto")
+  let
+    encryptedKeyString = EncString.fromString str
 
-  {kdf, kdfIterations} <- liftAff $ Promise.toAff $ api.postPrelogin {email}
-  liftAff $ Promise.toAff $ runFn4 crypto.makeKey (Password password) email kdf kdfIterations
+    encType = EncString.encryptionType encryptedKeyString
+  key <-
+    if encType == EncString.encryptionTypeAesCbc256_B64 then
+      liftPromise $ runFn2 crypto.decryptToBytes (EncString.fromString str) masterKey
+    else if encType == EncString.encryptionTypeAesCbc256_HmacSha256_B64 then do
+      stretchedMasterKey <- liftPromise $ crypto.stretchKey masterKey
+      liftPromise $ runFn2 crypto.decryptToBytes (EncString.fromString str) stretchedMasterKey
+    else
+      liftEffect $ Exc.throw $ "Unsupported key encryption type: " <> show encType
+  pure $ SymmetricCryptoKey.fromArrayBuffer key
 
 getLogInRequestToken ::
   forall r.
@@ -35,25 +62,36 @@ getLogInRequestToken email password = do
   key <- makePreloginKey email password
   crypto <- l (L :: L "crypto")
   api :: ApiService <- l (L :: L "api")
+  _localHashedPassword <-
+    liftPromise
+      $ runFn3 crypto.hashPassword password key (toNullable $ Just hashPurposeLocalAuthorization)
+  Hash hashedPassword <- liftPromise $ runFn3 crypto.hashPassword password key null
+  liftPromise
+    $ api.postIdentityToken
+        { email: email
+        , masterPasswordHash: hashedPassword
+        , captchaResponse: ""
+        , twoFactor:
+            { provider: twoFactorProviderTypeEmail
+            , token: ""
+            , remember: false
+            }
+        , device:
+            { type: deviceTypeUnknownBrowser
+            , name: "Temporary device name"
+            , identifier: "42"
+            , pushToken: null
+            }
+        }
 
-  _localHashedPassword <- liftAff $ Promise.toAff $
-    runFn3 crypto.hashPassword password key (toNullable $ Just hashPurposeLocalAuthorization)
+decrypt ::
+  forall r.
+  HasL "crypto" CryptoService r =>
+  SymmetricCryptoKey ->
+  EncryptedString ->
+  Al r String
+decrypt key input = do
+  crypto <- l (L :: L "crypto")
+  liftPromise $ runFn2 crypto.decryptToUtf8 (EncString.fromString input) key
 
-  Hash hashedPassword <- liftAff $ Promise.toAff $ runFn3 crypto.hashPassword password key null
-
-  liftAff $ Promise.toAff $ api.postIdentityToken  {
-      email: email,
-      masterPasswordHash: hashedPassword,
-      captchaResponse: "",
-      twoFactor: {
-        provider: twoFactorProviderTypeEmail,
-        token: "",
-        remember: false
-      },
-      device: {
-        type: deviceTypeUnknownBrowser,
-        name: "Temporary device name",
-        identifier: "42",
-        pushToken: null
-      }
-    }
+liftPromise = liftAff <<< Promise.toAff

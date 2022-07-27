@@ -13,9 +13,10 @@ import Utils exposing (..)
 
 type Msg
     = RecieveMessage String
+    | ShowLoginPage
     | ShowError String
     | CloseNotification
-    | Submit { email : String, password : String, server : String }
+    | SubmitLogin { email : String, password : String, server : String }
     | LoginMsg Login.Msg
 
 
@@ -52,7 +53,7 @@ showPage page =
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \_ -> ( init, Cmd.none )
+        { init = \_ -> init
         , view = view
         , update = update
         , subscriptions =
@@ -68,15 +69,23 @@ main =
 
                             Bridge.Empty ->
                                 RecieveMessage "Empty"
+
+                            Bridge.NeedsLogin ->
+                                ShowLoginPage
+
+                            Bridge.Error err ->
+                                ShowError err
                     )
         }
 
 
-init : Model
+init : ( Model, Cmd Msg )
 init =
-    { notifications = []
-    , page = LoadingPage
-    }
+    ( { notifications = []
+      , page = LoadingPage
+      }
+    , FFI.sendBridge Bridge.Init
+    )
 
 
 view : Model -> Html Msg
@@ -139,7 +148,7 @@ update msg model =
             , Cmd.none
             )
 
-        Submit data ->
+        SubmitLogin data ->
             ( model
             , FFI.sendBridge (Bridge.Login data)
             )
@@ -152,7 +161,11 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        ShowLoginPage ->
+            (Login.page loginCallbacks LoginMsg).init ()
+                |> Tuple.mapFirst (\pageModel -> { model | page = LoginModel pageModel })
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
-    { submit = Submit }
+    { submit = SubmitLogin }

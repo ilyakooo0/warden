@@ -27,8 +27,9 @@ derive instance genericCmd_Login :: Generic Cmd_Login _
 derive instance eqCmd_Login :: Eq Cmd_Login
 derive instance ordCmd_Login :: Ord Cmd_Login
 
-newtype Cmd =
-    Login Cmd_Login
+data Cmd =
+    Init
+  | Login Cmd_Login
 
 instance encodeJsonCmd :: EncodeJson Cmd where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions
@@ -54,8 +55,10 @@ derive instance ordSub_Hello :: Ord Sub_Hello
 
 data Sub =
     Empty
+  | Error String
   | GotEverything String
   | Hello Sub_Hello
+  | NeedsLogin
 
 instance encodeJsonSub :: EncodeJson Sub where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions
@@ -64,3 +67,4 @@ instance decodeJsonSub :: DecodeJson Sub where
 derive instance genericSub :: Generic Sub _
 derive instance eqSub :: Eq Sub
 derive instance ordSub :: Ord Sub
+

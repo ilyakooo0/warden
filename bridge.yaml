@@ -2,11 +2,13 @@ Sub:
 - Hello:
     first: String
     second: String
-
 - GotEverything: String
 - Empty
+- NeedsLogin
+- Error: String
 
 Cmd:
+- Init
 - Login:
     email: String
     server: String

@@ -1,11 +1,18 @@
-module Data.EncString where
+module Data.SymmetricCryptoKey where
 
 import Prelude
-import BW.Types (EncryptedString(..))
+import Data.ArrayBuffer.Types (ArrayBuffer)
+import Data.Nullable (Nullable)
 
-foreign import data EncString :: Type
-
-foreign import encryptionType :: EncString -> EncryptionType
+type SymmetricCryptoKey
+  = { key :: ArrayBuffer
+    , encKey :: Nullable ArrayBuffer
+    , macKey :: Nullable ArrayBuffer
+    , encType :: EncryptionType
+    , keyB64 :: String
+    , encKeyB64 :: String
+    , macKeyB64 :: String
+    }
 
 encryptionTypeAesCbc256_B64 = 0 :: EncryptionType
 
@@ -24,4 +31,4 @@ encryptionTypeRsa2048_OaepSha1_HmacSha256_B64 = 6 :: EncryptionType
 type EncryptionType
   = Int
 
-foreign import fromString :: EncryptedString -> EncString
+foreign import fromArrayBuffer :: ArrayBuffer -> SymmetricCryptoKey

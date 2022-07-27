@@ -32,16 +32,24 @@ jsonEncCmd_Login  val =
 
 
 type Cmd  =
-    Login Cmd_Login
+    Init 
+    | Login Cmd_Login
 
 jsonDecCmd : Json.Decode.Decoder ( Cmd )
 jsonDecCmd =
-    Json.Decode.lazy (\_ -> Json.Decode.map Login (jsonDecCmd_Login))
-
+    let jsonDecDictCmd = Dict.fromList
+            [ ("Init", Json.Decode.lazy (\_ -> Json.Decode.succeed Init))
+            , ("Login", Json.Decode.lazy (\_ -> Json.Decode.map Login (jsonDecCmd_Login)))
+            ]
+        jsonDecObjectSetCmd = Set.fromList []
+    in  decodeSumTaggedObject "Cmd" "tag" "contents" jsonDecDictCmd jsonDecObjectSetCmd
 
 jsonEncCmd : Cmd -> Value
-jsonEncCmd (Login v1) =
-    jsonEncCmd_Login v1
+jsonEncCmd  val =
+    let keyval v = case v of
+                    Init  -> ("Init", encodeValue (Json.Encode.list identity []))
+                    Login v1 -> ("Login", encodeValue (jsonEncCmd_Login v1))
+    in encodeSumTaggedObject "tag" "contents" keyval val
 
 
 
@@ -67,15 +75,19 @@ jsonEncSub_Hello  val =
 
 type Sub  =
     Empty 
+    | Error String
     | GotEverything String
     | Hello Sub_Hello
+    | NeedsLogin 
 
 jsonDecSub : Json.Decode.Decoder ( Sub )
 jsonDecSub =
     let jsonDecDictSub = Dict.fromList
             [ ("Empty", Json.Decode.lazy (\_ -> Json.Decode.succeed Empty))
+            , ("Error", Json.Decode.lazy (\_ -> Json.Decode.map Error (Json.Decode.string)))
             , ("GotEverything", Json.Decode.lazy (\_ -> Json.Decode.map GotEverything (Json.Decode.string)))
             , ("Hello", Json.Decode.lazy (\_ -> Json.Decode.map Hello (jsonDecSub_Hello)))
+            , ("NeedsLogin", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedsLogin))
             ]
         jsonDecObjectSetSub = Set.fromList []
     in  decodeSumTaggedObject "Sub" "tag" "contents" jsonDecDictSub jsonDecObjectSetSub
@@ -84,7 +96,9 @@ jsonEncSub : Sub -> Value
 jsonEncSub  val =
     let keyval v = case v of
                     Empty  -> ("Empty", encodeValue (Json.Encode.list identity []))
+                    Error v1 -> ("Error", encodeValue (Json.Encode.string v1))
                     GotEverything v1 -> ("GotEverything", encodeValue (Json.Encode.string v1))
                     Hello v1 -> ("Hello", encodeValue (jsonEncSub_Hello v1))
+                    NeedsLogin  -> ("NeedsLogin", encodeValue (Json.Encode.list identity []))
     in encodeSumTaggedObject "tag" "contents" keyval val
 
