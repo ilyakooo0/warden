@@ -2,12 +2,12 @@ module Data.SymmetricCryptoKey where
 
 import Prelude
 import Data.ArrayBuffer.Types (ArrayBuffer)
-import Data.Nullable (Nullable)
+import Data.JNullable (JNullable)
 
 type SymmetricCryptoKey
   = { key :: ArrayBuffer
-    , encKey :: Nullable ArrayBuffer
-    , macKey :: Nullable ArrayBuffer
+    , encKey :: JNullable ArrayBuffer
+    , macKey :: JNullable ArrayBuffer
     , encType :: EncryptionType
     , keyB64 :: String
     , encKeyB64 :: String

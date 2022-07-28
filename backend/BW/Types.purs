@@ -2,17 +2,21 @@ module BW.Types where
 
 import Prelude
 
-import Data.ArrayBuffer.Types (ArrayBuffer)
+import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.Date (Date)
-import Data.Nullable (Nullable)
+import Data.JNullable (JNullable)
+import Data.JOpt (JOpt)
 import Data.ShowableJson (ShowableJson)
 import Data.Timestamp (Timestamp(..))
-import Data.Undefined.NoProblem (Opt)
 
 newtype EncryptedString
   = EncryptedString String
 
 derive newtype instance Show EncryptedString
+derive newtype instance Ord EncryptedString
+derive newtype instance Eq EncryptedString
+derive newtype instance EncodeJson EncryptedString
+derive newtype instance DecodeJson EncryptedString
 
 kdfPBKDF2_SHA256 = 0 :: KDF
 
@@ -35,7 +39,7 @@ type ProfileResponse
     , emailVerified :: Boolean
     , masterPasswordHint :: String
     , premiumPersonally :: Boolean
-    , premiumFromOrganization :: Boolean
+    -- , premiumFromOrganization :: Boolean
     , culture :: String
     , twoFactorEnabled :: Boolean
     , key :: EncryptedString
@@ -65,7 +69,7 @@ type ProfileOrganizationResponse
     , usersGetPremium :: Boolean
     , seats :: Int
     , maxCollections :: Int
-    , maxStorageGb :: Nullable Int
+    , maxStorageGb :: JNullable Int
     , key :: String
     , hasPublicAndPrivateKeys :: Boolean
     , status :: OrganizationUserStatusType
@@ -83,9 +87,9 @@ type ProfileOrganizationResponse
     , planProductType :: ProductType
     , keyConnectorEnabled :: Boolean
     , keyConnectorUrl :: String
-    , familySponsorshipLastSyncDate :: Nullable Date
-    , familySponsorshipValidUntil :: Nullable Date
-    , familySponsorshipToDelete :: Nullable Boolean
+    , familySponsorshipLastSyncDate :: JNullable Timestamp
+    , familySponsorshipValidUntil :: JNullable Timestamp
+    , familySponsorshipToDelete :: JNullable Boolean
     }
 
 organizationUserStatusTypeInvited = 0 :: OrganizationUserStatusType
@@ -185,7 +189,7 @@ type ProfileProviderOrganizationResponse
     , usersGetPremium :: Boolean
     , seats :: Int
     , maxCollections :: Int
-    , maxStorageGb :: Nullable Int
+    , maxStorageGb :: JNullable Int
     , key :: String
     , hasPublicAndPrivateKeys :: Boolean
     , status :: OrganizationUserStatusType
@@ -203,20 +207,20 @@ type ProfileProviderOrganizationResponse
     , planProductType :: ProductType
     , keyConnectorEnabled :: Boolean
     , keyConnectorUrl :: String
-    , familySponsorshipLastSyncDate :: Nullable Date
-    , familySponsorshipValidUntil :: Nullable Date
-    , familySponsorshipToDelete :: Nullable Boolean
+    , familySponsorshipLastSyncDate :: JNullable Timestamp
+    , familySponsorshipValidUntil :: JNullable Timestamp
+    , familySponsorshipToDelete :: JNullable Boolean
     }
 
 type Urls
-  = { base :: Nullable String
-    , webVault :: Nullable String
-    , api :: Nullable String
-    , identity :: Nullable String
-    , icons :: Nullable String
-    , notifications :: Nullable String
-    , events :: Nullable String
-    , keyConnector :: Nullable String
+  = { base :: JNullable String
+    , webVault :: JNullable String
+    , api :: JNullable String
+    , identity :: JNullable String
+    , icons :: JNullable String
+    , notifications :: JNullable String
+    , events :: JNullable String
+    , keyConnector :: JNullable String
     }
 
 type PasswordTokenRequest
@@ -231,7 +235,7 @@ type DeviceRequest
   = { type :: DeviceType
     , name :: String
     , identifier :: String
-    , pushToken :: Nullable String
+    , pushToken :: JNullable String
     }
 
 deviceTypeAndroid = 0 :: DeviceType
@@ -314,18 +318,26 @@ hashPurposeLocalAuthorization = 2 :: HashPurpose
 type HashPurpose
   = Int
 
-newtype Hash
-  = Hash String
+newtype StringHash
+  = StringHash String
 
 newtype AccessToken
   = AccessToken String
 
 derive newtype instance Show AccessToken
+derive newtype instance Eq AccessToken
+derive newtype instance Ord AccessToken
+derive newtype instance EncodeJson AccessToken
+derive newtype instance DecodeJson AccessToken
 
 newtype RefreshToken
   = RefreshToken String
 
 derive newtype instance Show RefreshToken
+derive newtype instance Eq RefreshToken
+derive newtype instance Ord RefreshToken
+derive newtype instance EncodeJson RefreshToken
+derive newtype instance DecodeJson RefreshToken
 
 
 type IdentityTokenResponse
@@ -336,12 +348,12 @@ type IdentityTokenResponse
     , resetMasterPassword :: Boolean
     , privateKey :: EncryptedString
     , key :: EncryptedString
-    , twoFactorToken :: Nullable String
+    , twoFactorToken :: JNullable String
     , kdf :: KDF
     , kdfIterations :: Int
-    , forcePasswordReset :: Nullable Boolean
-    , apiUseKeyConnector :: Nullable Boolean
-    , keyConnectorUrl :: Nullable String
+    , forcePasswordReset :: JNullable Boolean
+    , apiUseKeyConnector :: JNullable Boolean
+    , keyConnectorUrl :: JNullable String
     }
 
 newtype Email
@@ -352,8 +364,8 @@ type SyncResponse
     , folders :: Array FolderResponse
     , collections :: Array CollectionDetailsResponse
     , ciphers :: Array CipherResponse
-    , domains :: Nullable DomainsResponse
-    , policies :: Nullable (Array PolicyResponse)
+    , domains :: JNullable DomainsResponse
+    , policies :: JNullable (Array PolicyResponse)
     , sends :: Array SendResponse
     }
 
@@ -365,33 +377,33 @@ type FolderResponse
 
 type CollectionDetailsResponse
   = { id :: String
-    , organizationId :: Nullable String
+    , organizationId :: JNullable String
     , name :: String
-    , externalId :: Nullable String
+    , externalId :: JNullable String
     , readOnly :: Boolean
     }
 
 type CipherResponse
   = { id :: String
-    , organizationId :: Nullable String
-    , folderId :: Nullable String
+    , organizationId :: JNullable String
+    , folderId :: JNullable String
     , type :: CipherType
     , name :: EncryptedString
-    , notes :: Nullable EncryptedString
-    , fields :: Nullable (Array FieldApi)
-    , login :: Nullable LoginApi
-    , card :: Nullable CardApi
-    , identity :: Nullable IdentityApi
-    , secureNote :: Nullable SecureNoteApi
+    , notes :: JNullable EncryptedString
+    , fields :: JNullable (Array FieldApi)
+    , login :: JNullable LoginApi
+    , card :: JNullable CardApi
+    , identity :: JNullable IdentityApi
+    , secureNote :: JNullable SecureNoteApi
     , favorite :: Boolean
     , edit :: Boolean
     , viewPassword :: Boolean
     , organizationUseTotp :: Boolean
     , revisionDate :: Timestamp
-    , attachments :: Nullable (Array AttachmentResponse)
-    , passwordHistory :: Nullable (Array PasswordHistoryResponse)
-    , collectionIds :: Nullable (Array String)
-    , deletedDate :: Nullable String
+    , attachments :: JNullable (Array AttachmentResponse)
+    , passwordHistory :: JNullable (Array PasswordHistoryResponse)
+    , collectionIds :: JNullable (Array String)
+    , deletedDate :: JNullable String
     , reprompt :: CipherRepromptType
     }
 
@@ -410,7 +422,7 @@ type FieldApi
   = { name :: String
     , value :: String
     , type :: FieldType
-    , linkedId :: Nullable LinkedIdType
+    , linkedId :: JNullable LinkedIdType
     }
 
 fieldTypeText = 0 :: FieldType
@@ -482,18 +494,18 @@ type LinkedIdType
   = Int
 
 type LoginApi
-  = { uris :: Opt (Array LoginUriApi)
-    , username :: Nullable EncryptedString
-    , password :: Nullable EncryptedString
-    , passwordRevisionDate :: Nullable String
-    , totp :: Nullable EncryptedString
+  = { uris :: JOpt (Array LoginUriApi)
+    , username :: JNullable EncryptedString
+    , password :: JNullable EncryptedString
+    , passwordRevisionDate :: JNullable String
+    , totp :: JNullable EncryptedString
     -- This thing is undefined in some cases for some reson. Just ignoring it
-    , autofillOnPageLoad :: Opt (Nullable Boolean)
+    , autofillOnPageLoad :: JOpt (JNullable Boolean)
     }
 
 type LoginUriApi
   = { uri :: String
-    , match :: Nullable UriMatchType
+    , match :: JNullable UriMatchType
     }
 
 uriMatchTypeDomain = 0 :: UriMatchType
@@ -512,12 +524,12 @@ type UriMatchType
   = Int
 
 type CardApi
-  = { cardholderName :: Nullable String
-    , brand :: Nullable String
-    , number :: Nullable String
-    , expMonth :: Nullable String
-    , expYear :: Nullable String
-    , code :: Nullable String
+  = { cardholderName :: JNullable String
+    , brand :: JNullable String
+    , number :: JNullable String
+    , expMonth :: JNullable String
+    , expYear :: JNullable String
+    , code :: JNullable String
     }
 
 type IdentityApi
@@ -580,7 +592,7 @@ type GlobalDomainResponse
 
 type PolicyResponse
   = { id :: String
-    , organizationId :: Nullable String
+    , organizationId :: JNullable String
     , type :: PolicyType
     , data :: ShowableJson
     , enabled :: Boolean
@@ -616,15 +628,15 @@ type SendResponse
     , accessId :: String
     , type :: SendType
     , name :: String
-    , notes :: Nullable String
-    , file :: Nullable SendFileApi
-    , text :: Nullable SendTextApi
+    , notes :: JNullable String
+    , file :: JNullable SendFileApi
+    , text :: JNullable SendTextApi
     , key :: String
-    , maxAccessCount :: Nullable Int
+    , maxAccessCount :: JNullable Int
     , accessCount :: Int
     , revisionDate :: String
     , expirationDate :: String
-    , deletionDate :: Nullable String
+    , deletionDate :: JNullable String
     , password :: String
     , disable :: Boolean
     , hideEmail :: Boolean

@@ -9,8 +9,8 @@ import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.EncString as EncString
 import Data.Function.Uncurried (runFn2, runFn3, runFn4)
+import Data.JNullable (jnull, nullify)
 import Data.Maybe (Maybe(..))
-import Data.Nullable (null, toNullable)
 import Data.String as String
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.SymmetricCryptoKey as SymmetricCryptoKey
@@ -19,19 +19,19 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Exception (error)
 import Effect.Exception as Exc
+import Localstorage (class StorageKey)
+import Web.Storage.Storage (Storage)
 
+-- | Creates the master key
 makePreloginKey ::
   forall r.
-  HasL "api" ApiService r =>
   HasL "crypto" CryptoService r =>
-  Email -> Password -> Al r SymmetricCryptoKey
-makePreloginKey (Email email') (Password password) = do
-  api :: ApiService <- l (L :: L "api")
+  PreloginResponse -> Email -> Password -> Al r SymmetricCryptoKey
+makePreloginKey { kdf, kdfIterations } (Email email') password = do
   crypto <- l (L :: L "crypto")
   let
     email = (String.trim >>> String.toLower) email'
-  { kdf, kdfIterations } <- liftPromise $ api.postPrelogin { email }
-  liftPromise $ runFn4 crypto.makeKey (Password password) email kdf kdfIterations
+  liftPromise $ runFn4 crypto.makeKey password email kdf kdfIterations
 
 makeDecryptionKey ::
   forall r.
@@ -58,15 +58,15 @@ getLogInRequestToken ::
   forall r.
   HasL "api" ApiService r =>
   HasL "crypto" CryptoService r =>
-  Email -> Password -> Al r IdentityTokenResponse
-getLogInRequestToken email password = do
-  key <- makePreloginKey email password
+  PreloginResponse -> Email -> Password -> Al r IdentityTokenResponse
+getLogInRequestToken prelogin email password = do
+  key <- makePreloginKey prelogin email password
   crypto <- l (L :: L "crypto")
   api :: ApiService <- l (L :: L "api")
   _localHashedPassword <-
     liftPromise
-      $ runFn3 crypto.hashPassword password key (toNullable $ Just hashPurposeLocalAuthorization)
-  Hash hashedPassword <- liftPromise $ runFn3 crypto.hashPassword password key null
+      $ runFn3 crypto.hashPassword password key (nullify hashPurposeLocalAuthorization)
+  StringHash hashedPassword <- liftPromise $ runFn3 crypto.hashPassword password key jnull
   liftPromise
     $ api.postIdentityToken
         { email: email
@@ -81,9 +81,14 @@ getLogInRequestToken email password = do
             { type: deviceTypeUnknownBrowser
             , name: "Temporary device name"
             , identifier: "42"
-            , pushToken: null
+            , pushToken: jnull
             }
         }
+
+hashPassword :: forall r. HasL "cryptoFunctions" CryptoFunctions r => Password -> Al r Hash
+hashPassword (Password password) = do
+  cryptoFunctions <- l (L :: L "cryptoFunctions")
+  liftPromise $ runFn2 cryptoFunctions.hash password cryptoFunctionsTypeSha512
 
 decrypt ::
   forall r.

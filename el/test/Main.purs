@@ -1,11 +1,9 @@
 module Test.Main
   ( main
-  )
-  where
+  ) where
 
 import Prelude
 import Test.Unit
-
 import Control.El
 import Control.Monad.Reader (runReaderT)
 import Effect (Effect)
@@ -15,13 +13,15 @@ import Test.Unit.Output.Fancy (runTest)
 import Type.Proxy (Proxy(..))
 
 main ∷ Effect Unit
-main = launchAff_ $ void $ runTest do
-  suite "sync code" do
-    test "arithmetic" do
-      x <- runReaderT singleHandler {handle: 2, ignore: "Hello"}
-      Assert.equal x 2
-
+main =
+  launchAff_ $ void
+    $ runTest do
+        suite "sync code" do
+          test "arithmetic" do
+            x <- runReaderT singleHandler { handle: 2, ignored: "Hello" }
+            Assert.equal x 2
 
 singleHandler :: forall r. HasL "handle" Int r => Al r Int
 singleHandler = do
-  l (L :: L "handle")
+  x <- l (L :: L "handle")
+  pure $ x + 1

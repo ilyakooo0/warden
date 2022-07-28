@@ -2,13 +2,14 @@ module Main exposing (..)
 
 import Bridge
 import Browser
-import FFI exposing (getBridge)
+import FFI exposing (getBridge, sendBridge)
 import Html exposing (..)
 import Html.Attributes as Attr
 import Notification
 import Pages.Ciphers as Ciphers
 import Pages.Loader exposing (loader)
 import Pages.Login as Login
+import Pages.MasterPassword as MasterPassword
 import Pages.Navigation as Navigation
 import Utils exposing (..)
 
@@ -22,6 +23,12 @@ type Msg
     | LoginMsg Login.Msg
     | CiphersMsg Ciphers.Msg
     | LoadCiphers Bridge.Sub_LoadCiphers_List
+    | OpenCiphersScreen
+    | Reset
+    | NeedsReset
+    | MasterPasswordMsg MasterPassword.Msg
+    | SendMasterPassword { password : String }
+    | ShowMasterPasswordPage { server : String, login : String }
 
 
 type alias Model =
@@ -39,6 +46,7 @@ type PageModel
     = LoginModel Login.Model
     | LoadingPage
     | CiphersModel Ciphers.Model
+    | MasterPasswordModel MasterPassword.Model
 
 
 showPage : PageModel -> ( String, List (Html Msg) )
@@ -61,6 +69,13 @@ showPage page =
         LoadingPage ->
             ( "", [ loader ] )
 
+        MasterPasswordModel model ->
+            let
+                p =
+                    MasterPassword.page masterPasswordCallbacks MasterPasswordMsg
+            in
+            ( p.title model, p.view model )
+
 
 main : Program () Model Msg
 main =
@@ -68,21 +83,33 @@ main =
         { init = \_ -> init
         , view = view
         , update = update
-        , subscriptions =
-            \_ ->
-                getBridge ShowError
-                    (\msg ->
-                        case msg of
-                            Bridge.NeedsLogin ->
-                                ShowLoginPage
-
-                            Bridge.Error err ->
-                                ShowError err
-
-                            Bridge.LoadCiphers ciphers ->
-                                LoadCiphers ciphers
-                    )
+        , subscriptions = subscriptions
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    getBridge ShowError
+        (\msg ->
+            case msg of
+                Bridge.NeedsLogin ->
+                    ShowLoginPage
+
+                Bridge.Error err ->
+                    ShowError err
+
+                Bridge.LoadCiphers ciphers ->
+                    LoadCiphers ciphers
+
+                Bridge.LoginSuccessful ->
+                    OpenCiphersScreen
+
+                Bridge.Reset ->
+                    Reset
+
+                Bridge.NeedsMasterPassword { server, login } ->
+                    ShowMasterPasswordPage { server = server, login = login }
+        )
 
 
 init : ( Model, Cmd Msg )
@@ -181,6 +208,30 @@ update msg model =
             (Ciphers.page ciphersCallbacks CiphersMsg).init ciphers
                 |> Tuple.mapFirst (\pageModel -> { model | page = CiphersModel pageModel })
 
+        OpenCiphersScreen ->
+            ( { model | page = LoadingPage }, sendBridge Bridge.NeedCiphersList )
+
+        Reset ->
+            init
+
+        ShowMasterPasswordPage { server, login } ->
+            (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).init { server = server, login = login }
+                |> Tuple.mapFirst (\pageModel -> { model | page = MasterPasswordModel pageModel })
+
+        NeedsReset ->
+            ( { model | page = LoadingPage }, sendBridge Bridge.NeedsReset )
+
+        SendMasterPassword { password } ->
+            ( { model | page = LoadingPage }, sendBridge (Bridge.SendMasterPassword password) )
+
+        MasterPasswordMsg imsg ->
+            case model.page of
+                MasterPasswordModel page ->
+                    (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).update imsg page |> processPage MasterPasswordModel
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -190,3 +241,10 @@ loginCallbacks =
 ciphersCallbacks : Ciphers.Callbacks
 ciphersCallbacks =
     {}
+
+
+masterPasswordCallbacks : MasterPassword.Callbacks Msg
+masterPasswordCallbacks =
+    { submit = SendMasterPassword
+    , reset = NeedsReset
+    }

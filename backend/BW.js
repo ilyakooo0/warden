@@ -9,7 +9,7 @@ import { TokenService } from "../../deps/bw/libs/shared/dist/src/services/token.
 import { WebCryptoFunctionService } from "../../deps/bw/libs/shared/dist/src/services/webCryptoFunction.service";
 import { Account, AccountProfile, AccountTokens } from "../../deps/bw/libs/shared/dist/src/models/domain/account";
 
-// import BrowserStorageService from "../../deps/bw/libs/shared/dist/src/services/browserStorage.service";
+// import BrowserStorageService from "../../../../deps/bw/libs/shared/dist/src/services/browserStorage.service";
 import { CryptoService } from "../../deps/bw/libs/shared/dist/src/services/crypto.service";
 
 import { I18nService } from "../../deps/bw/libs/shared/dist/src/services/i18n.service";
@@ -74,7 +74,8 @@ export function getServices() {
         getSync: () => api.getSync().then(sanitize),
       }
     },
-    crypto: bg.cryptoService
+    crypto: bg.cryptoService,
+    cryptoFunctions: bg.cryptoFunctionService
   }
 }
 

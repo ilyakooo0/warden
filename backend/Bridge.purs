@@ -30,6 +30,9 @@ derive instance ordCmd_Login :: Ord Cmd_Login
 data Cmd =
     Init
   | Login Cmd_Login
+  | NeedCiphersList
+  | NeedsReset
+  | SendMasterPassword String
 
 instance encodeJsonCmd :: EncodeJson Cmd where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions
@@ -64,10 +67,27 @@ derive instance genericSub_LoadCiphers_List :: Generic Sub_LoadCiphers_List _
 derive instance eqSub_LoadCiphers_List :: Eq Sub_LoadCiphers_List
 derive instance ordSub_LoadCiphers_List :: Ord Sub_LoadCiphers_List
 
+newtype Sub_NeedsMasterPassword =
+    Sub_NeedsMasterPassword {
+      login :: String
+    , server :: String
+    }
+
+instance encodeJsonSub_NeedsMasterPassword :: EncodeJson Sub_NeedsMasterPassword where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_NeedsMasterPassword :: DecodeJson Sub_NeedsMasterPassword where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_NeedsMasterPassword :: Generic Sub_NeedsMasterPassword _
+derive instance eqSub_NeedsMasterPassword :: Eq Sub_NeedsMasterPassword
+derive instance ordSub_NeedsMasterPassword :: Ord Sub_NeedsMasterPassword
+
 data Sub =
     Error String
   | LoadCiphers Sub_LoadCiphers_List
+  | LoginSuccessful
   | NeedsLogin
+  | NeedsMasterPassword Sub_NeedsMasterPassword
+  | Reset
 
 instance encodeJsonSub :: EncodeJson Sub where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions
