@@ -102,7 +102,10 @@ main = do
       ciphers <- traverse processCipher sync.ciphers
       liftEffect $ Elm.send app $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List ciphers
       pure unit
-    Bridge.NeedsReset -> pure unit
+    Bridge.NeedsReset -> do
+      WebStorage.clear storage
+      Elm.send app Bridge.Reset
+      pure unit
     Bridge.SendMasterPassword masterPassword -> runElmAff app $ do
       flip runReaderT {app: app, storage: storage, crypto: services.crypto, cryptoFunctions: services.cryptoFunctions} $ do
         hash <- getOrReset storage MasterPasswordHashKey
