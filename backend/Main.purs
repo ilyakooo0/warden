@@ -2,35 +2,25 @@ module Main
   ( main
   ) where
 
-import Bridge
 import Prelude
 
-import BW (ApiService, CryptoService, Hash(..), Services)
+import BW (ApiService, CryptoService, Hash, Services)
 import BW as WB
 import BW.Logic (decrypt, hashPassword, liftPromise)
 import BW.Logic as Logic
-import BW.Types (CipherResponse, Email(..), EncryptedString(..), IdentityTokenResponse, Password(..), PreloginResponse, SyncResponse, Urls, PreloginRequest)
+import BW.Types (CipherResponse, Email(..), IdentityTokenResponse, Password(..), PreloginResponse, SyncResponse, Urls)
 import Bridge as Bridge
 import Control.El (class HasL, Al, L(..), l)
 import Control.Monad.Reader (runReaderT)
-import Control.Promise (Promise)
-import Control.Promise as Promise
-import Data.Argonaut (class DecodeJson, class EncodeJson, encodeJson)
-import Data.Argonaut as Json
-import Data.Array as A
+import Data.Argonaut (class DecodeJson)
 import Data.Either (Either(..))
-import Data.JNullable (JNullable(..), jnull, nullify)
+import Data.JNullable (jnull, nullify)
 import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable, null, toNullable)
-import Data.Nullable as Nullable
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.Timestamp as Timestamp
 import Data.Traversable (traverse)
 import Effect (Effect)
 import Effect.Aff (Aff, runAff_, try)
-import Effect.Aff as Aff
-import Effect.Aff.Class (class MonadAff, liftAff)
-import Effect.Aff.Class as Aff
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Exception as Exc
@@ -38,12 +28,8 @@ import Effect.Ref as Ref
 import Elm as Elm
 import FFI (Elm)
 import FFI as FFI
-import Localstorage (class StorageKey, storageKey)
+import Localstorage (class StorageKey)
 import Localstorage as Storage
-import Localstorage as Storage
-import Prelude as Array
-import Unsafe.Coerce (unsafeCoerce)
-import Web.HTML (Window)
 import Web.HTML as Html
 import Web.HTML.Window as Window
 import Web.Storage.Storage (Storage)

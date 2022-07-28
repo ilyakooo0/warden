@@ -4,23 +4,17 @@ import BW
 import BW.Types
 import Control.El
 import Prelude
-import Control.Monad.Error.Class (throwError)
 import Control.Promise (Promise)
 import Control.Promise as Promise
 import Data.EncString as EncString
 import Data.Function.Uncurried (runFn2, runFn3, runFn4)
 import Data.JNullable (jnull, nullify)
-import Data.Maybe (Maybe(..))
 import Data.String as String
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.SymmetricCryptoKey as SymmetricCryptoKey
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
-import Effect.Exception (error)
 import Effect.Exception as Exc
-import Localstorage (class StorageKey)
-import Web.Storage.Storage (Storage)
 
 -- | Creates the master key
 makePreloginKey ::

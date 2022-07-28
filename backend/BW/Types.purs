@@ -3,11 +3,10 @@ module BW.Types where
 import Prelude
 
 import Data.Argonaut (class DecodeJson, class EncodeJson)
-import Data.Date (Date)
 import Data.JNullable (JNullable)
 import Data.JOpt (JOpt)
 import Data.ShowableJson (ShowableJson)
-import Data.Timestamp (Timestamp(..))
+import Data.Timestamp (Timestamp)
 
 newtype EncryptedString
   = EncryptedString String
