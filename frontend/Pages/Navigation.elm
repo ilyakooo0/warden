@@ -1,7 +1,9 @@
 module Pages.Navigation exposing
     ( Config
+    , MenuConfig
     , PageStack
-    , menu
+    , TopButton(..)
+    , mapMenuConfig
     , popView
     , pushView
     , showNavigationView
@@ -14,78 +16,91 @@ import List.Nonempty as Nonempty exposing (Nonempty)
 import Utils exposing (..)
 
 
-type TopButton
-    = BackButton
-    | MenuButton
+type TopButton msg
+    = BackButton msg
+    | MenuButton (MenuConfig msg)
 
 
 type alias Config msg =
-    { topButton : Maybe TopButton
+    { topButton : Maybe (TopButton msg)
     , title : String
-    , pop : msg
-    , toggleMenu : msg
     }
 
 
-navigation : Config msg -> Html msg
-navigation { topButton, title, pop, toggleMenu } =
-    nav [ Attr.class "p-tabs p-tabs__list" ]
-        [ h3 [ Attr.class "u-no-margin u-no-padding" ]
-            [ button
-                (Attr.class "p-button--base is-inline u-no-margin" :: optional (Nothing == topButton) (Attr.style "visibility" "hidden"))
-                [ i
-                    [ Attr.class
-                        (case topButton of
-                            Just BackButton ->
-                                "p-icon--chevron-up ninety-counter"
+navigation : Config msg -> List (Html msg)
+navigation { topButton, title } =
+    (case topButton of
+        Just (MenuButton cfg) ->
+            optional cfg.visible (menu cfg)
 
-                            Just MenuButton ->
-                                "p-icon--menu"
+        _ ->
+            []
+    )
+        ++ [ nav [ Attr.class "p-tabs p-tabs__list" ]
+                [ h3 [ Attr.class "u-no-margin u-no-padding" ]
+                    [ case topButton of
+                        Nothing ->
+                            button
+                                [ Attr.class "p-button--base is-inline u-no-margin", Attr.style "visibility" "hidden" ]
+                                []
 
-                            Nothing ->
-                                ""
-                        )
-                    , Ev.onClick
-                        (case topButton of
-                            Nothing ->
-                                pop
+                        Just (BackButton msg) ->
+                            button
+                                [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick msg ]
+                                [ i [ Attr.class "p-icon--chevron-up ninety-counter" ] [] ]
 
-                            Just BackButton ->
-                                pop
-
-                            Just MenuButton ->
-                                toggleMenu
-                        )
+                        Just (MenuButton cfg) ->
+                            button
+                                [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick cfg.toggle ]
+                                [ i [ Attr.class "p-icon--menu" ] [] ]
+                    , text title
                     ]
-                    []
                 ]
-            , text title
-            ]
-        ]
+           ]
 
 
 type alias MenuConfig msg =
     { title : String
-    , items : List { icon : String, name : String, trigger : msg }
-    , close : msg
+    , items : List { icon : String, name : String, trigger : msg, current : Bool }
+    , toggle : msg
+    , visible : Bool
+    }
+
+
+mapMenuConfig : (a -> b) -> MenuConfig a -> MenuConfig b
+mapMenuConfig f { title, items, toggle, visible } =
+    { items =
+        List.map
+            (\{ icon, name, trigger, current } ->
+                { icon = icon, name = name, trigger = f trigger, current = current }
+            )
+            items
+    , title = title
+    , toggle = f toggle
+    , visible = visible
     }
 
 
 menu : MenuConfig msg -> Html msg
-menu { title, items, close } =
+menu { title, items, toggle } =
     div [ Attr.class "p-side-navigation--icons is-drawer-expanded" ]
         [ div [ Attr.class "p-side-navigation__overlay" ] []
         , nav [ Attr.class "p-side-navigation__drawer" ]
             [ div [ Attr.class "p-side-navigation__drawer-header" ]
-                [ a [ Attr.class "p-side-navigation__toggle--in-drawer", Ev.onClick close ] [ text title ]
+                [ a [ Attr.class "p-side-navigation__toggle--in-drawer", Ev.onClick toggle ] [ text title ]
                 ]
             , ul [ Attr.class "p-side-navigation__list" ]
                 (items
                     |> List.map
-                        (\{ icon, name, trigger } ->
+                        (\{ icon, name, trigger, current } ->
                             li [ Attr.class "p-side-navigation__item" ]
                                 [ a [ Attr.class "p-side-navigation__link", Ev.onClick trigger ]
-                                    [ i [ Attr.class "p-side-navigation__icon", Attr.class ("p-icon--" ++ icon) ] []
+                                    [ i
+                                        [ Attr.class "p-side-navigation__icon"
+                                        , Attr.class ("p-icon--" ++ icon)
+                                        , Attr.classList [ ( "is-active", current ) ]
+                                        ]
+                                        []
                                     , text name
                                     ]
                                 ]
@@ -110,41 +125,25 @@ popView stack =
 
 
 showNavigationView :
-    { popStack : msg
-    , toggleMenu : msg
-    }
-    -> PageStack model
+    PageStack model
     ->
         (model
          ->
             { title : String
             , body : List (Html msg)
-            , menuConfig : Maybe (MenuConfig msg)
-            , menuPossible : Bool
+            , topButton : Maybe (TopButton msg)
             }
         )
     -> Html msg
-showNavigationView { popStack, toggleMenu } stack render =
+showNavigationView stack render =
     let
-        { title, body, menuConfig, menuPossible } =
+        { title, body, topButton } =
             render (Nonempty.head stack)
     in
     div []
-        (maybeList menuConfig menu
-            ++ [ navigation
-                    { topButton =
-                        if menuPossible then
-                            Just MenuButton
-
-                        else if Nonempty.length stack > 1 then
-                            Just BackButton
-
-                        else
-                            Nothing
-                    , title = title
-                    , pop = popStack
-                    , toggleMenu = toggleMenu
-                    }
-               , main_ [] body
-               ]
+        (navigation
+            { topButton = topButton
+            , title = title
+            }
+            ++ [ main_ [] body ]
         )

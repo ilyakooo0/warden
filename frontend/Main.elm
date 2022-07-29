@@ -34,8 +34,6 @@ type Msg
     | ShowCipherPage Bridge.Sub_LoadCipher
     | RequestCipher CipherId
     | PopView
-    | ToggleMenu
-    | ChangeFilter CipherFilter
 
 
 type alias CipherId =
@@ -45,9 +43,6 @@ type alias CipherId =
 type alias Model =
     { notifications : List Notification.Config
     , pageStack : Navigation.PageStack PageModel
-    , menuShown : Bool
-    , email : Maybe String
-    , filter : CipherFilter
     }
 
 
@@ -64,7 +59,13 @@ type PageModel
     | CipherModel Cipher.Model
 
 
-showPage : PageModel -> ( String, List (Html Msg) )
+showPage :
+    PageModel
+    ->
+        { title : String
+        , body : List (Html Msg)
+        , topButton : Maybe (Navigation.TopButton Msg)
+        }
 showPage page =
     case page of
         LoginModel model ->
@@ -72,31 +73,50 @@ showPage page =
                 p =
                     Login.page loginCallbacks LoginMsg
             in
-            ( p.title model, p.view model )
+            { title = p.title model
+            , body = p.view model
+            , topButton = Nothing
+            }
 
         CiphersModel model ->
             let
                 p =
                     Ciphers.page ciphersCallbacks CiphersMsg
             in
-            ( p.title model, p.view model )
+            { title = p.title model
+            , body = p.view model
+            , topButton =
+                Ciphers.menuConfig model
+                    |> Navigation.mapMenuConfig CiphersMsg
+                    |> Navigation.MenuButton
+                    |> Just
+            }
 
         LoadingPage ->
-            ( "", [ loader ] )
+            { title = ""
+            , body = [ loader ]
+            , topButton = Nothing
+            }
 
         MasterPasswordModel model ->
             let
                 p =
                     MasterPassword.page masterPasswordCallbacks MasterPasswordMsg
             in
-            ( p.title model, p.view model )
+            { title = p.title model
+            , body = p.view model
+            , topButton = Nothing
+            }
 
         CipherModel model ->
             let
                 p =
                     Cipher.page cipherCallbacks CipherMsg
             in
-            ( p.title model, p.view model )
+            { title = p.title model
+            , body = p.view model
+            , topButton = Nothing
+            }
 
 
 main : Program () Model Msg
@@ -137,78 +157,18 @@ subscriptions _ =
         )
 
 
-type CipherFilter
-    = AnyCipher
-    | Specific Bridge.Sub_LoadCiphers_cipherType
-
-
-applyCipherFilter : CipherFilter -> Bridge.Sub_LoadCiphers_List -> Bridge.Sub_LoadCiphers_List
-applyCipherFilter filter list =
-    case filter of
-        AnyCipher ->
-            list
-
-        Specific t ->
-            list |> List.filter (.cipherType >> (==) t)
-
-
 init : ( Model, Cmd Msg )
 init =
     ( { notifications = []
       , pageStack = Nonempty.singleton LoadingPage
-      , menuShown = False
-      , email = Nothing
-      , filter = AnyCipher
       }
     , FFI.sendBridge Bridge.Init
     )
 
 
-pageShouldShowMenu : PageModel -> Bool
-pageShouldShowMenu page =
-    case page of
-        CiphersModel _ ->
-            True
-
-        _ ->
-            False
-
-
 view : Model -> Html Msg
 view model =
-    Navigation.showNavigationView
-        { popStack = PopView
-        , toggleMenu = ToggleMenu
-        }
-        model.pageStack
-        (\page ->
-            let
-                ( title, body ) =
-                    case page of
-                        CiphersModel m ->
-                            CiphersModel { m | ciphers = m.ciphers |> applyCipherFilter model.filter }
-                                |> showPage
-
-                        _ ->
-                            showPage page
-            in
-            { title = title
-            , body = maybeList (List.head model.notifications) (Notification.notification CloseNotification) ++ body
-            , menuConfig =
-                if pageShouldShowMenu page && model.menuShown then
-                    Just
-                        { title = Maybe.withDefault "" model.email
-                        , items =
-                            [ { icons = "", name = "", trigger = ChangeFilter AnyCipher }
-                            ]
-                        , close = ToggleMenu
-                        }
-
-                else
-                    Nothing
-            , menuPossible = pageShouldShowMenu page
-            }
-        )
+    Navigation.showNavigationView model.pageStack showPage
 
 
 mapHead : (a -> a) -> Nonempty a -> Nonempty a
@@ -356,9 +316,6 @@ update msg model =
             ( { model | pageStack = Navigation.popView model.pageStack }
             , Cmd.none
             )
-
-        ToggleMenu ->
-            ( { model | menuShown = not model.menuShown }, Cmd.none )
 
 
 loginCallbacks : Login.Callbacks Msg
