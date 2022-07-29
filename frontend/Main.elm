@@ -4,6 +4,7 @@ import Bridge
 import Browser
 import FFI exposing (getBridge, sendBridge)
 import Html exposing (..)
+import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Notification
 import Pages.Cipher as Cipher
 import Pages.Ciphers as Ciphers
@@ -32,6 +33,7 @@ type Msg
     | CipherMsg Cipher.Msg
     | ShowCipherPage Bridge.Sub_LoadCipher
     | RequestCipher CipherId
+    | PopView
 
 
 type alias CipherId =
@@ -40,7 +42,7 @@ type alias CipherId =
 
 type alias Model =
     { notifications : List Notification.Config
-    , page : PageModel
+    , pageStack : Navigation.PageStack PageModel
     }
 
 
@@ -134,7 +136,7 @@ init : ( Model, Cmd Msg )
 init =
     -- Cipher.init |> Tuple.mapBoth (\p -> { notifications = [], page = CipherModel p }) (Cmd.map CipherMsg)
     ( { notifications = []
-      , page = LoadingPage
+      , pageStack = Nonempty.singleton LoadingPage
       }
     , FFI.sendBridge Bridge.Init
     )
@@ -142,15 +144,38 @@ init =
 
 view : Model -> Html Msg
 view model =
-    let
-        ( title, body ) =
-            showPage model.page
-    in
-    div []
-        [ Navigation.navigation { back = False, title = title }
-        , main_ []
-            (maybeList (List.head model.notifications) (Notification.notification CloseNotification) ++ body)
-        ]
+    Navigation.showNavigationView { popStack = PopView }
+        model.pageStack
+        (\page ->
+            let
+                ( title, body ) =
+                    showPage page
+            in
+            ( title
+            , maybeList (List.head model.notifications) (Notification.notification CloseNotification) ++ body
+            )
+        )
+
+
+mapHead : (a -> a) -> Nonempty a -> Nonempty a
+mapHead f (Nonempty x xx) =
+    Nonempty (f x) xx
+
+
+doNotStoreInHistory : PageModel -> Bool
+doNotStoreInHistory page =
+    case page of
+        LoginModel _ ->
+            True
+
+        MasterPasswordModel _ ->
+            True
+
+        LoadingPage ->
+            True
+
+        _ ->
+            False
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -160,7 +185,7 @@ update msg model =
         processPage liftModel ( resultModel, cmd ) =
             case resultModel of
                 Ok mdl ->
-                    ( { model | page = liftModel mdl }, cmd )
+                    ( { model | pageStack = mapHead (always (liftModel mdl)) model.pageStack }, cmd )
 
                 Err err ->
                     ( appendNotification
@@ -171,6 +196,13 @@ update msg model =
                         model
                     , cmd
                     )
+
+        appendPageStack : PageModel -> Model
+        appendPageStack mdl =
+            { model | pageStack = model.pageStack |> Nonempty.toList |> List.filter (doNotStoreInHistory >> not) |> Nonempty mdl }
+
+        currentPage =
+            model.pageStack |> Nonempty.head
     in
     case msg of
         RecieveMessage x ->
@@ -204,7 +236,7 @@ update msg model =
             )
 
         LoginMsg imsg ->
-            case model.page of
+            case currentPage of
                 LoginModel page ->
                     (Login.page loginCallbacks LoginMsg).update imsg page |> processPage LoginModel
 
@@ -212,7 +244,7 @@ update msg model =
                     ( model, Cmd.none )
 
         CiphersMsg imsg ->
-            case model.page of
+            case currentPage of
                 CiphersModel page ->
                     (Ciphers.page ciphersCallbacks CiphersMsg).update imsg page |> processPage CiphersModel
 
@@ -221,30 +253,30 @@ update msg model =
 
         ShowLoginPage ->
             (Login.page loginCallbacks LoginMsg).init ()
-                |> Tuple.mapFirst (\pageModel -> { model | page = LoginModel pageModel })
+                |> Tuple.mapFirst (\pageModel -> appendPageStack <| LoginModel pageModel)
 
         LoadCiphers ciphers ->
             (Ciphers.page ciphersCallbacks CiphersMsg).init ciphers
-                |> Tuple.mapFirst (\pageModel -> { model | page = CiphersModel pageModel })
+                |> Tuple.mapFirst (\pageModel -> appendPageStack <| CiphersModel pageModel)
 
         OpenCiphersScreen ->
-            ( { model | page = LoadingPage }, sendBridge Bridge.NeedCiphersList )
+            ( appendPageStack <| LoadingPage, sendBridge Bridge.NeedCiphersList )
 
         Reset ->
             init
 
         ShowMasterPasswordPage { server, login } ->
             (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).init { server = server, login = login }
-                |> Tuple.mapFirst (\pageModel -> { model | page = MasterPasswordModel pageModel })
+                |> Tuple.mapFirst (\pageModel -> appendPageStack <| MasterPasswordModel pageModel)
 
         NeedsReset ->
-            ( { model | page = LoadingPage }, sendBridge Bridge.NeedsReset )
+            ( appendPageStack <| LoadingPage, sendBridge Bridge.NeedsReset )
 
         SendMasterPassword { password } ->
-            ( { model | page = LoadingPage }, sendBridge (Bridge.SendMasterPassword password) )
+            ( appendPageStack <| LoadingPage, sendBridge (Bridge.SendMasterPassword password) )
 
         MasterPasswordMsg imsg ->
-            case model.page of
+            case currentPage of
                 MasterPasswordModel page ->
                     (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).update imsg page |> processPage MasterPasswordModel
 
@@ -252,7 +284,7 @@ update msg model =
                     ( model, Cmd.none )
 
         CipherMsg imsg ->
-            case model.page of
+            case currentPage of
                 CipherModel page ->
                     (Cipher.page cipherCallbacks CipherMsg).update imsg page |> processPage CipherModel
 
@@ -261,10 +293,15 @@ update msg model =
 
         ShowCipherPage cipher ->
             (Cipher.page cipherCallbacks CipherMsg).init cipher
-                |> Tuple.mapFirst (\pageModel -> { model | page = CipherModel pageModel })
+                |> Tuple.mapFirst (\pageModel -> appendPageStack <| CipherModel pageModel)
 
         RequestCipher id ->
-            ( { model | page = LoadingPage }, sendBridge (Bridge.RequestCipher id) )
+            ( appendPageStack <| LoadingPage, sendBridge (Bridge.RequestCipher id) )
+
+        PopView ->
+            ( { model | pageStack = Navigation.popView model.pageStack }
+            , Cmd.none
+            )
 
 
 loginCallbacks : Login.Callbacks Msg

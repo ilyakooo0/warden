@@ -1,24 +1,33 @@
-module Pages.Navigation exposing (Config, menu, navigation)
+module Pages.Navigation exposing
+    ( Config
+    , PageStack
+    , menu
+    , popView
+    , pushView
+    , showNavigationView
+    )
 
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
+import List.Nonempty as Nonempty exposing (Nonempty)
 import Utils exposing (..)
 
 
-type alias Config =
+type alias Config msg =
     { back : Bool
     , title : String
+    , pop : msg
     }
 
 
-navigation : Config -> Html msg
-navigation { back, title } =
+navigation : Config msg -> Html msg
+navigation { back, title, pop } =
     nav [ Attr.class "p-tabs p-tabs__list" ]
         [ h3 [ Attr.class "u-no-margin u-no-padding" ]
             [ button
                 (Attr.class "p-button--base is-inline u-no-margin" :: optional (not back) (Attr.style "visibility" "hidden"))
-                [ i [ Attr.class "p-icon--chevron-up ninety-counter" ] []
+                [ i [ Attr.class "p-icon--chevron-up ninety-counter", Ev.onClick pop ] []
                 ]
             , text title
             ]
@@ -53,4 +62,30 @@ menu { title, items, close } =
                         )
                 )
             ]
+        ]
+
+
+type alias PageStack model =
+    Nonempty model
+
+
+pushView : model -> PageStack model -> PageStack model
+pushView model stack =
+    Nonempty.cons model stack
+
+
+popView : PageStack model -> PageStack model
+popView stack =
+    Nonempty.tail stack |> Nonempty.fromList |> Maybe.withDefault stack
+
+
+showNavigationView : { popStack : msg } -> PageStack model -> (model -> ( String, List (Html msg) )) -> Html msg
+showNavigationView { popStack } stack render =
+    let
+        ( title, body ) =
+            render (Nonempty.head stack)
+    in
+    div []
+        [ navigation { back = Nonempty.length stack > 1, title = title, pop = popStack }
+        , main_ [] body
         ]
