@@ -71,11 +71,29 @@ view : Model -> List (Html Msg)
 view model =
     [ form []
         [ label [] [ text "Server" ]
-        , input [ Attr.type_ "url", Attr.value model.server, Ev.onInput UpdateServer ] []
+        , input
+            [ Attr.type_ "url"
+            , Attr.value model.server
+            , Ev.onInput UpdateServer
+            , Attr.attribute "autocomplete" "url"
+            ]
+            []
         , label [] [ text "Email" ]
-        , input [ Attr.type_ "email", Attr.value model.email, Ev.onInput UpdateEmail ] []
+        , input
+            [ Attr.type_ "email"
+            , Attr.value model.email
+            , Ev.onInput UpdateEmail
+            , Attr.attribute "autocomplete" "email"
+            ]
+            []
         , label [] [ text "Password" ]
-        , input [ Attr.type_ "password", Attr.value model.password, Ev.onInput UpdatePassword ] []
+        , input
+            [ Attr.type_ "password"
+            , Attr.value model.password
+            , Ev.onInput UpdatePassword
+            , Attr.attribute "autocomplete" "current-password"
+            ]
+            []
         ]
     , alignRight [ button [ Ev.onClick Submit ] [ text "Log in" ] ]
     ]

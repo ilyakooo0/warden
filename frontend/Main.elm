@@ -134,7 +134,6 @@ subscriptions _ =
 
 init : ( Model, Cmd Msg )
 init =
-    -- Cipher.init |> Tuple.mapBoth (\p -> { notifications = [], page = CipherModel p }) (Cmd.map CipherMsg)
     ( { notifications = []
       , pageStack = Nonempty.singleton LoadingPage
       }
