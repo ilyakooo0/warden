@@ -179,15 +179,38 @@ jsonEncSub_LoadCipher  val =
 
 
 
+type Sub_LoadCiphers_cipherType  =
+    CardType 
+    | IdentityType 
+    | LoginType 
+    | NoteType 
+
+jsonDecSub_LoadCiphers_cipherType : Json.Decode.Decoder ( Sub_LoadCiphers_cipherType )
+jsonDecSub_LoadCiphers_cipherType = 
+    let jsonDecDictSub_LoadCiphers_cipherType = Dict.fromList [("CardType", CardType), ("IdentityType", IdentityType), ("LoginType", LoginType), ("NoteType", NoteType)]
+    in  decodeSumUnaries "Sub_LoadCiphers_cipherType" jsonDecDictSub_LoadCiphers_cipherType
+
+jsonEncSub_LoadCiphers_cipherType : Sub_LoadCiphers_cipherType -> Value
+jsonEncSub_LoadCiphers_cipherType  val =
+    case val of
+        CardType -> Json.Encode.string "CardType"
+        IdentityType -> Json.Encode.string "IdentityType"
+        LoginType -> Json.Encode.string "LoginType"
+        NoteType -> Json.Encode.string "NoteType"
+
+
+
 type alias Sub_LoadCiphers  =
-   { date: String
+   { cipherType: Sub_LoadCiphers_cipherType
+   , date: String
    , id: String
    , name: String
    }
 
 jsonDecSub_LoadCiphers : Json.Decode.Decoder ( Sub_LoadCiphers )
 jsonDecSub_LoadCiphers =
-   Json.Decode.succeed (\pdate pid pname -> {date = pdate, id = pid, name = pname})
+   Json.Decode.succeed (\pcipherType pdate pid pname -> {cipherType = pcipherType, date = pdate, id = pid, name = pname})
+   |> required "cipherType" (jsonDecSub_LoadCiphers_cipherType)
    |> required "date" (Json.Decode.string)
    |> required "id" (Json.Decode.string)
    |> required "name" (Json.Decode.string)
@@ -195,7 +218,8 @@ jsonDecSub_LoadCiphers =
 jsonEncSub_LoadCiphers : Sub_LoadCiphers -> Value
 jsonEncSub_LoadCiphers  val =
    Json.Encode.object
-   [ ("date", Json.Encode.string val.date)
+   [ ("cipherType", jsonEncSub_LoadCiphers_cipherType val.cipherType)
+   , ("date", Json.Encode.string val.date)
    , ("id", Json.Encode.string val.id)
    , ("name", Json.Encode.string val.name)
    ]

@@ -115,9 +115,24 @@ derive instance genericSub_LoadCipher :: Generic Sub_LoadCipher _
 derive instance eqSub_LoadCipher :: Eq Sub_LoadCipher
 derive instance ordSub_LoadCipher :: Ord Sub_LoadCipher
 
+data Sub_LoadCiphers_cipherType =
+    CardType
+  | IdentityType
+  | LoginType
+  | NoteType
+
+instance encodeJsonSub_LoadCiphers_cipherType :: EncodeJson Sub_LoadCiphers_cipherType where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_LoadCiphers_cipherType :: DecodeJson Sub_LoadCiphers_cipherType where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_LoadCiphers_cipherType :: Generic Sub_LoadCiphers_cipherType _
+derive instance eqSub_LoadCiphers_cipherType :: Eq Sub_LoadCiphers_cipherType
+derive instance ordSub_LoadCiphers_cipherType :: Ord Sub_LoadCiphers_cipherType
+
 newtype Sub_LoadCiphers =
     Sub_LoadCiphers {
-      date :: String
+      cipherType :: Sub_LoadCiphers_cipherType
+    , date :: String
     , id :: String
     , name :: String
     }

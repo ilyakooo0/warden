@@ -8,11 +8,12 @@ import BW (ApiService, CryptoService, Hash, Services)
 import BW as WB
 import BW.Logic (decrypt, hashPassword, liftPromise)
 import BW.Logic as Logic
-import BW.Types (CipherResponse, Email(..), IdentityTokenResponse, Password(..), PreloginResponse, SyncResponse, Urls, cipherTypeCard, cipherTypeLogin, cipherTypeSecureNote)
+import BW.Types (CipherResponse, Email(..), IdentityTokenResponse, Password(..), PreloginResponse, SyncResponse, Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
 import Bridge (Sub_LoadCipher(..))
 import Bridge as Bridge
 import Control.El (class HasL, Al, L(..), l)
 import Control.Monad.Error.Class (throwError)
+import Control.Monad.List.Trans as List
 import Control.Monad.Reader (runReaderT)
 import Data.Argonaut (class DecodeJson)
 import Data.Array as Array
@@ -194,9 +195,19 @@ processCipher ::
   CipherResponse -> Al r Bridge.Sub_LoadCiphers
 processCipher cipher = do
   name <- decrypt cipher.name
+  cipherType <- case cipher.type of
+        n | n == cipherTypeLogin -> pure Bridge.LoginType
+        n | n == cipherTypeSecureNote -> pure Bridge.NoteType
+        n | n == cipherTypeCard -> pure Bridge.CardType
+        n | n == cipherTypeIdentity -> pure Bridge.IdentityType
+        n -> throwError $ error $ "Unsupported cipher type: " <> show n
   pure
     $ Bridge.Sub_LoadCiphers
-        { name: name, date: Timestamp.toLocalDateTimeString cipher.revisionDate, id: cipher.id }
+        { name: name
+        , date: Timestamp.toLocalDateTimeString cipher.revisionDate
+        , id: cipher.id
+        , cipherType
+        }
 
 runElmAff :: FFI.Elm -> Aff Unit -> Effect Unit
 runElmAff app =

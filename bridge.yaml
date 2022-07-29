@@ -6,6 +6,11 @@ Sub:
         name: String
         date: String
         id: String
+        cipherType:
+            - LoginType
+            - CardType
+            - NoteType
+            - IdentityType
 - LoginSuccessful
 - NeedsMasterPassword:
     server: String
@@ -27,7 +32,6 @@ Sub:
             expMonth: String
             expYear: String
             code: String
-
 
 Cmd:
 - Init

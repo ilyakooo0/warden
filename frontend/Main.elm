@@ -34,6 +34,8 @@ type Msg
     | ShowCipherPage Bridge.Sub_LoadCipher
     | RequestCipher CipherId
     | PopView
+    | ToggleMenu
+    | ChangeFilter CipherFilter
 
 
 type alias CipherId =
@@ -43,6 +45,9 @@ type alias CipherId =
 type alias Model =
     { notifications : List Notification.Config
     , pageStack : Navigation.PageStack PageModel
+    , menuShown : Bool
+    , email : Maybe String
+    , filter : CipherFilter
     }
 
 
@@ -132,27 +137,77 @@ subscriptions _ =
         )
 
 
+type CipherFilter
+    = AnyCipher
+    | Specific Bridge.Sub_LoadCiphers_cipherType
+
+
+applyCipherFilter : CipherFilter -> Bridge.Sub_LoadCiphers_List -> Bridge.Sub_LoadCiphers_List
+applyCipherFilter filter list =
+    case filter of
+        AnyCipher ->
+            list
+
+        Specific t ->
+            list |> List.filter (.cipherType >> (==) t)
+
+
 init : ( Model, Cmd Msg )
 init =
     ( { notifications = []
       , pageStack = Nonempty.singleton LoadingPage
+      , menuShown = False
+      , email = Nothing
+      , filter = AnyCipher
       }
     , FFI.sendBridge Bridge.Init
     )
 
 
+pageShouldShowMenu : PageModel -> Bool
+pageShouldShowMenu page =
+    case page of
+        CiphersModel _ ->
+            True
+
+        _ ->
+            False
+
+
 view : Model -> Html Msg
 view model =
-    Navigation.showNavigationView { popStack = PopView }
+    Navigation.showNavigationView
+        { popStack = PopView
+        , toggleMenu = ToggleMenu
+        }
         model.pageStack
         (\page ->
             let
                 ( title, body ) =
-                    showPage page
+                    case page of
+                        CiphersModel m ->
+                            CiphersModel { m | ciphers = m.ciphers |> applyCipherFilter model.filter }
+                                |> showPage
+
+                        _ ->
+                            showPage page
             in
-            ( title
-            , maybeList (List.head model.notifications) (Notification.notification CloseNotification) ++ body
-            )
+            { title = title
+            , body = maybeList (List.head model.notifications) (Notification.notification CloseNotification) ++ body
+            , menuConfig =
+                if pageShouldShowMenu page && model.menuShown then
+                    Just
+                        { title = Maybe.withDefault "" model.email
+                        , items =
+                            [ { icons = "", name = "", trigger = ChangeFilter AnyCipher }
+                            ]
+                        , close = ToggleMenu
+                        }
+
+                else
+                    Nothing
+            , menuPossible = pageShouldShowMenu page
+            }
         )
 
 
@@ -301,6 +356,9 @@ update msg model =
             ( { model | pageStack = Navigation.popView model.pageStack }
             , Cmd.none
             )
+
+        ToggleMenu ->
+            ( { model | menuShown = not model.menuShown }, Cmd.none )
 
 
 loginCallbacks : Login.Callbacks Msg

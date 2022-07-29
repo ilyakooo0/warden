@@ -14,20 +14,50 @@ import List.Nonempty as Nonempty exposing (Nonempty)
 import Utils exposing (..)
 
 
+type TopButton
+    = BackButton
+    | MenuButton
+
+
 type alias Config msg =
-    { back : Bool
+    { topButton : Maybe TopButton
     , title : String
     , pop : msg
+    , toggleMenu : msg
     }
 
 
 navigation : Config msg -> Html msg
-navigation { back, title, pop } =
+navigation { topButton, title, pop, toggleMenu } =
     nav [ Attr.class "p-tabs p-tabs__list" ]
         [ h3 [ Attr.class "u-no-margin u-no-padding" ]
             [ button
-                (Attr.class "p-button--base is-inline u-no-margin" :: optional (not back) (Attr.style "visibility" "hidden"))
-                [ i [ Attr.class "p-icon--chevron-up ninety-counter", Ev.onClick pop ] []
+                (Attr.class "p-button--base is-inline u-no-margin" :: optional (Nothing == topButton) (Attr.style "visibility" "hidden"))
+                [ i
+                    [ Attr.class
+                        (case topButton of
+                            Just BackButton ->
+                                "p-icon--chevron-up ninety-counter"
+
+                            Just MenuButton ->
+                                "p-icon--menu"
+
+                            Nothing ->
+                                ""
+                        )
+                    , Ev.onClick
+                        (case topButton of
+                            Nothing ->
+                                pop
+
+                            Just BackButton ->
+                                pop
+
+                            Just MenuButton ->
+                                toggleMenu
+                        )
+                    ]
+                    []
                 ]
             , text title
             ]
@@ -79,13 +109,42 @@ popView stack =
     Nonempty.tail stack |> Nonempty.fromList |> Maybe.withDefault stack
 
 
-showNavigationView : { popStack : msg } -> PageStack model -> (model -> ( String, List (Html msg) )) -> Html msg
-showNavigationView { popStack } stack render =
+showNavigationView :
+    { popStack : msg
+    , toggleMenu : msg
+    }
+    -> PageStack model
+    ->
+        (model
+         ->
+            { title : String
+            , body : List (Html msg)
+            , menuConfig : Maybe (MenuConfig msg)
+            , menuPossible : Bool
+            }
+        )
+    -> Html msg
+showNavigationView { popStack, toggleMenu } stack render =
     let
-        ( title, body ) =
+        { title, body, menuConfig, menuPossible } =
             render (Nonempty.head stack)
     in
     div []
-        [ navigation { back = Nonempty.length stack > 1, title = title, pop = popStack }
-        , main_ [] body
-        ]
+        (maybeList menuConfig menu
+            ++ [ navigation
+                    { topButton =
+                        if menuPossible then
+                            Just MenuButton
+
+                        else if Nonempty.length stack > 1 then
+                            Just BackButton
+
+                        else
+                            Nothing
+                    , title = title
+                    , pop = popStack
+                    , toggleMenu = toggleMenu
+                    }
+               , main_ [] body
+               ]
+        )
