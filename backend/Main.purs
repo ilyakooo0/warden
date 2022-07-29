@@ -8,13 +8,18 @@ import BW (ApiService, CryptoService, Hash, Services)
 import BW as WB
 import BW.Logic (decrypt, hashPassword, liftPromise)
 import BW.Logic as Logic
-import BW.Types (CipherResponse, Email(..), IdentityTokenResponse, Password(..), PreloginResponse, SyncResponse, Urls)
+import BW.Types (CipherResponse, Email(..), IdentityTokenResponse, Password(..), PreloginResponse, SyncResponse, Urls, cipherTypeCard, cipherTypeLogin, cipherTypeSecureNote)
+import Bridge (Sub_LoadCipher(..))
 import Bridge as Bridge
 import Control.El (class HasL, Al, L(..), l)
+import Control.Monad.Error.Class (throwError)
 import Control.Monad.Reader (runReaderT)
 import Data.Argonaut (class DecodeJson)
+import Data.Array as Array
 import Data.Either (Either(..))
-import Data.JNullable (jnull, nullify)
+import Data.JNullable (fromJNullable, jnull, nullify)
+import Data.JNullable as JNullable
+import Data.JOpt (fromJOpt)
 import Data.Maybe (Maybe(..))
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.Timestamp as Timestamp
@@ -23,6 +28,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, runAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
+import Effect.Exception (error)
 import Effect.Exception as Exc
 import Effect.Ref as Ref
 import Elm as Elm
@@ -111,6 +117,45 @@ main = do
       liftEffect $ Storage.get storage TokenKey >>= \x -> case x of
         Just _ -> liftEffect $ Elm.send app Bridge.LoginSuccessful
         Nothing -> Elm.send app Bridge.NeedsLogin
+    Bridge.RequestCipher id -> run do
+      sync <- getOrReset storage SyncKey
+      case Array.find (\c -> c.id == id) sync.ciphers of
+        Nothing -> pure unit
+        Just cipher -> do
+          name <- decrypt cipher.name
+          cipherType <- do
+            case cipher.type of
+              n | cipherTypeSecureNote == n -> do
+                note <- fromJNullable "" <$> (traverse decrypt cipher.notes)
+                pure $ Bridge.NoteCipher note
+              n | cipherTypeLogin == n -> do
+                case JNullable.toMaybe cipher.login of
+                  Nothing -> throwError $ error "Login data is missing"
+                  Just login -> do
+                    username <- fromJNullable "" <$> (traverse decrypt login.username)
+                    password <- fromJNullable "" <$> (traverse decrypt login.password)
+                    uris <- fromJOpt [] <$> ((traverse >>> traverse) (_.uri >>> decrypt) login.uris)
+                    pure $ Bridge.LoginCipher $ Bridge.Sub_LoadCipher_cipherType_LoginCipher
+                      { username
+                      , password
+                      , uris: Bridge.Sub_LoadCipher_cipherType_LoginCipher_uris_List uris
+                      }
+              n | cipherTypeCard == n -> do
+                case JNullable.toMaybe cipher.card of
+                  Nothing -> throwError $ error "Card data is missing"
+                  Just card -> do
+                    cardholderName <- fromJNullable "" <$> (traverse decrypt card.cardholderName)
+                    number <- fromJNullable "" <$> (traverse decrypt card.number)
+                    code <- fromJNullable "" <$> (traverse decrypt card.code)
+                    brand <- fromJNullable "" <$> (traverse decrypt card.brand)
+                    expMonth <- fromJNullable "" <$> (traverse decrypt card.expMonth)
+                    expYear <- fromJNullable "" <$> (traverse decrypt card.expYear)
+                    pure $ Bridge.CardCipher $ Bridge.Sub_LoadCipher_cipherType_CardCipher
+                      { brand, cardholderName, code, expMonth, expYear, number }
+              n -> throwError $ error $ "Unsupported cipher type: " <> show n
+          send $ Bridge.LoadCipher $ Bridge.Sub_LoadCipher {cipherType, name, id}
+          pure unit
+      pure unit
 
 data SyncKey  = SyncKey
 
@@ -151,7 +196,7 @@ processCipher cipher = do
   name <- decrypt cipher.name
   pure
     $ Bridge.Sub_LoadCiphers
-        { name: name, date: Timestamp.toLocalDateTimeString cipher.revisionDate }
+        { name: name, date: Timestamp.toLocalDateTimeString cipher.revisionDate, id: cipher.id }
 
 runElmAff :: FFI.Elm -> Aff Unit -> Effect Unit
 runElmAff app =
@@ -208,3 +253,8 @@ requestMasterPassword = do
   sync <- getOrReset storage SyncKey
   liftEffect $ Elm.send app $ Bridge.NeedsMasterPassword
     $ Bridge.Sub_NeedsMasterPassword {server: url, login: sync.profile.email}
+
+send :: forall r. HasL "app" Elm r => Bridge.Sub -> Al r Unit
+send sub = do
+  app <- l (L :: L "app")
+  liftEffect $ Elm.send app sub

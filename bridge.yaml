@@ -5,11 +5,28 @@ Sub:
     List:
         name: String
         date: String
+        id: String
 - LoginSuccessful
 - NeedsMasterPassword:
     server: String
     login: String
 - Reset
+- LoadCipher:
+    id: String
+    name: String
+    cipherType:
+        - LoginCipher:
+            uris: {List: String}
+            username: String
+            password: String
+        - NoteCipher: String
+        - CardCipher:
+            cardholderName: String
+            brand: String
+            number: String
+            expMonth: String
+            expYear: String
+            code: String
 
 
 Cmd:
@@ -21,3 +38,4 @@ Cmd:
 - NeedCiphersList
 - SendMasterPassword: String
 - NeedsReset
+- RequestCipher: String

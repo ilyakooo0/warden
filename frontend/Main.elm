@@ -4,8 +4,8 @@ import Bridge
 import Browser
 import FFI exposing (getBridge, sendBridge)
 import Html exposing (..)
-import Html.Attributes as Attr
 import Notification
+import Pages.Cipher as Cipher
 import Pages.Ciphers as Ciphers
 import Pages.Loader exposing (loader)
 import Pages.Login as Login
@@ -29,6 +29,13 @@ type Msg
     | MasterPasswordMsg MasterPassword.Msg
     | SendMasterPassword { password : String }
     | ShowMasterPasswordPage { server : String, login : String }
+    | CipherMsg Cipher.Msg
+    | ShowCipherPage Bridge.Sub_LoadCipher
+    | RequestCipher CipherId
+
+
+type alias CipherId =
+    String
 
 
 type alias Model =
@@ -47,6 +54,7 @@ type PageModel
     | LoadingPage
     | CiphersModel Ciphers.Model
     | MasterPasswordModel MasterPassword.Model
+    | CipherModel Cipher.Model
 
 
 showPage : PageModel -> ( String, List (Html Msg) )
@@ -62,7 +70,7 @@ showPage page =
         CiphersModel model ->
             let
                 p =
-                    Ciphers.page {} CiphersMsg
+                    Ciphers.page ciphersCallbacks CiphersMsg
             in
             ( p.title model, p.view model )
 
@@ -73,6 +81,13 @@ showPage page =
             let
                 p =
                     MasterPassword.page masterPasswordCallbacks MasterPasswordMsg
+            in
+            ( p.title model, p.view model )
+
+        CipherModel model ->
+            let
+                p =
+                    Cipher.page cipherCallbacks CipherMsg
             in
             ( p.title model, p.view model )
 
@@ -109,11 +124,15 @@ subscriptions _ =
 
                 Bridge.NeedsMasterPassword { server, login } ->
                     ShowMasterPasswordPage { server = server, login = login }
+
+                Bridge.LoadCipher cipher ->
+                    ShowCipherPage cipher
         )
 
 
 init : ( Model, Cmd Msg )
 init =
+    -- Cipher.init |> Tuple.mapBoth (\p -> { notifications = [], page = CipherModel p }) (Cmd.map CipherMsg)
     ( { notifications = []
       , page = LoadingPage
       }
@@ -232,14 +251,34 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        CipherMsg imsg ->
+            case model.page of
+                CipherModel page ->
+                    (Cipher.page cipherCallbacks CipherMsg).update imsg page |> processPage CipherModel
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ShowCipherPage cipher ->
+            (Cipher.page cipherCallbacks CipherMsg).init cipher
+                |> Tuple.mapFirst (\pageModel -> { model | page = CipherModel pageModel })
+
+        RequestCipher id ->
+            ( { model | page = LoadingPage }, sendBridge (Bridge.RequestCipher id) )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
     { submit = SubmitLogin }
 
 
-ciphersCallbacks : Ciphers.Callbacks
+ciphersCallbacks : Ciphers.Callbacks Msg
 ciphersCallbacks =
+    { selected = RequestCipher }
+
+
+cipherCallbacks : Cipher.Callbacks
+cipherCallbacks =
     {}
 
 

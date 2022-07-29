@@ -503,7 +503,7 @@ type LoginApi
     }
 
 type LoginUriApi
-  = { uri :: String
+  = { uri :: EncryptedString
     , match :: JNullable UriMatchType
     }
 
@@ -523,12 +523,12 @@ type UriMatchType
   = Int
 
 type CardApi
-  = { cardholderName :: JNullable String
-    , brand :: JNullable String
-    , number :: JNullable String
-    , expMonth :: JNullable String
-    , expYear :: JNullable String
-    , code :: JNullable String
+  = { cardholderName :: JNullable EncryptedString
+    , brand :: JNullable EncryptedString
+    , number :: JNullable EncryptedString
+    , expMonth :: JNullable EncryptedString
+    , expYear :: JNullable EncryptedString
+    , code :: JNullable EncryptedString
     }
 
 type IdentityApi

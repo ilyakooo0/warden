@@ -40,6 +40,7 @@ to generate this file without the comments in this block.
   , "strings"
   , "subtlecrypto"
   , "transformers"
+  , "tuples"
   , "typelevel-prelude"
   , "undefined-is-not-a-problem"
   , "unsafe-coerce"

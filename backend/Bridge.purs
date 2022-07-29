@@ -32,6 +32,7 @@ data Cmd =
   | Login Cmd_Login
   | NeedCiphersList
   | NeedsReset
+  | RequestCipher String
   | SendMasterPassword String
 
 instance encodeJsonCmd :: EncodeJson Cmd where
@@ -42,9 +43,82 @@ derive instance genericCmd :: Generic Cmd _
 derive instance eqCmd :: Eq Cmd
 derive instance ordCmd :: Ord Cmd
 
+newtype Sub_LoadCipher_cipherType_CardCipher =
+    Sub_LoadCipher_cipherType_CardCipher {
+      brand :: String
+    , cardholderName :: String
+    , code :: String
+    , expMonth :: String
+    , expYear :: String
+    , number :: String
+    }
+
+instance encodeJsonSub_LoadCipher_cipherType_CardCipher :: EncodeJson Sub_LoadCipher_cipherType_CardCipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_LoadCipher_cipherType_CardCipher :: DecodeJson Sub_LoadCipher_cipherType_CardCipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_LoadCipher_cipherType_CardCipher :: Generic Sub_LoadCipher_cipherType_CardCipher _
+derive instance eqSub_LoadCipher_cipherType_CardCipher :: Eq Sub_LoadCipher_cipherType_CardCipher
+derive instance ordSub_LoadCipher_cipherType_CardCipher :: Ord Sub_LoadCipher_cipherType_CardCipher
+
+newtype Sub_LoadCipher_cipherType_LoginCipher_uris_List =
+    Sub_LoadCipher_cipherType_LoginCipher_uris_List (Array String)
+
+instance encodeJsonSub_LoadCipher_cipherType_LoginCipher_uris_List :: EncodeJson Sub_LoadCipher_cipherType_LoginCipher_uris_List where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_LoadCipher_cipherType_LoginCipher_uris_List :: DecodeJson Sub_LoadCipher_cipherType_LoginCipher_uris_List where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_LoadCipher_cipherType_LoginCipher_uris_List :: Generic Sub_LoadCipher_cipherType_LoginCipher_uris_List _
+derive instance eqSub_LoadCipher_cipherType_LoginCipher_uris_List :: Eq Sub_LoadCipher_cipherType_LoginCipher_uris_List
+derive instance ordSub_LoadCipher_cipherType_LoginCipher_uris_List :: Ord Sub_LoadCipher_cipherType_LoginCipher_uris_List
+
+newtype Sub_LoadCipher_cipherType_LoginCipher =
+    Sub_LoadCipher_cipherType_LoginCipher {
+      password :: String
+    , uris :: Sub_LoadCipher_cipherType_LoginCipher_uris_List
+    , username :: String
+    }
+
+instance encodeJsonSub_LoadCipher_cipherType_LoginCipher :: EncodeJson Sub_LoadCipher_cipherType_LoginCipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_LoadCipher_cipherType_LoginCipher :: DecodeJson Sub_LoadCipher_cipherType_LoginCipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_LoadCipher_cipherType_LoginCipher :: Generic Sub_LoadCipher_cipherType_LoginCipher _
+derive instance eqSub_LoadCipher_cipherType_LoginCipher :: Eq Sub_LoadCipher_cipherType_LoginCipher
+derive instance ordSub_LoadCipher_cipherType_LoginCipher :: Ord Sub_LoadCipher_cipherType_LoginCipher
+
+data Sub_LoadCipher_cipherType =
+    CardCipher Sub_LoadCipher_cipherType_CardCipher
+  | LoginCipher Sub_LoadCipher_cipherType_LoginCipher
+  | NoteCipher String
+
+instance encodeJsonSub_LoadCipher_cipherType :: EncodeJson Sub_LoadCipher_cipherType where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_LoadCipher_cipherType :: DecodeJson Sub_LoadCipher_cipherType where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_LoadCipher_cipherType :: Generic Sub_LoadCipher_cipherType _
+derive instance eqSub_LoadCipher_cipherType :: Eq Sub_LoadCipher_cipherType
+derive instance ordSub_LoadCipher_cipherType :: Ord Sub_LoadCipher_cipherType
+
+newtype Sub_LoadCipher =
+    Sub_LoadCipher {
+      cipherType :: Sub_LoadCipher_cipherType
+    , id :: String
+    , name :: String
+    }
+
+instance encodeJsonSub_LoadCipher :: EncodeJson Sub_LoadCipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_LoadCipher :: DecodeJson Sub_LoadCipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_LoadCipher :: Generic Sub_LoadCipher _
+derive instance eqSub_LoadCipher :: Eq Sub_LoadCipher
+derive instance ordSub_LoadCipher :: Ord Sub_LoadCipher
+
 newtype Sub_LoadCiphers =
     Sub_LoadCiphers {
       date :: String
+    , id :: String
     , name :: String
     }
 
@@ -83,6 +157,7 @@ derive instance ordSub_NeedsMasterPassword :: Ord Sub_NeedsMasterPassword
 
 data Sub =
     Error String
+  | LoadCipher Sub_LoadCipher
   | LoadCiphers Sub_LoadCiphers_List
   | LoginSuccessful
   | NeedsLogin

@@ -17,14 +17,15 @@ type Msg
     = Noop
 
 
-type alias Callbacks =
-    {}
+type alias Callbacks msg =
+    { selected : String -> msg
+    }
 
 
-page : Callbacks -> Page Bridge.Sub_LoadCiphers_List Model Msg emsg
+page : Callbacks emsg -> Page Bridge.Sub_LoadCiphers_List Model Msg emsg
 page callbacks liftMsg =
     { init = \ciphers -> Tuple.mapSecond (Cmd.map liftMsg) (init ciphers)
-    , view = \model -> view model |> List.map (Html.map liftMsg)
+    , view = view callbacks
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
     , title = always "Passwords"
@@ -38,7 +39,7 @@ init ciphers =
     )
 
 
-update : Callbacks -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
+update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
 update {} liftMsg msg model =
     case msg of
         Noop ->
@@ -50,12 +51,12 @@ subscriptions model =
     Sub.none
 
 
-view : Model -> List (Html Msg)
-view { ciphers } =
+view : Callbacks emsg -> Model -> List (Html emsg)
+view { selected } { ciphers } =
     [ ul [ Attr.class "p-list--divided" ]
         (List.map
-            (\{ name, date } ->
-                li [ Attr.class "p-list__item cipher-row" ]
+            (\{ name, date, id } ->
+                li [ Attr.class "p-list__item cipher-row", Ev.onClick (selected id) ]
                     [ div [ Attr.class "cipher-row-container" ]
                         [ p [] [ text name ]
                         , p [ Attr.class "p-text--small u-align-text--right u-text--muted" ] [ text date ]
