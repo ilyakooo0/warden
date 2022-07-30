@@ -67,11 +67,12 @@ type alias MenuConfig msg =
     , items : List { icon : String, name : String, trigger : msg, current : Bool }
     , toggle : msg
     , visible : Bool
+    , logOut : msg
     }
 
 
 mapMenuConfig : (a -> b) -> MenuConfig a -> MenuConfig b
-mapMenuConfig f { title, items, toggle, visible } =
+mapMenuConfig f { title, items, toggle, visible, logOut } =
     { items =
         List.map
             (\{ icon, name, trigger, current } ->
@@ -81,16 +82,23 @@ mapMenuConfig f { title, items, toggle, visible } =
     , title = title
     , toggle = f toggle
     , visible = visible
+    , logOut = f logOut
     }
 
 
 menu : MenuConfig msg -> Html msg
-menu { title, items, toggle, visible } =
+menu { title, items, toggle, visible, logOut } =
     div [ Attr.class "p-side-navigation--icons", Attr.classList [ ( "is-drawer-expanded", visible ) ] ]
         [ div [ Attr.class "p-side-navigation__overlay" ] []
         , nav [ Attr.class "p-side-navigation__drawer" ]
             [ div [ Attr.class "p-side-navigation__drawer-header" ]
                 [ a [ Attr.class "p-side-navigation__toggle--in-drawer", Ev.onClick toggle ] [ text title ]
+                , button
+                    [ Attr.class "p-button--negative is-inline u-float-right"
+                    , Attr.style "margin-right" "1rem"
+                    , Ev.onClick logOut
+                    ]
+                    [ text "Log out" ]
                 ]
             , ul [ Attr.class "p-side-navigation__list" ]
                 (items

@@ -339,7 +339,7 @@ loginCallbacks =
 
 ciphersCallbacks : Ciphers.Callbacks Msg
 ciphersCallbacks =
-    { selected = RequestCipher }
+    { selected = RequestCipher, logOut = NeedsReset }
 
 
 cipherCallbacks : Cipher.Callbacks

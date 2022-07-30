@@ -66,6 +66,7 @@ menuConfig email { ciphersListFilter, menuVisible } =
         ]
     , toggle = ToggleMenu
     , visible = menuVisible
+    , logOut = LogOut
     }
 
 
@@ -74,10 +75,12 @@ type Msg
     | UpdateSearch String
     | ToggleMenu
     | UpdateFilter CiphersFilter
+    | LogOut
 
 
 type alias Callbacks msg =
     { selected : String -> msg
+    , logOut : msg
     }
 
 
@@ -121,7 +124,7 @@ init ciphers =
 
 
 update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update {} liftMsg msg model =
+update { logOut } liftMsg msg model =
     case msg of
         Noop ->
             ( Ok model, Cmd.none )
@@ -134,6 +137,9 @@ update {} liftMsg msg model =
 
         UpdateFilter filter ->
             ( Ok { model | ciphersListFilter = filter, menuVisible = False }, Cmd.none )
+
+        LogOut ->
+            ( Ok model, pureCmd logOut )
 
 
 subscriptions : Model -> Sub Msg
