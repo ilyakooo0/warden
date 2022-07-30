@@ -35,6 +35,7 @@ type Cmd  =
     Init 
     | Login Cmd_Login
     | NeedCiphersList 
+    | NeedEmail 
     | NeedsReset 
     | RequestCipher String
     | SendMasterPassword String
@@ -45,6 +46,7 @@ jsonDecCmd =
             [ ("Init", Json.Decode.lazy (\_ -> Json.Decode.succeed Init))
             , ("Login", Json.Decode.lazy (\_ -> Json.Decode.map Login (jsonDecCmd_Login)))
             , ("NeedCiphersList", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedCiphersList))
+            , ("NeedEmail", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedEmail))
             , ("NeedsReset", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedsReset))
             , ("RequestCipher", Json.Decode.lazy (\_ -> Json.Decode.map RequestCipher (Json.Decode.string)))
             , ("SendMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map SendMasterPassword (Json.Decode.string)))
@@ -58,6 +60,7 @@ jsonEncCmd  val =
                     Init  -> ("Init", encodeValue (Json.Encode.list identity []))
                     Login v1 -> ("Login", encodeValue (jsonEncCmd_Login v1))
                     NeedCiphersList  -> ("NeedCiphersList", encodeValue (Json.Encode.list identity []))
+                    NeedEmail  -> ("NeedEmail", encodeValue (Json.Encode.list identity []))
                     NeedsReset  -> ("NeedsReset", encodeValue (Json.Encode.list identity []))
                     RequestCipher v1 -> ("RequestCipher", encodeValue (Json.Encode.string v1))
                     SendMasterPassword v1 -> ("SendMasterPassword", encodeValue (Json.Encode.string v1))
@@ -621,6 +624,7 @@ type Sub  =
     | LoginSuccessful 
     | NeedsLogin 
     | NeedsMasterPassword Sub_NeedsMasterPassword
+    | RecieveEmail String
     | Reset 
 
 jsonDecSub : Json.Decode.Decoder ( Sub )
@@ -632,6 +636,7 @@ jsonDecSub =
             , ("LoginSuccessful", Json.Decode.lazy (\_ -> Json.Decode.succeed LoginSuccessful))
             , ("NeedsLogin", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedsLogin))
             , ("NeedsMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map NeedsMasterPassword (jsonDecSub_NeedsMasterPassword)))
+            , ("RecieveEmail", Json.Decode.lazy (\_ -> Json.Decode.map RecieveEmail (Json.Decode.string)))
             , ("Reset", Json.Decode.lazy (\_ -> Json.Decode.succeed Reset))
             ]
         jsonDecObjectSetSub = Set.fromList []
@@ -646,6 +651,7 @@ jsonEncSub  val =
                     LoginSuccessful  -> ("LoginSuccessful", encodeValue (Json.Encode.list identity []))
                     NeedsLogin  -> ("NeedsLogin", encodeValue (Json.Encode.list identity []))
                     NeedsMasterPassword v1 -> ("NeedsMasterPassword", encodeValue (jsonEncSub_NeedsMasterPassword v1))
+                    RecieveEmail v1 -> ("RecieveEmail", encodeValue (Json.Encode.string v1))
                     Reset  -> ("Reset", encodeValue (Json.Encode.list identity []))
     in encodeSumTaggedObject "tag" "contents" keyval val
 

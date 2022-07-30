@@ -31,6 +31,7 @@ data Cmd =
     Init
   | Login Cmd_Login
   | NeedCiphersList
+  | NeedEmail
   | NeedsReset
   | RequestCipher String
   | SendMasterPassword String
@@ -494,6 +495,7 @@ data Sub =
   | LoginSuccessful
   | NeedsLogin
   | NeedsMasterPassword Sub_NeedsMasterPassword
+  | RecieveEmail String
   | Reset
 
 instance encodeJsonSub :: EncodeJson Sub where

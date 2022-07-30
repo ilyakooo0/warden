@@ -35,6 +35,7 @@ type Msg
     | ShowCipherPage Bridge.Sub_LoadCipher
     | RequestCipher CipherId
     | PopView
+    | RecieveEmail String
 
 
 type alias CipherId =
@@ -44,6 +45,7 @@ type alias CipherId =
 type alias Model =
     { notifications : List Notification.Config
     , pageStack : Navigation.PageStack PageModel
+    , userEmail : Maybe String
     }
 
 
@@ -61,13 +63,14 @@ type PageModel
 
 
 showPage :
-    PageModel
+    String
+    -> PageModel
     ->
         { title : String
         , body : List (Html Msg)
         , topButton : Maybe (Navigation.TopButton Msg)
         }
-showPage page =
+showPage email page =
     case page of
         LoginModel model ->
             let
@@ -87,7 +90,7 @@ showPage page =
             { title = p.title model
             , body = p.view model
             , topButton =
-                Ciphers.menuConfig model
+                Ciphers.menuConfig email model
                     |> Navigation.mapMenuConfig CiphersMsg
                     |> Navigation.MenuButton
                     |> Just
@@ -155,6 +158,9 @@ subscriptions _ =
 
                 Bridge.LoadCipher cipher ->
                     ShowCipherPage cipher
+
+                Bridge.RecieveEmail email ->
+                    RecieveEmail email
         )
 
 
@@ -162,6 +168,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { notifications = []
       , pageStack = Nonempty.singleton LoadingPage
+      , userEmail = Nothing
       }
     , FFI.sendBridge Bridge.Init
     )
@@ -171,7 +178,7 @@ view : Model -> Html Msg
 view model =
     div []
         (maybeList (List.head model.notifications) (Lazy.lazy2 Notification.notification CloseNotification)
-            ++ [ Lazy.lazy2 Navigation.showNavigationView model.pageStack showPage ]
+            ++ [ Lazy.lazy2 Navigation.showNavigationView model.pageStack (showPage (Maybe.withDefault "" model.userEmail)) ]
         )
 
 
@@ -278,7 +285,7 @@ update msg model =
                 |> Tuple.mapFirst (\pageModel -> appendPageStack <| CiphersModel pageModel)
 
         OpenCiphersScreen ->
-            ( appendPageStack <| LoadingPage, sendBridge Bridge.NeedCiphersList )
+            ( appendPageStack <| LoadingPage, Cmd.batch [ sendBridge Bridge.NeedCiphersList, sendBridge Bridge.NeedEmail ] )
 
         Reset ->
             init
@@ -320,6 +327,9 @@ update msg model =
             ( { model | pageStack = Navigation.popView model.pageStack }
             , Cmd.none
             )
+
+        RecieveEmail email ->
+            ( { model | userEmail = Just email }, Cmd.none )
 
 
 loginCallbacks : Login.Callbacks Msg

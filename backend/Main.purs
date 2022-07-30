@@ -202,6 +202,10 @@ main = do
           send $ Bridge.LoadCipher $ Bridge.Sub_LoadCipher {cipherType, name, id}
           pure unit
       pure unit
+    Bridge.NeedEmail -> run do
+      sync <- getOrReset storage SyncKey
+      send $ Bridge.RecieveEmail sync.profile.email
+      pure unit
 
 data SyncKey  = SyncKey
 

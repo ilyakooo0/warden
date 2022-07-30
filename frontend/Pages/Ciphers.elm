@@ -34,9 +34,9 @@ applyCipherFilter filter list =
             list |> List.filter (.cipherType >> (==) t)
 
 
-menuConfig : Model -> Navigation.MenuConfig Msg
-menuConfig { ciphersListFilter, menuVisible } =
-    { title = "TODO"
+menuConfig : String -> Model -> Navigation.MenuConfig Msg
+menuConfig email { ciphersListFilter, menuVisible } =
+    { title = email
     , items =
         [ { icon = "units"
           , name = "All items"

@@ -77,6 +77,7 @@ Sub:
                 Maybe: String
             licenseNumber:
                 Maybe: String
+- RecieveEmail: String
 
 Cmd:
 - Init
@@ -88,3 +89,4 @@ Cmd:
 - SendMasterPassword: String
 - NeedsReset
 - RequestCipher: String
+- NeedEmail
