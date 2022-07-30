@@ -94,11 +94,14 @@ menu { title, items, toggle } =
                     |> List.map
                         (\{ icon, name, trigger, current } ->
                             li [ Attr.class "p-side-navigation__item" ]
-                                [ a [ Attr.class "p-side-navigation__link", Ev.onClick trigger ]
+                                [ a
+                                    [ Attr.class "p-side-navigation__link"
+                                    , Attr.classList [ ( "is-active", current ) ]
+                                    , Ev.onClick trigger
+                                    ]
                                     [ i
                                         [ Attr.class "p-side-navigation__icon"
                                         , Attr.class ("p-icon--" ++ icon)
-                                        , Attr.classList [ ( "is-active", current ) ]
                                         ]
                                         []
                                     , text name
