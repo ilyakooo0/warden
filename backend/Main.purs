@@ -94,6 +94,9 @@ main = do
       sync <- getOrReset storage SyncKey
       ciphers <- traverse processCipher sync.ciphers
       liftEffect $ Elm.send app $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List ciphers
+      api <- getAuthedApi
+      sync <- liftPromise $ api.getSync unit
+      liftEffect $ Storage.store storage SyncKey sync
       pure unit
     Bridge.NeedsReset -> do
       WebStorage.clear storage
@@ -116,7 +119,7 @@ main = do
         pure unit
     Bridge.Init -> do
       liftEffect $ Storage.get storage TokenKey >>= \x -> case x of
-        Just _ -> liftEffect $ Elm.send app Bridge.LoginSuccessful
+        Just _ -> do liftEffect $ Elm.send app Bridge.LoginSuccessful
         Nothing -> Elm.send app Bridge.NeedsLogin
     Bridge.RequestCipher id -> run do
       sync <- getOrReset storage SyncKey
