@@ -31,13 +31,13 @@ navigation : Config msg -> List (Html msg)
 navigation { topButton, title } =
     (case topButton of
         Just (MenuButton cfg) ->
-            optional cfg.visible (menu cfg)
+            [ menu cfg ]
 
         _ ->
             []
     )
         ++ [ nav [ Attr.class "p-tabs p-tabs__list" ]
-                [ h3 [ Attr.class "u-no-margin u-no-padding" ]
+                [ h3 [ Attr.class "" ]
                     [ case topButton of
                         Nothing ->
                             button
@@ -82,8 +82,8 @@ mapMenuConfig f { title, items, toggle, visible } =
 
 
 menu : MenuConfig msg -> Html msg
-menu { title, items, toggle } =
-    div [ Attr.class "p-side-navigation--icons is-drawer-expanded" ]
+menu { title, items, toggle, visible } =
+    div [ Attr.class "p-side-navigation--icons", Attr.classList [ ( "is-drawer-expanded", visible ) ] ]
         [ div [ Attr.class "p-side-navigation__overlay" ] []
         , nav [ Attr.class "p-side-navigation__drawer" ]
             [ div [ Attr.class "p-side-navigation__drawer-header" ]
