@@ -128,23 +128,3 @@ in  upstream
         "https://github.com/ilyakooo0/purescript-argonaut-aeson-generic.git"
     , version = "purescript-0.14"
     }
-  with subtlecrypto =
-    { dependencies =
-      [ "aff"
-      , "aff-promise"
-      , "arraybuffer-types"
-      , "console"
-      , "effect"
-      , "either"
-      , "exceptions"
-      , "foreign"
-      , "functions"
-      , "maybe"
-      , "prelude"
-      , "transformers"
-      , "tuples"
-      , "unsafe-coerce"
-      ]
-    , repo = "https://github.com/xc-jp/purescript-subtlecrypto.git"
-    , version = "7999dc92b94d1b7285375cfaad4a0ae6644b71b6"
-    }

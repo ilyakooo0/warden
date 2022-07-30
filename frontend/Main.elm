@@ -36,6 +36,8 @@ type Msg
     | RequestCipher CipherId
     | PopView
     | RecieveEmail String
+    | Copy String
+    | Open String
 
 
 type alias CipherId =
@@ -331,6 +333,12 @@ update msg model =
         RecieveEmail email ->
             ( { model | userEmail = Just email }, Cmd.none )
 
+        Copy text ->
+            ( model, FFI.sendBridge (Bridge.Copy text) )
+
+        Open uri ->
+            ( model, FFI.sendBridge (Bridge.Open uri) )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -342,9 +350,9 @@ ciphersCallbacks =
     { selected = RequestCipher, logOut = NeedsReset }
 
 
-cipherCallbacks : Cipher.Callbacks
+cipherCallbacks : Cipher.Callbacks Msg
 cipherCallbacks =
-    {}
+    { copy = Copy, open = Open }
 
 
 masterPasswordCallbacks : MasterPassword.Callbacks Msg

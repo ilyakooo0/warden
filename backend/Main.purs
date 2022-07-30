@@ -9,19 +9,19 @@ import BW as WB
 import BW.Logic (decrypt, hashPassword, liftPromise)
 import BW.Logic as Logic
 import BW.Types (CipherResponse, Email(..), IdentityTokenResponse, Password(..), PreloginResponse, SyncResponse, Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
-import Bridge (Sub_LoadCipher(..))
 import Bridge as Bridge
 import Control.El (class HasL, Al, L(..), l)
 import Control.Monad.Error.Class (throwError)
-import Control.Monad.List.Trans as List
 import Control.Monad.Reader (runReaderT)
 import Data.Argonaut (class DecodeJson)
 import Data.Array as Array
+import Data.Clipboard as Clipboard
 import Data.Either (Either(..))
 import Data.JNullable (fromJNullable, jnull, nullify)
 import Data.JNullable as JNullable
 import Data.JOpt (fromJOpt)
 import Data.Maybe (Maybe(..))
+import Data.OpenURL (openURL)
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.Timestamp as Timestamp
 import Data.Traversable (traverse)
@@ -95,7 +95,6 @@ main = do
       ciphers <- traverse processCipher sync.ciphers
       liftEffect $ Elm.send app $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List ciphers
       api <- getAuthedApi
-      sync <- liftPromise $ api.getSync unit
       liftEffect $ Storage.store storage SyncKey sync
       pure unit
     Bridge.NeedsReset -> do
@@ -206,6 +205,9 @@ main = do
       sync <- getOrReset storage SyncKey
       send $ Bridge.RecieveEmail sync.profile.email
       pure unit
+    Bridge.Copy text -> run do
+      liftPromise $ Clipboard.clipboard text
+    Bridge.Open uri -> openURL uri
 
 data SyncKey  = SyncKey
 

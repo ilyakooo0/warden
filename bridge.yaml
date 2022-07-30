@@ -90,3 +90,5 @@ Cmd:
 - NeedsReset
 - RequestCipher: String
 - NeedEmail
+- Copy: String
+- Open: String

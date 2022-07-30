@@ -28,11 +28,13 @@ derive instance eqCmd_Login :: Eq Cmd_Login
 derive instance ordCmd_Login :: Ord Cmd_Login
 
 data Cmd =
-    Init
+    Copy String
+  | Init
   | Login Cmd_Login
   | NeedCiphersList
   | NeedEmail
   | NeedsReset
+  | Open String
   | RequestCipher String
   | SendMasterPassword String
 

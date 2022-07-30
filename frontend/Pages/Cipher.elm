@@ -16,16 +16,17 @@ type alias Model =
 
 
 type Msg
-    = Noop
-    | TogglePasswordVisiblity
+    = TogglePasswordVisiblity
     | ToggleCVVVisiblity
+    | Copy String
+    | Open String
 
 
-type alias Callbacks =
-    {}
+type alias Callbacks msg =
+    { copy : String -> msg, open : String -> msg }
 
 
-page : Callbacks -> Page Bridge.Sub_LoadCipher Model Msg emsg
+page : Callbacks emsg -> Page Bridge.Sub_LoadCipher Model Msg emsg
 page callbacks liftMsg =
     { init = \cipher -> Tuple.mapSecond (Cmd.map liftMsg) (init cipher)
     , view = \model -> view model |> List.map (Html.map liftMsg)
@@ -45,17 +46,20 @@ init cipher =
     )
 
 
-update : Callbacks -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update {} _ msg model =
+update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
+update { copy, open } _ msg model =
     case msg of
-        Noop ->
-            ( Ok model, Cmd.none )
-
         TogglePasswordVisiblity ->
             ( Ok { model | passwordHidden = not model.passwordHidden }, Cmd.none )
 
         ToggleCVVVisiblity ->
             ( Ok { model | cvvHidden = not model.cvvHidden }, Cmd.none )
+
+        Copy text ->
+            ( Ok model, copy text |> pureCmd )
+
+        Open uri ->
+            ( Ok model, open uri |> pureCmd )
 
 
 subscriptions : Model -> Sub Msg
@@ -80,7 +84,7 @@ view { passwordHidden, cipher, cvvHidden } =
             maybeList username
                 (\x ->
                     row
-                        { name = "Username", value = x, nameIcon = "user", icons = [ ( "copy", Noop ) ] }
+                        { name = "Username", value = x, nameIcon = "user", icons = [ ( "copy", Copy x ) ] }
                 )
                 ++ maybeList password
                     (\x ->
@@ -93,14 +97,14 @@ view { passwordHidden, cipher, cvvHidden } =
                                 else
                                     x
                             , nameIcon = "security"
-                            , icons = [ ( hiddenButtonIcon passwordHidden, TogglePasswordVisiblity ), ( "copy", Noop ) ]
+                            , icons = [ ( hiddenButtonIcon passwordHidden, TogglePasswordVisiblity ), ( "copy", Copy x ) ]
                             }
                     )
                 ++ (uris
                         |> List.map
                             (\uri ->
                                 row
-                                    { name = "URL", value = uri, nameIcon = "get-link", icons = [ ( "external-link", Noop ), ( "copy", Noop ) ] }
+                                    { name = "URL", value = uri, nameIcon = "get-link", icons = [ ( "external-link", Open uri ), ( "copy", Copy uri ) ] }
                             )
                    )
 
@@ -109,14 +113,19 @@ view { passwordHidden, cipher, cvvHidden } =
             ]
 
         Bridge.CardCipher { number, code, cardholderName, expMonth, expYear } ->
-            maybeList number (\x -> row { name = "Card number", value = x, nameIcon = "containers", icons = [ ( "copy", Noop ) ] })
+            maybeList number (\x -> row { name = "Card number", value = x, nameIcon = "containers", icons = [ ( "copy", Copy x ) ] })
                 ++ optional (expMonth /= Nothing || expYear /= Nothing)
                     (row
-                        { name = "Expiration date"
-                        , value = [ expMonth, expYear ] |> List.concatMap (flip maybeList identity) |> String.join "/"
-                        , nameIcon = "timed-out"
-                        , icons = [ ( "copy", Noop ) ]
-                        }
+                        (let
+                            x =
+                                [ expMonth, expYear ] |> List.concatMap (flip maybeList identity) |> String.join "/"
+                         in
+                         { name = "Expiration date"
+                         , value = x
+                         , nameIcon = "timed-out"
+                         , icons = [ ( "copy", Copy x ) ]
+                         }
+                        )
                     )
                 ++ maybeList code
                     (\x ->
@@ -129,20 +138,25 @@ view { passwordHidden, cipher, cvvHidden } =
                                 else
                                     x
                             , nameIcon = "security"
-                            , icons = [ ( hiddenButtonIcon cvvHidden, ToggleCVVVisiblity ), ( "copy", Noop ) ]
+                            , icons = [ ( hiddenButtonIcon cvvHidden, ToggleCVVVisiblity ), ( "copy", Copy x ) ]
                             }
                     )
                 ++ maybeList cardholderName
-                    (\x -> row { name = "Cardholder name", value = x, nameIcon = "user", icons = [ ( "copy", Noop ) ] })
+                    (\x -> row { name = "Cardholder name", value = x, nameIcon = "user", icons = [ ( "copy", Copy x ) ] })
 
-        Bridge.IdentityCipher { address1, address2, address3, city, company, country, email, firstName, lastName, licenseNumber, middleName, passportNumber, phone, postalCode, ssn, state, title, username } ->
+        Bridge.IdentityCipher { address1, address2, address3, company, email, firstName, lastName, licenseNumber, middleName, passportNumber, phone, ssn, username } ->
             optional (firstName /= Nothing || middleName /= Nothing || lastName /= Nothing)
                 (row
-                    { name = "Name"
-                    , value = [ firstName, middleName, lastName ] |> List.concatMap (flip maybeList identity) |> unwords
-                    , nameIcon = ""
-                    , icons = [ ( "copy", Noop ) ]
-                    }
+                    (let
+                        x =
+                            [ firstName, middleName, lastName ] |> List.concatMap (flip maybeList identity) |> unwords
+                     in
+                     { name = "Name"
+                     , value = x
+                     , nameIcon = ""
+                     , icons = [ ( "copy", Copy x ) ]
+                     }
+                    )
                 )
                 ++ maybeList username
                     (\x ->
@@ -150,7 +164,7 @@ view { passwordHidden, cipher, cvvHidden } =
                             { name = "Username"
                             , value = x
                             , nameIcon = ""
-                            , icons = [ ( "copy", Noop ) ]
+                            , icons = [ ( "copy", Copy x ) ]
                             }
                     )
                 ++ maybeList company
@@ -159,7 +173,7 @@ view { passwordHidden, cipher, cvvHidden } =
                             { name = "Company"
                             , value = x
                             , nameIcon = ""
-                            , icons = [ ( "copy", Noop ) ]
+                            , icons = [ ( "copy", Copy x ) ]
                             }
                     )
                 ++ maybeList ssn
@@ -168,7 +182,7 @@ view { passwordHidden, cipher, cvvHidden } =
                             { name = "Socia security number"
                             , value = x
                             , nameIcon = ""
-                            , icons = [ ( "copy", Noop ) ]
+                            , icons = [ ( "copy", Copy x ) ]
                             }
                     )
                 ++ maybeList passportNumber
@@ -177,7 +191,7 @@ view { passwordHidden, cipher, cvvHidden } =
                             { name = "Passport number"
                             , value = x
                             , nameIcon = ""
-                            , icons = [ ( "copy", Noop ) ]
+                            , icons = [ ( "copy", Copy x ) ]
                             }
                     )
                 ++ maybeList licenseNumber
@@ -186,7 +200,7 @@ view { passwordHidden, cipher, cvvHidden } =
                             { name = "License Number"
                             , value = x
                             , nameIcon = ""
-                            , icons = [ ( "copy", Noop ) ]
+                            , icons = [ ( "copy", Copy x ) ]
                             }
                     )
                 ++ maybeList email
@@ -195,7 +209,7 @@ view { passwordHidden, cipher, cvvHidden } =
                             { name = "Email"
                             , value = x
                             , nameIcon = ""
-                            , icons = [ ( "copy", Noop ) ]
+                            , icons = [ ( "copy", Copy x ) ]
                             }
                     )
                 ++ maybeList phone
@@ -204,16 +218,21 @@ view { passwordHidden, cipher, cvvHidden } =
                             { name = "Phone number"
                             , value = x
                             , nameIcon = ""
-                            , icons = [ ( "copy", Noop ) ]
+                            , icons = [ ( "copy", Copy x ) ]
                             }
                     )
                 ++ optional (address1 /= Nothing || address2 /= Nothing || address3 /= Nothing)
                     (row
-                        { name = "Address"
-                        , value = [ address1, address2, address3 ] |> List.concatMap (flip maybeList identity) |> unwords
-                        , nameIcon = ""
-                        , icons = [ ( "copy", Noop ) ]
-                        }
+                        (let
+                            x =
+                                [ address1, address2, address3 ] |> List.concatMap (flip maybeList identity) |> unwords
+                         in
+                         { name = "Address"
+                         , value = x
+                         , nameIcon = ""
+                         , icons = [ ( "copy", Copy x ) ]
+                         }
+                        )
                     )
     )
         |> List.intersperse (hr [] [])

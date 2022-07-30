@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=App Title
-Exec=webapp-container --local-content-can-access-remote-urls --app-id="appname.iko" $@ index.html
+Exec=webapp-container --webappUrlPatterns=index.html --local-content-can-access-remote-urls --app-id="appname.iko" $@ index.html
 Icon=logo.svg
 Terminal=false
 Type=Application

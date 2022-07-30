@@ -32,22 +32,26 @@ jsonEncCmd_Login  val =
 
 
 type Cmd  =
-    Init 
+    Copy String
+    | Init 
     | Login Cmd_Login
     | NeedCiphersList 
     | NeedEmail 
     | NeedsReset 
+    | Open String
     | RequestCipher String
     | SendMasterPassword String
 
 jsonDecCmd : Json.Decode.Decoder ( Cmd )
 jsonDecCmd =
     let jsonDecDictCmd = Dict.fromList
-            [ ("Init", Json.Decode.lazy (\_ -> Json.Decode.succeed Init))
+            [ ("Copy", Json.Decode.lazy (\_ -> Json.Decode.map Copy (Json.Decode.string)))
+            , ("Init", Json.Decode.lazy (\_ -> Json.Decode.succeed Init))
             , ("Login", Json.Decode.lazy (\_ -> Json.Decode.map Login (jsonDecCmd_Login)))
             , ("NeedCiphersList", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedCiphersList))
             , ("NeedEmail", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedEmail))
             , ("NeedsReset", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedsReset))
+            , ("Open", Json.Decode.lazy (\_ -> Json.Decode.map Open (Json.Decode.string)))
             , ("RequestCipher", Json.Decode.lazy (\_ -> Json.Decode.map RequestCipher (Json.Decode.string)))
             , ("SendMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map SendMasterPassword (Json.Decode.string)))
             ]
@@ -57,11 +61,13 @@ jsonDecCmd =
 jsonEncCmd : Cmd -> Value
 jsonEncCmd  val =
     let keyval v = case v of
+                    Copy v1 -> ("Copy", encodeValue (Json.Encode.string v1))
                     Init  -> ("Init", encodeValue (Json.Encode.list identity []))
                     Login v1 -> ("Login", encodeValue (jsonEncCmd_Login v1))
                     NeedCiphersList  -> ("NeedCiphersList", encodeValue (Json.Encode.list identity []))
                     NeedEmail  -> ("NeedEmail", encodeValue (Json.Encode.list identity []))
                     NeedsReset  -> ("NeedsReset", encodeValue (Json.Encode.list identity []))
+                    Open v1 -> ("Open", encodeValue (Json.Encode.string v1))
                     RequestCipher v1 -> ("RequestCipher", encodeValue (Json.Encode.string v1))
                     SendMasterPassword v1 -> ("SendMasterPassword", encodeValue (Json.Encode.string v1))
     in encodeSumTaggedObject "tag" "contents" keyval val
