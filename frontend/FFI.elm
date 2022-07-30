@@ -14,8 +14,7 @@ port bridgeCmd : D.Value -> Cmd msg
 getBridge : (String -> msg) -> (Bridge.Sub -> msg) -> Sub msg
 getBridge err f =
     bridgeSub
-        ((\v -> Debug.log (E.encode 1 v) v)
-            >> D.decodeValue Bridge.jsonDecSub
+        (D.decodeValue Bridge.jsonDecSub
             >> (\res ->
                     case res of
                         Ok a ->

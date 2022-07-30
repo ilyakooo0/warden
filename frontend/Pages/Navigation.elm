@@ -12,6 +12,7 @@ module Pages.Navigation exposing
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
+import Html.Lazy as Lazy
 import List.Nonempty as Nonempty exposing (Nonempty)
 import Utils exposing (..)
 
@@ -27,36 +28,38 @@ type alias Config msg =
     }
 
 
-navigation : Config msg -> List (Html msg)
+navigation : Config msg -> Html msg
 navigation { topButton, title } =
-    (case topButton of
-        Just (MenuButton cfg) ->
-            [ menu cfg ]
+    div []
+        ((case topButton of
+            Just (MenuButton cfg) ->
+                [ Lazy.lazy menu cfg ]
 
-        _ ->
-            []
-    )
-        ++ [ nav [ Attr.class "p-tabs p-tabs__list" ]
-                [ h3 [ Attr.class "" ]
-                    [ case topButton of
-                        Nothing ->
-                            button
-                                [ Attr.class "p-button--base is-inline u-no-margin", Attr.style "visibility" "hidden" ]
-                                []
+            _ ->
+                []
+         )
+            ++ [ nav [ Attr.class "p-tabs p-tabs__list" ]
+                    [ h3 []
+                        [ case topButton of
+                            Nothing ->
+                                button
+                                    [ Attr.class "p-button--base is-inline u-no-margin", Attr.style "visibility" "hidden" ]
+                                    []
 
-                        Just (BackButton msg) ->
-                            button
-                                [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick msg ]
-                                [ i [ Attr.class "p-icon--chevron-up ninety-counter" ] [] ]
+                            Just (BackButton msg) ->
+                                button
+                                    [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick msg ]
+                                    [ i [ Attr.class "p-icon--chevron-up ninety-counter" ] [] ]
 
-                        Just (MenuButton cfg) ->
-                            button
-                                [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick cfg.toggle ]
-                                [ i [ Attr.class "p-icon--menu" ] [] ]
-                    , text title
+                            Just (MenuButton cfg) ->
+                                button
+                                    [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick cfg.toggle ]
+                                    [ i [ Attr.class "p-icon--menu" ] [] ]
+                        , text title
+                        ]
                     ]
-                ]
-           ]
+               ]
+        )
 
 
 type alias MenuConfig msg =
@@ -144,9 +147,9 @@ showNavigationView stack render =
             render (Nonempty.head stack)
     in
     div []
-        (navigation
+        [ Lazy.lazy navigation
             { topButton = topButton
             , title = title
             }
-            ++ [ main_ [] body ]
-        )
+        , main_ [] body
+        ]

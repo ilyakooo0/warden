@@ -4,6 +4,7 @@ import Bridge
 import Browser
 import FFI exposing (getBridge, sendBridge)
 import Html exposing (..)
+import Html.Lazy as Lazy
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Notification
 import Pages.Cipher as Cipher
@@ -169,8 +170,8 @@ init =
 view : Model -> Html Msg
 view model =
     div []
-        (maybeList (List.head model.notifications) (Notification.notification CloseNotification)
-            ++ [ Navigation.showNavigationView model.pageStack showPage ]
+        (maybeList (List.head model.notifications) (Lazy.lazy2 Notification.notification CloseNotification)
+            ++ [ Lazy.lazy2 Navigation.showNavigationView model.pageStack showPage ]
         )
 
 

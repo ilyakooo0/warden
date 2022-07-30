@@ -84,7 +84,7 @@ type Query
 -}
 constructQueries : String -> List Query
 constructQueries =
-    prepareString >> String.words >> List.filter (String.isEmpty >> not) >> List.map Query
+    prepareString >> String.words >> List.filter (String.isEmpty >> not) >> List.filter (String.length >> (<) 1) >> List.map Query
 
 
 {-| Search a search term within a search entry.

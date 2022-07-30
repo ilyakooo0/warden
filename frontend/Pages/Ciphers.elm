@@ -4,6 +4,7 @@ import Bridge
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
+import Html.Keyed as Keyed
 import Page exposing (..)
 import Pages.Navigation as Navigation
 import Search
@@ -150,18 +151,20 @@ view { selected } liftMsg { ciphers, search, ciphersListFilter } =
         , Attr.attribute "autocomplete" "off"
         ]
         []
-    , ul [ Attr.class "p-list--divided" ]
+    , Keyed.ul [ Attr.class "p-list--divided" ]
         (ciphers
             |> applyCipherFilter ciphersListFilter
             |> Search.searchList (cipherSearch search)
             |> List.map
                 (\{ name, date, id } ->
-                    li [ Attr.class "p-list__item cipher-row", Ev.onClick (selected id) ]
+                    ( id
+                    , li [ Attr.class "p-list__item cipher-row", Ev.onClick (selected id) ]
                         [ div [ Attr.class "cipher-row-container" ]
                             [ p [] [ text name ]
                             , p [ Attr.class "p-text--small u-align-text--right u-text--muted" ] [ text date ]
                             ]
                         ]
+                    )
                 )
         )
     ]
