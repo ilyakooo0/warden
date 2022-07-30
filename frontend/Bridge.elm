@@ -97,6 +97,74 @@ jsonEncSub_LoadCipher_cipherType_CardCipher  val =
 
 
 
+type alias Sub_LoadCipher_cipherType_IdentityCipher  =
+   { address1: String
+   , address2: String
+   , address3: String
+   , city: String
+   , company: String
+   , country: String
+   , email: String
+   , firstName: String
+   , lastName: String
+   , licenseNumber: String
+   , middleName: String
+   , passportNumber: String
+   , phone: String
+   , postalCode: String
+   , ssn: String
+   , state: String
+   , title: String
+   , username: String
+   }
+
+jsonDecSub_LoadCipher_cipherType_IdentityCipher : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher )
+jsonDecSub_LoadCipher_cipherType_IdentityCipher =
+   Json.Decode.succeed (\paddress1 paddress2 paddress3 pcity pcompany pcountry pemail pfirstName plastName plicenseNumber pmiddleName ppassportNumber pphone ppostalCode pssn pstate ptitle pusername -> {address1 = paddress1, address2 = paddress2, address3 = paddress3, city = pcity, company = pcompany, country = pcountry, email = pemail, firstName = pfirstName, lastName = plastName, licenseNumber = plicenseNumber, middleName = pmiddleName, passportNumber = ppassportNumber, phone = pphone, postalCode = ppostalCode, ssn = pssn, state = pstate, title = ptitle, username = pusername})
+   |> required "address1" (Json.Decode.string)
+   |> required "address2" (Json.Decode.string)
+   |> required "address3" (Json.Decode.string)
+   |> required "city" (Json.Decode.string)
+   |> required "company" (Json.Decode.string)
+   |> required "country" (Json.Decode.string)
+   |> required "email" (Json.Decode.string)
+   |> required "firstName" (Json.Decode.string)
+   |> required "lastName" (Json.Decode.string)
+   |> required "licenseNumber" (Json.Decode.string)
+   |> required "middleName" (Json.Decode.string)
+   |> required "passportNumber" (Json.Decode.string)
+   |> required "phone" (Json.Decode.string)
+   |> required "postalCode" (Json.Decode.string)
+   |> required "ssn" (Json.Decode.string)
+   |> required "state" (Json.Decode.string)
+   |> required "title" (Json.Decode.string)
+   |> required "username" (Json.Decode.string)
+
+jsonEncSub_LoadCipher_cipherType_IdentityCipher : Sub_LoadCipher_cipherType_IdentityCipher -> Value
+jsonEncSub_LoadCipher_cipherType_IdentityCipher  val =
+   Json.Encode.object
+   [ ("address1", Json.Encode.string val.address1)
+   , ("address2", Json.Encode.string val.address2)
+   , ("address3", Json.Encode.string val.address3)
+   , ("city", Json.Encode.string val.city)
+   , ("company", Json.Encode.string val.company)
+   , ("country", Json.Encode.string val.country)
+   , ("email", Json.Encode.string val.email)
+   , ("firstName", Json.Encode.string val.firstName)
+   , ("lastName", Json.Encode.string val.lastName)
+   , ("licenseNumber", Json.Encode.string val.licenseNumber)
+   , ("middleName", Json.Encode.string val.middleName)
+   , ("passportNumber", Json.Encode.string val.passportNumber)
+   , ("phone", Json.Encode.string val.phone)
+   , ("postalCode", Json.Encode.string val.postalCode)
+   , ("ssn", Json.Encode.string val.ssn)
+   , ("state", Json.Encode.string val.state)
+   , ("title", Json.Encode.string val.title)
+   , ("username", Json.Encode.string val.username)
+   ]
+
+
+
 type alias Sub_LoadCipher_cipherType_LoginCipher_uris_List  = (List String)
 
 jsonDecSub_LoadCipher_cipherType_LoginCipher_uris_List : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_LoginCipher_uris_List )
@@ -133,6 +201,7 @@ jsonEncSub_LoadCipher_cipherType_LoginCipher  val =
 
 type Sub_LoadCipher_cipherType  =
     CardCipher Sub_LoadCipher_cipherType_CardCipher
+    | IdentityCipher Sub_LoadCipher_cipherType_IdentityCipher
     | LoginCipher Sub_LoadCipher_cipherType_LoginCipher
     | NoteCipher String
 
@@ -140,6 +209,7 @@ jsonDecSub_LoadCipher_cipherType : Json.Decode.Decoder ( Sub_LoadCipher_cipherTy
 jsonDecSub_LoadCipher_cipherType =
     let jsonDecDictSub_LoadCipher_cipherType = Dict.fromList
             [ ("CardCipher", Json.Decode.lazy (\_ -> Json.Decode.map CardCipher (jsonDecSub_LoadCipher_cipherType_CardCipher)))
+            , ("IdentityCipher", Json.Decode.lazy (\_ -> Json.Decode.map IdentityCipher (jsonDecSub_LoadCipher_cipherType_IdentityCipher)))
             , ("LoginCipher", Json.Decode.lazy (\_ -> Json.Decode.map LoginCipher (jsonDecSub_LoadCipher_cipherType_LoginCipher)))
             , ("NoteCipher", Json.Decode.lazy (\_ -> Json.Decode.map NoteCipher (Json.Decode.string)))
             ]
@@ -150,6 +220,7 @@ jsonEncSub_LoadCipher_cipherType : Sub_LoadCipher_cipherType -> Value
 jsonEncSub_LoadCipher_cipherType  val =
     let keyval v = case v of
                     CardCipher v1 -> ("CardCipher", encodeValue (jsonEncSub_LoadCipher_cipherType_CardCipher v1))
+                    IdentityCipher v1 -> ("IdentityCipher", encodeValue (jsonEncSub_LoadCipher_cipherType_IdentityCipher v1))
                     LoginCipher v1 -> ("LoginCipher", encodeValue (jsonEncSub_LoadCipher_cipherType_LoginCipher v1))
                     NoteCipher v1 -> ("NoteCipher", encodeValue (Json.Encode.string v1))
     in encodeSumTaggedObject "tag" "contents" keyval val

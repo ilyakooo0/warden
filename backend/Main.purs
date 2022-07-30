@@ -153,6 +153,48 @@ main = do
                     expYear <- fromJNullable "" <$> (traverse decrypt card.expYear)
                     pure $ Bridge.CardCipher $ Bridge.Sub_LoadCipher_cipherType_CardCipher
                       { brand, cardholderName, code, expMonth, expYear, number }
+              n | cipherTypeIdentity == n -> do
+                case JNullable.toMaybe cipher.identity of
+                  Nothing -> throwError $ error "Identity data is missing"
+                  Just identity -> do
+                    firstName <- fromJNullable "" <$> (traverse decrypt identity.firstName)
+                    middleName <- fromJNullable "" <$> (traverse decrypt identity.middleName)
+                    lastName <- fromJNullable "" <$> (traverse decrypt identity.lastName)
+                    address1 <- fromJNullable "" <$> (traverse decrypt identity.address1)
+                    address2 <- fromJNullable "" <$> (traverse decrypt identity.address2)
+                    address3 <- fromJNullable "" <$> (traverse decrypt identity.address3)
+                    city <- fromJNullable "" <$> (traverse decrypt identity.city)
+                    company <- fromJNullable "" <$> (traverse decrypt identity.company)
+                    country <- fromJNullable "" <$> (traverse decrypt identity.country)
+                    email <- fromJNullable "" <$> (traverse decrypt identity.email)
+                    licenseNumber <- fromJNullable "" <$> (traverse decrypt identity.licenseNumber)
+                    passportNumber <- fromJNullable "" <$> (traverse decrypt identity.passportNumber)
+                    phone <- fromJNullable "" <$> (traverse decrypt identity.phone)
+                    postalCode <- fromJNullable "" <$> (traverse decrypt identity.postalCode)
+                    ssn <- fromJNullable "" <$> (traverse decrypt identity.ssn)
+                    state <- fromJNullable "" <$> (traverse decrypt identity.state)
+                    title <- fromJNullable "" <$> (traverse decrypt identity.title)
+                    username <- fromJNullable "" <$> (traverse decrypt identity.username)
+                    pure $ Bridge.IdentityCipher $ Bridge.Sub_LoadCipher_cipherType_IdentityCipher
+                      { firstName,
+                        middleName,
+                        lastName,
+                        address1,
+                        address2,
+                        address3,
+                        city,
+                        company,
+                        country,
+                        email,
+                        licenseNumber,
+                        passportNumber,
+                        phone,
+                        postalCode,
+                        ssn,
+                        state,
+                        title,
+                        username
+                       }
               n -> throwError $ error $ "Unsupported cipher type: " <> show n
           send $ Bridge.LoadCipher $ Bridge.Sub_LoadCipher {cipherType, name, id}
           pure unit

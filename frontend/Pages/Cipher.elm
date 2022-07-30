@@ -118,6 +118,63 @@ view { passwordHidden, cipher, cvvHidden } =
                 }
             , row { name = "Cardholder name", value = cardholderName, nameIcon = "user", icons = [ ( "copy", Noop ) ] }
             ]
+
+        Bridge.IdentityCipher { address1, address2, address3, city, company, country, email, firstName, lastName, licenseNumber, middleName, passportNumber, phone, postalCode, ssn, state, title, username } ->
+            [ row
+                { name = "Name"
+                , value = firstName ++ " " ++ middleName ++ " " ++ lastName
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            , row
+                { name = "Username"
+                , value = username
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            , row
+                { name = "Company"
+                , value = company
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            , row
+                { name = "Socia security number"
+                , value = ssn
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            , row
+                { name = "Passport number"
+                , value = passportNumber
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            , row
+                { name = "License Number"
+                , value = licenseNumber
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            , row
+                { name = "Email"
+                , value = email
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            , row
+                { name = "Phone number"
+                , value = phone
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            , row
+                { name = "Address"
+                , value = address1 ++ "\n" ++ address2 ++ "\n" ++ address3
+                , nameIcon = ""
+                , icons = [ ( "copy", Noop ) ]
+                }
+            ]
     )
         |> List.intersperse (hr [] [])
 

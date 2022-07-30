@@ -95,7 +95,7 @@ showPage page =
         LoadingPage ->
             { title = ""
             , body = [ loader ]
-            , topButton = Nothing
+            , topButton = Just (BackButton PopView)
             }
 
         MasterPasswordModel model ->
@@ -168,7 +168,10 @@ init =
 
 view : Model -> Html Msg
 view model =
-    Navigation.showNavigationView model.pageStack showPage
+    div []
+        (maybeList (List.head model.notifications) (Notification.notification CloseNotification)
+            ++ [ Navigation.showNavigationView model.pageStack showPage ]
+        )
 
 
 mapHead : (a -> a) -> Nonempty a -> Nonempty a

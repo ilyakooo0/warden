@@ -32,6 +32,25 @@ Sub:
             expMonth: String
             expYear: String
             code: String
+        - IdentityCipher:
+            title: String
+            firstName: String
+            middleName: String
+            lastName: String
+            address1: String
+            address2: String
+            address3: String
+            city: String
+            state: String
+            postalCode: String
+            country: String
+            company: String
+            email: String
+            phone: String
+            ssn: String
+            username: String
+            passportNumber: String
+            licenseNumber: String
 
 Cmd:
 - Init

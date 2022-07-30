@@ -532,24 +532,24 @@ type CardApi
     }
 
 type IdentityApi
-  = { title :: String
-    , firstName :: String
-    , middleName :: String
-    , lastName :: String
-    , address1 :: String
-    , address2 :: String
-    , address3 :: String
-    , city :: String
-    , state :: String
-    , postalCode :: String
-    , country :: String
-    , company :: String
-    , email :: String
-    , phone :: String
-    , ssn :: String
-    , username :: String
-    , passportNumber :: String
-    , licenseNumber :: String
+  = { title :: JNullable EncryptedString
+    , firstName :: JNullable EncryptedString
+    , middleName :: JNullable EncryptedString
+    , lastName :: JNullable EncryptedString
+    , address1 :: JNullable EncryptedString
+    , address2 :: JNullable EncryptedString
+    , address3 :: JNullable EncryptedString
+    , city :: JNullable EncryptedString
+    , state :: JNullable EncryptedString
+    , postalCode :: JNullable EncryptedString
+    , country :: JNullable EncryptedString
+    , company :: JNullable EncryptedString
+    , email :: JNullable EncryptedString
+    , phone :: JNullable EncryptedString
+    , ssn :: JNullable EncryptedString
+    , username :: JNullable EncryptedString
+    , passportNumber :: JNullable EncryptedString
+    , licenseNumber :: JNullable EncryptedString
     }
 
 secureNoteApiGeneric = 0 :: SecureNoteApi

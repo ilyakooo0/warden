@@ -61,6 +61,36 @@ derive instance genericSub_LoadCipher_cipherType_CardCipher :: Generic Sub_LoadC
 derive instance eqSub_LoadCipher_cipherType_CardCipher :: Eq Sub_LoadCipher_cipherType_CardCipher
 derive instance ordSub_LoadCipher_cipherType_CardCipher :: Ord Sub_LoadCipher_cipherType_CardCipher
 
+newtype Sub_LoadCipher_cipherType_IdentityCipher =
+    Sub_LoadCipher_cipherType_IdentityCipher {
+      address1 :: String
+    , address2 :: String
+    , address3 :: String
+    , city :: String
+    , company :: String
+    , country :: String
+    , email :: String
+    , firstName :: String
+    , lastName :: String
+    , licenseNumber :: String
+    , middleName :: String
+    , passportNumber :: String
+    , phone :: String
+    , postalCode :: String
+    , ssn :: String
+    , state :: String
+    , title :: String
+    , username :: String
+    }
+
+instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_LoadCipher_cipherType_IdentityCipher :: Generic Sub_LoadCipher_cipherType_IdentityCipher _
+derive instance eqSub_LoadCipher_cipherType_IdentityCipher :: Eq Sub_LoadCipher_cipherType_IdentityCipher
+derive instance ordSub_LoadCipher_cipherType_IdentityCipher :: Ord Sub_LoadCipher_cipherType_IdentityCipher
+
 newtype Sub_LoadCipher_cipherType_LoginCipher_uris_List =
     Sub_LoadCipher_cipherType_LoginCipher_uris_List (Array String)
 
@@ -89,6 +119,7 @@ derive instance ordSub_LoadCipher_cipherType_LoginCipher :: Ord Sub_LoadCipher_c
 
 data Sub_LoadCipher_cipherType =
     CardCipher Sub_LoadCipher_cipherType_CardCipher
+  | IdentityCipher Sub_LoadCipher_cipherType_IdentityCipher
   | LoginCipher Sub_LoadCipher_cipherType_LoginCipher
   | NoteCipher String
 
