@@ -11,7 +11,7 @@ import Pages.Ciphers as Ciphers
 import Pages.Loader exposing (loader)
 import Pages.Login as Login
 import Pages.MasterPassword as MasterPassword
-import Pages.Navigation as Navigation
+import Pages.Navigation as Navigation exposing (TopButton(..))
 import Utils exposing (..)
 
 
@@ -115,7 +115,7 @@ showPage page =
             in
             { title = p.title model
             , body = p.view model
-            , topButton = Nothing
+            , topButton = Just (BackButton PopView)
             }
 
 
