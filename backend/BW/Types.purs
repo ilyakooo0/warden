@@ -552,10 +552,14 @@ type IdentityApi
     , licenseNumber :: JNullable EncryptedString
     }
 
-secureNoteApiGeneric = 0 :: SecureNoteApi
+secureNoteTypeGeneric = 0 :: SecureNoteType
 
-type SecureNoteApi
+type SecureNoteType
   = Int
+
+type SecureNoteApi = {
+  type :: SecureNoteType
+}
 
 type AttachmentResponse
   = { id :: String

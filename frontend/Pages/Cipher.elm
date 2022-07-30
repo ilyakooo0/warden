@@ -77,19 +77,25 @@ view : Model -> List (Html Msg)
 view { passwordHidden, cipher, cvvHidden } =
     (case cipher.cipherType of
         Bridge.LoginCipher { username, password, uris } ->
-            [ row { name = "Username", value = username, nameIcon = "user", icons = [ ( "copy", Noop ) ] }
-            , row
-                { name = "Password"
-                , value =
-                    if passwordHidden then
-                        hiddenPassword
+            maybeList username
+                (\x ->
+                    row
+                        { name = "Username", value = x, nameIcon = "user", icons = [ ( "copy", Noop ) ] }
+                )
+                ++ maybeList password
+                    (\x ->
+                        row
+                            { name = "Password"
+                            , value =
+                                if passwordHidden then
+                                    hiddenPassword
 
-                    else
-                        password
-                , nameIcon = "security"
-                , icons = [ ( hiddenButtonIcon passwordHidden, TogglePasswordVisiblity ), ( "copy", Noop ) ]
-                }
-            ]
+                                else
+                                    x
+                            , nameIcon = "security"
+                            , icons = [ ( hiddenButtonIcon passwordHidden, TogglePasswordVisiblity ), ( "copy", Noop ) ]
+                            }
+                    )
                 ++ (uris
                         |> List.map
                             (\uri ->
@@ -103,78 +109,112 @@ view { passwordHidden, cipher, cvvHidden } =
             ]
 
         Bridge.CardCipher { number, code, cardholderName, expMonth, expYear } ->
-            [ row { name = "Card number", value = number, nameIcon = "containers", icons = [ ( "copy", Noop ) ] }
-            , row { name = "Expiration date", value = expMonth ++ "/" ++ expYear, nameIcon = "timed-out", icons = [ ( "copy", Noop ) ] }
-            , row
-                { name = "CVV"
-                , value =
-                    if cvvHidden then
-                        cvvPassword
+            maybeList number (\x -> row { name = "Card number", value = x, nameIcon = "containers", icons = [ ( "copy", Noop ) ] })
+                ++ optional (expMonth /= Nothing || expYear /= Nothing)
+                    (row
+                        { name = "Expiration date"
+                        , value = [ expMonth, expYear ] |> List.concatMap (flip maybeList identity) |> String.join "/"
+                        , nameIcon = "timed-out"
+                        , icons = [ ( "copy", Noop ) ]
+                        }
+                    )
+                ++ maybeList code
+                    (\x ->
+                        row
+                            { name = "CVV"
+                            , value =
+                                if cvvHidden then
+                                    hiddenCvv
 
-                    else
-                        code
-                , nameIcon = "security"
-                , icons = [ ( hiddenButtonIcon cvvHidden, ToggleCVVVisiblity ), ( "copy", Noop ) ]
-                }
-            , row { name = "Cardholder name", value = cardholderName, nameIcon = "user", icons = [ ( "copy", Noop ) ] }
-            ]
+                                else
+                                    x
+                            , nameIcon = "security"
+                            , icons = [ ( hiddenButtonIcon cvvHidden, ToggleCVVVisiblity ), ( "copy", Noop ) ]
+                            }
+                    )
+                ++ maybeList cardholderName
+                    (\x -> row { name = "Cardholder name", value = x, nameIcon = "user", icons = [ ( "copy", Noop ) ] })
 
         Bridge.IdentityCipher { address1, address2, address3, city, company, country, email, firstName, lastName, licenseNumber, middleName, passportNumber, phone, postalCode, ssn, state, title, username } ->
-            [ row
-                { name = "Name"
-                , value = firstName ++ " " ++ middleName ++ " " ++ lastName
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            , row
-                { name = "Username"
-                , value = username
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            , row
-                { name = "Company"
-                , value = company
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            , row
-                { name = "Socia security number"
-                , value = ssn
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            , row
-                { name = "Passport number"
-                , value = passportNumber
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            , row
-                { name = "License Number"
-                , value = licenseNumber
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            , row
-                { name = "Email"
-                , value = email
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            , row
-                { name = "Phone number"
-                , value = phone
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            , row
-                { name = "Address"
-                , value = address1 ++ "\n" ++ address2 ++ "\n" ++ address3
-                , nameIcon = ""
-                , icons = [ ( "copy", Noop ) ]
-                }
-            ]
+            optional (firstName /= Nothing || middleName /= Nothing || lastName /= Nothing)
+                (row
+                    { name = "Name"
+                    , value = [ firstName, middleName, lastName ] |> List.concatMap (flip maybeList identity) |> unwords
+                    , nameIcon = ""
+                    , icons = [ ( "copy", Noop ) ]
+                    }
+                )
+                ++ maybeList username
+                    (\x ->
+                        row
+                            { name = "Username"
+                            , value = x
+                            , nameIcon = ""
+                            , icons = [ ( "copy", Noop ) ]
+                            }
+                    )
+                ++ maybeList company
+                    (\x ->
+                        row
+                            { name = "Company"
+                            , value = x
+                            , nameIcon = ""
+                            , icons = [ ( "copy", Noop ) ]
+                            }
+                    )
+                ++ maybeList ssn
+                    (\x ->
+                        row
+                            { name = "Socia security number"
+                            , value = x
+                            , nameIcon = ""
+                            , icons = [ ( "copy", Noop ) ]
+                            }
+                    )
+                ++ maybeList passportNumber
+                    (\x ->
+                        row
+                            { name = "Passport number"
+                            , value = x
+                            , nameIcon = ""
+                            , icons = [ ( "copy", Noop ) ]
+                            }
+                    )
+                ++ maybeList licenseNumber
+                    (\x ->
+                        row
+                            { name = "License Number"
+                            , value = x
+                            , nameIcon = ""
+                            , icons = [ ( "copy", Noop ) ]
+                            }
+                    )
+                ++ maybeList email
+                    (\x ->
+                        row
+                            { name = "Email"
+                            , value = x
+                            , nameIcon = ""
+                            , icons = [ ( "copy", Noop ) ]
+                            }
+                    )
+                ++ maybeList phone
+                    (\x ->
+                        row
+                            { name = "Phone number"
+                            , value = x
+                            , nameIcon = ""
+                            , icons = [ ( "copy", Noop ) ]
+                            }
+                    )
+                ++ optional (address1 /= Nothing || address2 /= Nothing || address3 /= Nothing)
+                    (row
+                        { name = "Address"
+                        , value = [ address1, address2, address3 ] |> List.concatMap (flip maybeList identity) |> unwords
+                        , nameIcon = ""
+                        , icons = [ ( "copy", Noop ) ]
+                        }
+                    )
     )
         |> List.intersperse (hr [] [])
 
@@ -184,8 +224,8 @@ hiddenPassword =
     String.repeat 12 "●"
 
 
-cvvPassword : String
-cvvPassword =
+hiddenCvv : String
+hiddenCvv =
     String.repeat 3 "●"
 
 

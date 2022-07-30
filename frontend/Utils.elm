@@ -81,3 +81,8 @@ tailEmpty x =
 
         _ :: xs ->
             xs
+
+
+unwords : List String -> String
+unwords =
+    String.join " "

@@ -22,35 +22,61 @@ Sub:
     cipherType:
         - LoginCipher:
             uris: {List: String}
-            username: String
-            password: String
+            username:
+                Maybe: String
+            password:
+                Maybe: String
         - NoteCipher: String
         - CardCipher:
-            cardholderName: String
-            brand: String
-            number: String
-            expMonth: String
-            expYear: String
-            code: String
+            cardholderName:
+                Maybe: String
+            brand:
+                Maybe: String
+            number:
+                Maybe: String
+            expMonth:
+                Maybe: String
+            expYear:
+                Maybe: String
+            code:
+                Maybe: String
         - IdentityCipher:
-            title: String
-            firstName: String
-            middleName: String
-            lastName: String
-            address1: String
-            address2: String
-            address3: String
-            city: String
-            state: String
-            postalCode: String
-            country: String
-            company: String
-            email: String
-            phone: String
-            ssn: String
-            username: String
-            passportNumber: String
-            licenseNumber: String
+            title:
+                Maybe: String
+            firstName:
+                Maybe: String
+            middleName:
+                Maybe: String
+            lastName:
+                Maybe: String
+            address1:
+                Maybe: String
+            address2:
+                Maybe: String
+            address3:
+                Maybe: String
+            city:
+                Maybe: String
+            state:
+                Maybe: String
+            postalCode:
+                Maybe: String
+            country:
+                Maybe: String
+            company:
+                Maybe: String
+            email:
+                Maybe: String
+            phone:
+                Maybe: String
+            ssn:
+                Maybe: String
+            username:
+                Maybe: String
+            passportNumber:
+                Maybe: String
+            licenseNumber:
+                Maybe: String
 
 Cmd:
 - Init
