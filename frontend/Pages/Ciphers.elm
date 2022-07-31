@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
 import Html.Keyed as Keyed
+import Html.Lazy as Lazy
 import Page exposing (..)
 import Pages.Navigation as Navigation
 import Search
@@ -143,7 +144,7 @@ update { logOut } liftMsg msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -157,10 +158,16 @@ view { selected } liftMsg { ciphers, search, ciphersListFilter } =
         , Attr.attribute "autocomplete" "off"
         ]
         []
-    , Keyed.ul [ Attr.class "p-list--divided" ]
+    , ciphers
+        |> applyCipherFilter ciphersListFilter
+        |> Search.searchList search .name (Lazy.lazy2 showCiphers selected)
+    ]
+
+
+showCiphers : (String -> msg) -> Bridge.Sub_LoadCiphers_List -> Html msg
+showCiphers selected ciphers =
+    Keyed.ul [ Attr.class "p-list--divided" ]
         (ciphers
-            |> applyCipherFilter ciphersListFilter
-            |> Search.searchList (cipherSearch search)
             |> List.map
                 (\{ name, date, id } ->
                     ( id
@@ -173,11 +180,3 @@ view { selected } liftMsg { ciphers, search, ciphersListFilter } =
                     )
                 )
         )
-    ]
-
-
-cipherSearch : String -> Search.Search Bridge.Sub_LoadCiphers
-cipherSearch query =
-    Search.Search
-        [ ( query, \q { name } -> Search.search q name )
-        ]
