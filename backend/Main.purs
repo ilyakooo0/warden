@@ -16,12 +16,14 @@ import Control.Monad.Reader (runReaderT)
 import Data.Argonaut (class DecodeJson)
 import Data.Array as Array
 import Data.Clipboard as Clipboard
+import Data.DateTime (DateTime)
 import Data.Either (Either(..))
 import Data.JNullable (fromJNullable, jnull, nullify)
 import Data.JNullable as JNullable
 import Data.JOpt (fromJOpt)
 import Data.Maybe (Maybe(..))
 import Data.OpenURL (openURL)
+import Data.Ord.Down (Down(..))
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.Timestamp as Timestamp
 import Data.Traversable (traverse)
@@ -93,8 +95,8 @@ main = do
     Bridge.NeedCiphersList -> run do
       sync <- getOrReset storage SyncKey
       ciphers <- traverse processCipher sync.ciphers
-      liftEffect $ Elm.send app $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List ciphers
-      api <- getAuthedApi
+      let sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
+      liftEffect $ Elm.send app $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
       liftEffect $ Storage.store storage SyncKey sync
       pure unit
     Bridge.NeedsReset -> do
@@ -243,7 +245,7 @@ processCipher ::
   forall r.
   HasL "crypto" CryptoService r =>
   HasL "key" SymmetricCryptoKey r =>
-  CipherResponse -> Al r Bridge.Sub_LoadCiphers
+  CipherResponse -> Al r {cipher :: Bridge.Sub_LoadCiphers, date :: DateTime}
 processCipher cipher = do
   name <- decrypt cipher.name
   cipherType <- case cipher.type of
@@ -252,13 +254,16 @@ processCipher cipher = do
         n | n == cipherTypeCard -> pure Bridge.CardType
         n | n == cipherTypeIdentity -> pure Bridge.IdentityType
         n -> throwError $ error $ "Unsupported cipher type: " <> show n
+  date <- liftEffect $ Timestamp.toDateTime cipher.revisionDate
   pure
-    $ Bridge.Sub_LoadCiphers
+    $ {cipher: Bridge.Sub_LoadCiphers
         { name: name
         , date: Timestamp.toLocalDateTimeString cipher.revisionDate
         , id: cipher.id
         , cipherType
         }
+      , date
+      }
 
 runElmAff :: FFI.Elm -> Aff Unit -> Effect Unit
 runElmAff app =

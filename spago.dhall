@@ -33,6 +33,7 @@ to generate this file without the comments in this block.
   , "maybe"
   , "newtype"
   , "nullable"
+  , "orders"
   , "prelude"
   , "refs"
   , "strings"
