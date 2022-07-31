@@ -4,7 +4,7 @@ set -e
 
 TEMP=$(mktemp -d)
 
-cp -r "$SRC_DIR"/{vanilla,appname.apparmor,appname.desktop,manifest.json,logo.svg,index.html,style.css} "$INSTALL_DIR"
+cp -r "$SRC_DIR"/{vanilla,appname.apparmor,appname.desktop,manifest.json,logo.png,index.html,style.css} "$INSTALL_DIR"
 
 elm make "$SRC_DIR/frontend/Main.elm" --optimize --output="$TEMP/elm.js"
 

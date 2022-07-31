@@ -1,8 +1,8 @@
 {
-    "name": "appname.iko",
-    "description": "A short description of your app",
+    "name": "soy.iko.warden",
+    "description": "A simple bitwarden client",
     "architecture": "@CLICK_ARCH@",
-    "title": "App Title",
+    "title": "Warden",
     "hooks": {
         "appname": {
             "apparmor": "appname.apparmor",
@@ -10,6 +10,6 @@
         }
     },
     "version": "1.0.0",
-    "maintainer": "Your FullName <email@domain.org>",
+    "maintainer": "Ilia Kostiuchenko <email@iko.soy>",
     "framework": "@CLICK_FRAMEWORK@"
 }
