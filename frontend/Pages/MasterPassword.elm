@@ -67,7 +67,7 @@ subscriptions _ =
 view : Model -> List (Html Msg)
 view model =
     [ alignRight [ button [ Attr.class "p-button--negative", Ev.onClick Reset ] [ text "Log out" ] ]
-    , table [ Attr.class "p-table--mobile-card" ]
+    , table [ Attr.class "p-table--mobile-card u-no-margin" ]
         [ thead [] [ tr [] [ th [] [ text "Server" ], th [] [ text "Email" ] ] ]
         , tbody
             []
