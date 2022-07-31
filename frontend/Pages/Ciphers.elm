@@ -6,6 +6,7 @@ import Html.Attributes as Attr
 import Html.Events as Ev
 import Html.Keyed as Keyed
 import Html.Lazy as Lazy
+import InfiniteScroll
 import Page exposing (..)
 import Pages.Navigation as Navigation
 import Search
@@ -17,6 +18,8 @@ type alias Model =
     , search : String
     , menuVisible : Bool
     , ciphersListFilter : CiphersFilter
+    , scroll : InfiniteScroll.Model Msg
+    , sublist : { end : Int }
     }
 
 
@@ -77,6 +80,8 @@ type Msg
     | ToggleMenu
     | UpdateFilter CiphersFilter
     | LogOut
+    | LoadMore InfiniteScroll.Direction
+    | InfiniteScrollMsg InfiniteScroll.Msg
 
 
 type alias Callbacks msg =
@@ -119,6 +124,8 @@ init ciphers =
       , search = ""
       , menuVisible = False
       , ciphersListFilter = AllCiphers
+      , scroll = InfiniteScroll.init (LoadMore >> pureCmd)
+      , sublist = { end = 20 }
       }
     , Cmd.none
     )
@@ -142,6 +149,25 @@ update { logOut } liftMsg msg model =
         LogOut ->
             ( Ok model, pureCmd logOut )
 
+        LoadMore direction ->
+            let
+                newSublist =
+                    case direction of
+                        InfiniteScroll.Top ->
+                            { end = model.sublist.end }
+
+                        InfiniteScroll.Bottom ->
+                            { end = min (model.sublist.end + 10) (List.length model.ciphers) }
+            in
+            ( Ok { model | sublist = newSublist, scroll = InfiniteScroll.stopLoading model.scroll }, Cmd.none )
+
+        InfiniteScrollMsg msg_ ->
+            let
+                ( scroll, cmd ) =
+                    InfiniteScroll.update InfiniteScrollMsg msg_ model.scroll
+            in
+            ( Ok { model | scroll = scroll }, Cmd.map liftMsg cmd )
+
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
@@ -149,7 +175,7 @@ subscriptions _ =
 
 
 view : Callbacks emsg -> (Msg -> emsg) -> Model -> List (Html emsg)
-view { selected } liftMsg { ciphers, search, ciphersListFilter } =
+view { selected } liftMsg { ciphers, search, ciphersListFilter, sublist } =
     [ input
         [ Attr.type_ "search"
         , Attr.value search
@@ -160,13 +186,13 @@ view { selected } liftMsg { ciphers, search, ciphersListFilter } =
         []
     , ciphers
         |> applyCipherFilter ciphersListFilter
-        |> Search.searchList search .name (Lazy.lazy2 showCiphers selected)
+        |> Search.searchList search .name (List.take sublist.end >> Lazy.lazy3 showCiphers liftMsg selected)
     ]
 
 
-showCiphers : (String -> msg) -> Bridge.Sub_LoadCiphers_List -> Html msg
-showCiphers selected ciphers =
-    Keyed.ul [ Attr.class "p-list--divided" ]
+showCiphers : (Msg -> msg) -> (String -> msg) -> Bridge.Sub_LoadCiphers_List -> Html msg
+showCiphers liftMsg selected ciphers =
+    Keyed.ul [ Attr.class "p-list--divided", InfiniteScroll.infiniteScroll (InfiniteScrollMsg >> liftMsg), Attr.class "ciphers-list no-scroll-bar" ]
         (ciphers
             |> List.map
                 (\{ name, date, id } ->

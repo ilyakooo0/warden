@@ -59,6 +59,16 @@ nav.p-tabs__list {
   margin-bottom: 0.5rem;
 }
 
+.ciphers-list {
+  height: calc(100vh - 9.5rem);
+  overflow: auto;
+  margin: 0;
+}
+
 p {
   word-break: break-word;
+}
+
+.no-scroll-bar::-webkit-scrollbar {
+  display: none;
 }

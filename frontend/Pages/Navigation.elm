@@ -38,7 +38,7 @@ navigation { topButton, title } =
             _ ->
                 []
          )
-            ++ [ nav [ Attr.class "p-tabs p-tabs__list" ]
+            ++ [ nav [ Attr.class "p-tabs p-tabs__list no-scroll-bar" ]
                     [ h3 []
                         [ case topButton of
                             Nothing ->
