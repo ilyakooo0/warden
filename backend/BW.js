@@ -64,11 +64,11 @@ export function getServices() {
         getProfile: (req) => api.getProfile(req),
         postIdentityToken: (req) => api.postIdentityToken(
           new PasswordTokenRequest(
-            email = req.email,
-            masterPasswordHash = req.masterPasswordHash,
-            captchaResponse = req.captchaResponse,
-            twoFactor = new TokenRequestTwoFactor(req.twoFactor),
-            device = req.device
+            req.email,
+            req.masterPasswordHash,
+            req.captchaResponse,
+            new TokenRequestTwoFactor(req.twoFactor),
+            req.device
           )
         ),
         getSync: () => api.getSync().then(sanitize),
@@ -80,20 +80,20 @@ export function getServices() {
 }
 
 class MainBackground {
-  messagingService; //: MessagingServiceAbstraction;
-  storageService; //: StorageServiceAbstraction;
-  i18nService; //: I18nServiceAbstraction;
-  platformUtilsService; //: PlatformUtilsServiceAbstraction;
-  logService; //: LogServiceAbstraction;
-  cryptoService; //: CryptoServiceAbstraction;
-  cryptoFunctionService; //: CryptoFunctionServiceAbstraction;
-  tokenService; //: TokenServiceAbstraction;
-  appIdService; //: AppIdServiceAbstraction;
-  apiService; //: ApiServiceAbstraction;
-  environmentService; //: EnvironmentServiceAbstraction;
-  authService; //: AuthServiceAbstraction;
-  stateService; //: StateServiceAbstraction;
-  stateMigrationService; //: StateMigrationService;
+  // messagingService; //: MessagingServiceAbstraction;
+  // storageService; //: StorageServiceAbstraction;
+  // i18nService; //: I18nServiceAbstraction;
+  // platformUtilsService; //: PlatformUtilsServiceAbstraction;
+  // logService; //: LogServiceAbstraction;
+  // cryptoService; //: CryptoServiceAbstraction;
+  // cryptoFunctionService; //: CryptoFunctionServiceAbstraction;
+  // tokenService; //: TokenServiceAbstraction;
+  // appIdService; //: AppIdServiceAbstraction;
+  // apiService; //: ApiServiceAbstraction;
+  // environmentService; //: EnvironmentServiceAbstraction;
+  // authService; //: AuthServiceAbstraction;
+  // stateService; //: StateServiceAbstraction;
+  // stateMigrationService; //: StateMigrationService;
 
 
   constructor() {
@@ -173,7 +173,10 @@ class MainBackground {
 }
 
 class MemoryStorageService {
-  storage = {};
+
+  constructor() {
+    this.storage = {};
+  }
 
   async get(key) {
     return this.storage[key]
