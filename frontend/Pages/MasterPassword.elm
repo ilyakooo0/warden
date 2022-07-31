@@ -77,13 +77,15 @@ view model =
                 ]
             ]
         ]
-    , label [] [ text "Password" ]
-    , input
-        [ Attr.type_ "password"
-        , Attr.value model.password
-        , Ev.onInput UpdatePassword
-        , Attr.attribute "autocomplete" "current-password"
+    , form [ Ev.onSubmit Submit ]
+        [ label [] [ text "Password" ]
+        , input
+            [ Attr.type_ "password"
+            , Attr.value model.password
+            , Ev.onInput UpdatePassword
+            , Attr.attribute "autocomplete" "current-password"
+            ]
+            []
+        , alignRight [ button [ Attr.type_ "submit" ] [ text "Log in" ] ]
         ]
-        []
-    , alignRight [ button [ Ev.onClick Submit ] [ text "Log in" ] ]
     ]
