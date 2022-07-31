@@ -58,3 +58,7 @@ nav.p-tabs__list {
 .cipher-row .p-text--small {
   margin-bottom: 0.5rem;
 }
+
+p {
+  word-break: break-word;
+}
