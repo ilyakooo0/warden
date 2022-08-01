@@ -16,8 +16,18 @@
       console.log(token);
       window.parent.postMessage({ "hCaptchaToken": token }, "*");
     }
+
+    const sitekey = location.search.replace("?", "")
+    console.log(sitekey)
+
+    const div = document.createElement("div");
+    div.setAttribute("class", "h-captcha");
+    div.setAttribute("data-sitekey", sitekey);
+    div.setAttribute("data-callback", "processSuccess");
+
+    document.body.append(div)
+
   </script>
-  <div class="h-captcha" data-sitekey="bc38c8a2-5311-4e8c-9dfc-49e99f6df417" data-callback="processSuccess"></div>
 </body>
 
 </html>
