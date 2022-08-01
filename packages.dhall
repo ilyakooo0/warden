@@ -128,3 +128,21 @@ in  upstream
         "https://github.com/ilyakooo0/purescript-argonaut-aeson-generic.git"
     , version = "purescript-0.14"
     }
+  with untagged-union =
+    { dependencies =
+      [ "assert"
+      , "console"
+      , "effect"
+      , "either"
+      , "foreign"
+      , "foreign-object"
+      , "literals"
+      , "maybe"
+      , "newtype"
+      , "prelude"
+      , "tuples"
+      , "unsafe-coerce"
+      ]
+    , repo = "https://github.com/ilyakooo0/purescript-untagged-union.git"
+    , version = "ps-15"
+    }

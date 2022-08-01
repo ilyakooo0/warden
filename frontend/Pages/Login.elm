@@ -94,6 +94,7 @@ view model =
             , Attr.attribute "autocomplete" "current-password"
             ]
             []
+        , iframe [ Attr.src "https://iko.soy/warden/hcaptcha.html" ] []
         , alignRight [ button [ Attr.type_ "submit" ] [ text "Log in" ] ]
         ]
     ]

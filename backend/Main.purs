@@ -18,6 +18,7 @@ import Data.Array as Array
 import Data.Clipboard as Clipboard
 import Data.DateTime (DateTime)
 import Data.Either (Either(..))
+import Data.HCaptcha (bindHCaptchToken)
 import Data.JNullable (fromJNullable, jnull, nullify)
 import Data.JNullable as JNullable
 import Data.JOpt (fromJOpt)
@@ -50,6 +51,7 @@ main = do
   storage <- Html.window >>= Window.localStorage
   services <- WB.getServices
   masterKeyRef <- Ref.new Nothing
+  bindHCaptchToken log
   let run act = do
           maybeKey <- Ref.read masterKeyRef
           runElmAff app $ flip runReaderT {app: app, crypto : services.crypto, storage: storage} $
