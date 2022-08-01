@@ -14,7 +14,7 @@
   <script>
     function processSuccess(token) {
       console.log(token);
-      window.parent.postMessage(token, "*");
+      window.parent.postMessage({ "hCaptchaToken": token }, "*");
     }
   </script>
   <div class="h-captcha" data-sitekey="bc38c8a2-5311-4e8c-9dfc-49e99f6df417" data-callback="processSuccess"></div>
