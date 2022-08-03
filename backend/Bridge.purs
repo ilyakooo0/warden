@@ -526,10 +526,12 @@ derive instance eqSub_NeedsMasterPassword :: Eq Sub_NeedsMasterPassword
 derive instance ordSub_NeedsMasterPassword :: Ord Sub_NeedsMasterPassword
 
 data Sub =
-    Error String
+    CaptchaDone
+  | Error String
   | LoadCipher Sub_LoadCipher
   | LoadCiphers Sub_LoadCiphers_List
   | LoginSuccessful
+  | NeedsCaptcha String
   | NeedsLogin
   | NeedsMasterPassword Sub_NeedsMasterPassword
   | RecieveEmail String

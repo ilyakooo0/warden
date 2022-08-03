@@ -13,6 +13,7 @@ import Data.JNullable (JNullable)
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Effect (Effect)
 import Effect.Unsafe (unsafePerformEffect)
+import Untagged.Union (type (|+|))
 
 type CryptoService
   = { makeKey :: Fn4 Password String KDF Int (Promise SymmetricCryptoKey)
@@ -26,7 +27,7 @@ type ApiService
   = { postPrelogin :: PreloginRequest -> Promise PreloginResponse
     , getProfile :: Unit -> Promise ProfileResponse
     -- TODO: There can really be more request and response types. Maybe handle this later.
-    , postIdentityToken :: PasswordTokenRequest -> Promise IdentityTokenResponse
+    , postIdentityToken :: PasswordTokenRequest -> Promise (IdentityCaptchaResponse |+| IdentityTokenResponse)
     , getSync :: Unit -> Promise SyncResponse
     }
 

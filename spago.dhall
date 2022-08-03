@@ -41,6 +41,7 @@ to generate this file without the comments in this block.
   , "tuples"
   , "typelevel-prelude"
   , "undefined-is-not-a-problem"
+  , "untagged-union"
   , "web-html"
   , "web-storage"
   ]

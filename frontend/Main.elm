@@ -7,6 +7,7 @@ import Html exposing (..)
 import Html.Lazy as Lazy
 import List.Nonempty as Nonempty exposing (Nonempty(..))
 import Notification
+import Pages.Captcha as Captcha
 import Pages.Cipher as Cipher
 import Pages.Ciphers as Ciphers
 import Pages.Loader exposing (loader)
@@ -38,6 +39,8 @@ type Msg
     | RecieveEmail String
     | Copy String
     | Open String
+    | CaptchaMsg Captcha.Msg
+    | ShowCaptcha Captcha.HCaptchSiteKey
 
 
 type alias CipherId =
@@ -62,6 +65,7 @@ type PageModel
     | CiphersModel Ciphers.Model
     | MasterPasswordModel MasterPassword.Model
     | CipherModel Cipher.Model
+    | CaptchaModel Captcha.Model
 
 
 showPage :
@@ -124,6 +128,16 @@ showPage email page =
             , topButton = Just (BackButton PopView)
             }
 
+        CaptchaModel model ->
+            let
+                p =
+                    Captcha.page captchaCallbacks CaptchaMsg
+            in
+            { title = p.title model
+            , body = p.view model
+            , topButton = Just (BackButton PopView)
+            }
+
 
 main : Program () Model Msg
 main =
@@ -163,6 +177,12 @@ subscriptions _ =
 
                 Bridge.RecieveEmail email ->
                     RecieveEmail email
+
+                Bridge.NeedsCaptcha uri ->
+                    ShowCaptcha uri
+
+                Bridge.CaptchaDone ->
+                    PopView
         )
 
 
@@ -227,6 +247,10 @@ update msg model =
         appendPageStack : PageModel -> Model
         appendPageStack mdl =
             { model | pageStack = model.pageStack |> Nonempty.toList |> List.filter (doNotStoreInHistory >> not) |> Nonempty mdl }
+
+        keepStackWith : PageModel -> Model
+        keepStackWith mdl =
+            { model | pageStack = Nonempty.cons mdl model.pageStack }
 
         currentPage =
             model.pageStack |> Nonempty.head
@@ -339,6 +363,18 @@ update msg model =
         Open uri ->
             ( model, FFI.sendBridge (Bridge.Open uri) )
 
+        ShowCaptcha uri ->
+            (Captcha.page captchaCallbacks CaptchaMsg).init uri
+                |> Tuple.mapFirst (\pageModel -> keepStackWith <| CaptchaModel pageModel)
+
+        CaptchaMsg imsg ->
+            case currentPage of
+                CaptchaModel page ->
+                    (Captcha.page captchaCallbacks CaptchaMsg).update imsg page |> processPage CaptchaModel
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -353,6 +389,11 @@ ciphersCallbacks =
 cipherCallbacks : Cipher.Callbacks Msg
 cipherCallbacks =
     { copy = Copy, open = Open }
+
+
+captchaCallbacks : Captcha.Callbacks
+captchaCallbacks =
+    {}
 
 
 masterPasswordCallbacks : MasterPassword.Callbacks Msg

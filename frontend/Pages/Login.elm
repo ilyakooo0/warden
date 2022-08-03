@@ -38,8 +38,8 @@ page callbacks liftMsg =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { server = "https://bitwarden.iko.soy"
-      , email = "mail@iko.soy"
+    ( { server = "https://vault.bitwarden.com"
+      , email = "ilyakooo0@gmail.com"
       , password = ""
       }
     , Cmd.none
@@ -70,31 +70,32 @@ subscriptions model =
 view : Model -> List (Html Msg)
 view model =
     [ form [ Ev.onSubmit Submit ]
-        [ label [] [ text "Server" ]
-        , input
+        ([ label [] [ text "Server" ]
+         , input
             [ Attr.type_ "url"
             , Attr.value model.server
             , Ev.onInput UpdateServer
             , Attr.attribute "autocomplete" "url"
             ]
             []
-        , label [] [ text "Email" ]
-        , input
+         , label [] [ text "Email" ]
+         , input
             [ Attr.type_ "email"
             , Attr.value model.email
             , Ev.onInput UpdateEmail
             , Attr.attribute "autocomplete" "email"
             ]
             []
-        , label [] [ text "Password" ]
-        , input
+         , label [] [ text "Password" ]
+         , input
             [ Attr.type_ "password"
             , Attr.value model.password
             , Ev.onInput UpdatePassword
             , Attr.attribute "autocomplete" "current-password"
             ]
             []
-        , iframe [ Attr.src "https://iko.soy/warden/hcaptcha.html" ] []
-        , alignRight [ button [ Attr.type_ "submit" ] [ text "Log in" ] ]
-        ]
+         ]
+            -- ++ maybeList model.siteKey (\siteKey -> iframe [ Attr.src ("https://iko.soy/warden/hcaptcha.html?" ++ siteKey) ] [])
+            ++ [ alignRight [ button [ Attr.type_ "submit" ] [ text "Log in" ] ] ]
+        )
     ]

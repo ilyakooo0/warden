@@ -5,6 +5,5 @@ export function bindHCaptchToken(callback) {
         callback(e.data.hCaptchaToken)();
       }
     })
-
   }
 }

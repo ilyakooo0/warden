@@ -36,7 +36,7 @@ type ProfileResponse
     , name :: String
     , email :: String
     , emailVerified :: Boolean
-    , masterPasswordHint :: String
+    , masterPasswordHint :: JNullable String
     , premiumPersonally :: Boolean
     -- , premiumFromOrganization :: Boolean
     , culture :: String
@@ -338,6 +338,9 @@ derive newtype instance Ord RefreshToken
 derive newtype instance EncodeJson RefreshToken
 derive newtype instance DecodeJson RefreshToken
 
+type IdentityCaptchaResponse =
+  { siteKey :: String
+  }
 
 type IdentityTokenResponse
   = { accessToken :: AccessToken

@@ -20,6 +20,7 @@ import Data.Either (Either(..))
 import Data.HCaptcha (bindHCaptchToken)
 import Data.JNullable (jnull, nullify)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (wrap)
 import Data.OpenURL (openURL)
 import Data.Ord.Down (Down(..))
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
@@ -38,6 +39,7 @@ import FFI as FFI
 import Localstorage (class StorageKey)
 import Localstorage as Storage
 import Storage (MasterPasswordHashKey(..), PreloginResponseKey(..), SyncKey(..), TokenKey(..), UrlsKey(..))
+import Untagged.Union (toEither1)
 import Web.HTML as Html
 import Web.HTML.Window as Window
 import Web.Storage.Storage (Storage)
@@ -49,7 +51,10 @@ main = do
   storage <- Html.window >>= Window.localStorage
   services <- WB.getServices
   masterKeyRef <- Ref.new Nothing
-  bindHCaptchToken log
+  hCaptchaTokenRef <- Ref.new Nothing
+  bindHCaptchToken \captchaToken -> do
+    Ref.write (Just captchaToken) hCaptchaTokenRef
+    Elm.send app Bridge.CaptchaDone
   let
     run act = do
       maybeKey <- Ref.read masterKeyRef
@@ -69,6 +74,8 @@ main = do
             Nothing -> requestMasterPassword
   Elm.subscribe app \cmd -> case cmd of
     Bridge.Login (Bridge.Cmd_Login { email, server, password }) -> do
+      captchaToken <- Ref.read hCaptchaTokenRef
+      Ref.write Nothing hCaptchaTokenRef
       let
         urls = baseUrl server
       runElmAff app do
@@ -82,23 +89,28 @@ main = do
             }
         flip runReaderT env do
           prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
-          token <-
+          loginResponse <-
             catchError
-              (Logic.getLogInRequestToken prelogin (Email email) (Password password))
+              (Logic.getLogInRequestToken prelogin (Email email) (Password password) captchaToken)
               (const $ liftEffect $ Exc.throw "Could not log in. Please check your data and try again.")
-          masterKey <- Logic.makePreloginKey prelogin (Email email) (Password password)
-          api <- liftPromise $ services.getApi urls (nullify token)
-          sync <- liftPromise $ api.getSync unit
-          hash <- hashPassword (Password password)
-          log $ show sync
-          liftEffect do
-            Ref.write (Just masterKey) masterKeyRef
-            Storage.store storage UrlsKey server
-            Storage.store storage MasterPasswordHashKey hash
-            Storage.store storage PreloginResponseKey prelogin
-            Storage.store storage SyncKey sync
-            Storage.store storage TokenKey token
-            Elm.send app Bridge.LoginSuccessful
+          case toEither1 loginResponse of
+            Left { siteKey } ->
+              liftEffect do
+                Elm.send app $ Bridge.NeedsCaptcha siteKey
+            Right token -> do
+              masterKey <- Logic.makePreloginKey prelogin (Email email) (Password password)
+              api <- liftPromise $ services.getApi urls (nullify token)
+              sync <- liftPromise $ api.getSync unit
+              hash <- hashPassword (Password password)
+              log $ show sync
+              liftEffect do
+                Ref.write (Just masterKey) masterKeyRef
+                Storage.store storage UrlsKey server
+                Storage.store storage MasterPasswordHashKey hash
+                Storage.store storage PreloginResponseKey prelogin
+                Storage.store storage SyncKey sync
+                Storage.store storage TokenKey token
+                Elm.send app Bridge.LoginSuccessful
     Bridge.NeedCiphersList ->
       run do
         sync <- getOrReset SyncKey

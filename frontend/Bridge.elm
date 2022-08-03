@@ -624,10 +624,12 @@ jsonEncSub_NeedsMasterPassword  val =
 
 
 type Sub  =
-    Error String
+    CaptchaDone 
+    | Error String
     | LoadCipher Sub_LoadCipher
     | LoadCiphers Sub_LoadCiphers_List
     | LoginSuccessful 
+    | NeedsCaptcha String
     | NeedsLogin 
     | NeedsMasterPassword Sub_NeedsMasterPassword
     | RecieveEmail String
@@ -636,10 +638,12 @@ type Sub  =
 jsonDecSub : Json.Decode.Decoder ( Sub )
 jsonDecSub =
     let jsonDecDictSub = Dict.fromList
-            [ ("Error", Json.Decode.lazy (\_ -> Json.Decode.map Error (Json.Decode.string)))
+            [ ("CaptchaDone", Json.Decode.lazy (\_ -> Json.Decode.succeed CaptchaDone))
+            , ("Error", Json.Decode.lazy (\_ -> Json.Decode.map Error (Json.Decode.string)))
             , ("LoadCipher", Json.Decode.lazy (\_ -> Json.Decode.map LoadCipher (jsonDecSub_LoadCipher)))
             , ("LoadCiphers", Json.Decode.lazy (\_ -> Json.Decode.map LoadCiphers (jsonDecSub_LoadCiphers_List)))
             , ("LoginSuccessful", Json.Decode.lazy (\_ -> Json.Decode.succeed LoginSuccessful))
+            , ("NeedsCaptcha", Json.Decode.lazy (\_ -> Json.Decode.map NeedsCaptcha (Json.Decode.string)))
             , ("NeedsLogin", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedsLogin))
             , ("NeedsMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map NeedsMasterPassword (jsonDecSub_NeedsMasterPassword)))
             , ("RecieveEmail", Json.Decode.lazy (\_ -> Json.Decode.map RecieveEmail (Json.Decode.string)))
@@ -651,10 +655,12 @@ jsonDecSub =
 jsonEncSub : Sub -> Value
 jsonEncSub  val =
     let keyval v = case v of
+                    CaptchaDone  -> ("CaptchaDone", encodeValue (Json.Encode.list identity []))
                     Error v1 -> ("Error", encodeValue (Json.Encode.string v1))
                     LoadCipher v1 -> ("LoadCipher", encodeValue (jsonEncSub_LoadCipher v1))
                     LoadCiphers v1 -> ("LoadCiphers", encodeValue (jsonEncSub_LoadCiphers_List v1))
                     LoginSuccessful  -> ("LoginSuccessful", encodeValue (Json.Encode.list identity []))
+                    NeedsCaptcha v1 -> ("NeedsCaptcha", encodeValue (Json.Encode.string v1))
                     NeedsLogin  -> ("NeedsLogin", encodeValue (Json.Encode.list identity []))
                     NeedsMasterPassword v1 -> ("NeedsMasterPassword", encodeValue (jsonEncSub_NeedsMasterPassword v1))
                     RecieveEmail v1 -> ("RecieveEmail", encodeValue (Json.Encode.string v1))

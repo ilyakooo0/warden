@@ -1,5 +1,7 @@
 Sub:
 - NeedsLogin
+- NeedsCaptcha: String
+- CaptchaDone
 - Error: String
 - LoadCiphers:
     List:

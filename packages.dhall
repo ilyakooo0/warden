@@ -144,5 +144,20 @@ in  upstream
       , "unsafe-coerce"
       ]
     , repo = "https://github.com/ilyakooo0/purescript-untagged-union.git"
-    , version = "ps-15"
+    , version = "iko/ps-15"
+    }
+  with literals =
+    { repo = "https://github.com/ilyakooo0/purescript-literals.git"
+    , version = "iko/_null"
+    , dependencies =
+      [ "assert"
+      , "effect"
+      , "integers"
+      , "maybe"
+      , "numbers"
+      , "partial"
+      , "prelude"
+      , "typelevel-prelude"
+      , "unsafe-coerce"
+      ]
     }

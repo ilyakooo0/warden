@@ -15,6 +15,8 @@ import Data.JNullable as JNullable
 import Data.JOpt (fromJOpt)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, wrap)
+import Data.JNullable (jnull, nullify)
+import Data.Maybe (Maybe, fromMaybe)
 import Data.String as String
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.SymmetricCryptoKey as SymmetricCryptoKey
@@ -23,6 +25,7 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Effect.Exception (error)
 import Effect.Exception as Exc
+import Untagged.Union (type (|+|))
 
 -- | Creates the master key
 makePreloginKey ::
@@ -60,8 +63,8 @@ getLogInRequestToken ::
   forall r.
   HasL "api" ApiService r =>
   HasL "crypto" CryptoService r =>
-  PreloginResponse -> Email -> Password -> Al r IdentityTokenResponse
-getLogInRequestToken prelogin email password = do
+  PreloginResponse -> Email -> Password -> Maybe String -> Al r (IdentityCaptchaResponse |+| IdentityTokenResponse)
+getLogInRequestToken prelogin email password captchaResponse = do
   key <- makePreloginKey prelogin email password
   crypto <- l (L :: L "crypto")
   api :: ApiService <- l (L :: L "api")
@@ -73,7 +76,7 @@ getLogInRequestToken prelogin email password = do
     $ api.postIdentityToken
         { email: email
         , masterPasswordHash: hashedPassword
-        , captchaResponse: ""
+        , captchaResponse: fromMaybe "" captchaResponse
         , twoFactor:
             { provider: twoFactorProviderTypeEmail
             , token: ""
