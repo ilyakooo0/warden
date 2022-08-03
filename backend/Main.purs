@@ -143,7 +143,7 @@ main = do
                     username <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt login.username)
                     password <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt login.password)
                     uris <- fromJOpt [] <$> ((traverse >>> traverse) (_.uri >>> decrypt) login.uris)
-                    pure $ Bridge.LoginCipher $ Bridge.Sub_LoadCipher_cipherType_LoginCipher
+                    pure $ Bridge.LoginCipher $ Bridge.Cipher_LoginCipher
                       { username
                       , password
                       , uris: wrap uris
@@ -158,7 +158,7 @@ main = do
                     brand <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.brand)
                     expMonth <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.expMonth)
                     expYear <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.expYear)
-                    pure $ Bridge.CardCipher $ Bridge.Sub_LoadCipher_cipherType_CardCipher
+                    pure $ Bridge.CardCipher $ Bridge.Cipher_CardCipher
                       { brand, cardholderName, code, expMonth, expYear, number }
               n | cipherTypeIdentity == n -> do
                 case JNullable.toMaybe cipher.identity of

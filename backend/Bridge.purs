@@ -12,6 +12,424 @@ import Data.Newtype (class Newtype)
 
 import Prelude
 
+newtype Cipher_CardCipher_brand_Maybe =
+    Cipher_CardCipher_brand_Maybe (Maybe String)
+
+derive instance newtypeCipher_CardCipher_brand_Maybe :: Newtype Cipher_CardCipher_brand_Maybe _
+instance encodeJsonCipher_CardCipher_brand_Maybe :: EncodeJson Cipher_CardCipher_brand_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_CardCipher_brand_Maybe :: DecodeJson Cipher_CardCipher_brand_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_CardCipher_brand_Maybe :: Generic Cipher_CardCipher_brand_Maybe _
+derive instance eqCipher_CardCipher_brand_Maybe :: Eq Cipher_CardCipher_brand_Maybe
+derive instance ordCipher_CardCipher_brand_Maybe :: Ord Cipher_CardCipher_brand_Maybe
+
+newtype Cipher_CardCipher_cardholderName_Maybe =
+    Cipher_CardCipher_cardholderName_Maybe (Maybe String)
+
+derive instance newtypeCipher_CardCipher_cardholderName_Maybe :: Newtype Cipher_CardCipher_cardholderName_Maybe _
+instance encodeJsonCipher_CardCipher_cardholderName_Maybe :: EncodeJson Cipher_CardCipher_cardholderName_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_CardCipher_cardholderName_Maybe :: DecodeJson Cipher_CardCipher_cardholderName_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_CardCipher_cardholderName_Maybe :: Generic Cipher_CardCipher_cardholderName_Maybe _
+derive instance eqCipher_CardCipher_cardholderName_Maybe :: Eq Cipher_CardCipher_cardholderName_Maybe
+derive instance ordCipher_CardCipher_cardholderName_Maybe :: Ord Cipher_CardCipher_cardholderName_Maybe
+
+newtype Cipher_CardCipher_code_Maybe =
+    Cipher_CardCipher_code_Maybe (Maybe String)
+
+derive instance newtypeCipher_CardCipher_code_Maybe :: Newtype Cipher_CardCipher_code_Maybe _
+instance encodeJsonCipher_CardCipher_code_Maybe :: EncodeJson Cipher_CardCipher_code_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_CardCipher_code_Maybe :: DecodeJson Cipher_CardCipher_code_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_CardCipher_code_Maybe :: Generic Cipher_CardCipher_code_Maybe _
+derive instance eqCipher_CardCipher_code_Maybe :: Eq Cipher_CardCipher_code_Maybe
+derive instance ordCipher_CardCipher_code_Maybe :: Ord Cipher_CardCipher_code_Maybe
+
+newtype Cipher_CardCipher_expMonth_Maybe =
+    Cipher_CardCipher_expMonth_Maybe (Maybe String)
+
+derive instance newtypeCipher_CardCipher_expMonth_Maybe :: Newtype Cipher_CardCipher_expMonth_Maybe _
+instance encodeJsonCipher_CardCipher_expMonth_Maybe :: EncodeJson Cipher_CardCipher_expMonth_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_CardCipher_expMonth_Maybe :: DecodeJson Cipher_CardCipher_expMonth_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_CardCipher_expMonth_Maybe :: Generic Cipher_CardCipher_expMonth_Maybe _
+derive instance eqCipher_CardCipher_expMonth_Maybe :: Eq Cipher_CardCipher_expMonth_Maybe
+derive instance ordCipher_CardCipher_expMonth_Maybe :: Ord Cipher_CardCipher_expMonth_Maybe
+
+newtype Cipher_CardCipher_expYear_Maybe =
+    Cipher_CardCipher_expYear_Maybe (Maybe String)
+
+derive instance newtypeCipher_CardCipher_expYear_Maybe :: Newtype Cipher_CardCipher_expYear_Maybe _
+instance encodeJsonCipher_CardCipher_expYear_Maybe :: EncodeJson Cipher_CardCipher_expYear_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_CardCipher_expYear_Maybe :: DecodeJson Cipher_CardCipher_expYear_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_CardCipher_expYear_Maybe :: Generic Cipher_CardCipher_expYear_Maybe _
+derive instance eqCipher_CardCipher_expYear_Maybe :: Eq Cipher_CardCipher_expYear_Maybe
+derive instance ordCipher_CardCipher_expYear_Maybe :: Ord Cipher_CardCipher_expYear_Maybe
+
+newtype Cipher_CardCipher_number_Maybe =
+    Cipher_CardCipher_number_Maybe (Maybe String)
+
+derive instance newtypeCipher_CardCipher_number_Maybe :: Newtype Cipher_CardCipher_number_Maybe _
+instance encodeJsonCipher_CardCipher_number_Maybe :: EncodeJson Cipher_CardCipher_number_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_CardCipher_number_Maybe :: DecodeJson Cipher_CardCipher_number_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_CardCipher_number_Maybe :: Generic Cipher_CardCipher_number_Maybe _
+derive instance eqCipher_CardCipher_number_Maybe :: Eq Cipher_CardCipher_number_Maybe
+derive instance ordCipher_CardCipher_number_Maybe :: Ord Cipher_CardCipher_number_Maybe
+
+newtype Cipher_CardCipher =
+    Cipher_CardCipher {
+      brand :: Cipher_CardCipher_brand_Maybe
+    , cardholderName :: Cipher_CardCipher_cardholderName_Maybe
+    , code :: Cipher_CardCipher_code_Maybe
+    , expMonth :: Cipher_CardCipher_expMonth_Maybe
+    , expYear :: Cipher_CardCipher_expYear_Maybe
+    , number :: Cipher_CardCipher_number_Maybe
+    }
+
+derive instance newtypeCipher_CardCipher :: Newtype Cipher_CardCipher _
+instance encodeJsonCipher_CardCipher :: EncodeJson Cipher_CardCipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_CardCipher :: DecodeJson Cipher_CardCipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_CardCipher :: Generic Cipher_CardCipher _
+derive instance eqCipher_CardCipher :: Eq Cipher_CardCipher
+derive instance ordCipher_CardCipher :: Ord Cipher_CardCipher
+
+newtype Cipher_IdentityCipher_address1_Maybe =
+    Cipher_IdentityCipher_address1_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_address1_Maybe :: Newtype Cipher_IdentityCipher_address1_Maybe _
+instance encodeJsonCipher_IdentityCipher_address1_Maybe :: EncodeJson Cipher_IdentityCipher_address1_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_address1_Maybe :: DecodeJson Cipher_IdentityCipher_address1_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_address1_Maybe :: Generic Cipher_IdentityCipher_address1_Maybe _
+derive instance eqCipher_IdentityCipher_address1_Maybe :: Eq Cipher_IdentityCipher_address1_Maybe
+derive instance ordCipher_IdentityCipher_address1_Maybe :: Ord Cipher_IdentityCipher_address1_Maybe
+
+newtype Cipher_IdentityCipher_address2_Maybe =
+    Cipher_IdentityCipher_address2_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_address2_Maybe :: Newtype Cipher_IdentityCipher_address2_Maybe _
+instance encodeJsonCipher_IdentityCipher_address2_Maybe :: EncodeJson Cipher_IdentityCipher_address2_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_address2_Maybe :: DecodeJson Cipher_IdentityCipher_address2_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_address2_Maybe :: Generic Cipher_IdentityCipher_address2_Maybe _
+derive instance eqCipher_IdentityCipher_address2_Maybe :: Eq Cipher_IdentityCipher_address2_Maybe
+derive instance ordCipher_IdentityCipher_address2_Maybe :: Ord Cipher_IdentityCipher_address2_Maybe
+
+newtype Cipher_IdentityCipher_address3_Maybe =
+    Cipher_IdentityCipher_address3_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_address3_Maybe :: Newtype Cipher_IdentityCipher_address3_Maybe _
+instance encodeJsonCipher_IdentityCipher_address3_Maybe :: EncodeJson Cipher_IdentityCipher_address3_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_address3_Maybe :: DecodeJson Cipher_IdentityCipher_address3_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_address3_Maybe :: Generic Cipher_IdentityCipher_address3_Maybe _
+derive instance eqCipher_IdentityCipher_address3_Maybe :: Eq Cipher_IdentityCipher_address3_Maybe
+derive instance ordCipher_IdentityCipher_address3_Maybe :: Ord Cipher_IdentityCipher_address3_Maybe
+
+newtype Cipher_IdentityCipher_city_Maybe =
+    Cipher_IdentityCipher_city_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_city_Maybe :: Newtype Cipher_IdentityCipher_city_Maybe _
+instance encodeJsonCipher_IdentityCipher_city_Maybe :: EncodeJson Cipher_IdentityCipher_city_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_city_Maybe :: DecodeJson Cipher_IdentityCipher_city_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_city_Maybe :: Generic Cipher_IdentityCipher_city_Maybe _
+derive instance eqCipher_IdentityCipher_city_Maybe :: Eq Cipher_IdentityCipher_city_Maybe
+derive instance ordCipher_IdentityCipher_city_Maybe :: Ord Cipher_IdentityCipher_city_Maybe
+
+newtype Cipher_IdentityCipher_company_Maybe =
+    Cipher_IdentityCipher_company_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_company_Maybe :: Newtype Cipher_IdentityCipher_company_Maybe _
+instance encodeJsonCipher_IdentityCipher_company_Maybe :: EncodeJson Cipher_IdentityCipher_company_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_company_Maybe :: DecodeJson Cipher_IdentityCipher_company_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_company_Maybe :: Generic Cipher_IdentityCipher_company_Maybe _
+derive instance eqCipher_IdentityCipher_company_Maybe :: Eq Cipher_IdentityCipher_company_Maybe
+derive instance ordCipher_IdentityCipher_company_Maybe :: Ord Cipher_IdentityCipher_company_Maybe
+
+newtype Cipher_IdentityCipher_country_Maybe =
+    Cipher_IdentityCipher_country_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_country_Maybe :: Newtype Cipher_IdentityCipher_country_Maybe _
+instance encodeJsonCipher_IdentityCipher_country_Maybe :: EncodeJson Cipher_IdentityCipher_country_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_country_Maybe :: DecodeJson Cipher_IdentityCipher_country_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_country_Maybe :: Generic Cipher_IdentityCipher_country_Maybe _
+derive instance eqCipher_IdentityCipher_country_Maybe :: Eq Cipher_IdentityCipher_country_Maybe
+derive instance ordCipher_IdentityCipher_country_Maybe :: Ord Cipher_IdentityCipher_country_Maybe
+
+newtype Cipher_IdentityCipher_email_Maybe =
+    Cipher_IdentityCipher_email_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_email_Maybe :: Newtype Cipher_IdentityCipher_email_Maybe _
+instance encodeJsonCipher_IdentityCipher_email_Maybe :: EncodeJson Cipher_IdentityCipher_email_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_email_Maybe :: DecodeJson Cipher_IdentityCipher_email_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_email_Maybe :: Generic Cipher_IdentityCipher_email_Maybe _
+derive instance eqCipher_IdentityCipher_email_Maybe :: Eq Cipher_IdentityCipher_email_Maybe
+derive instance ordCipher_IdentityCipher_email_Maybe :: Ord Cipher_IdentityCipher_email_Maybe
+
+newtype Cipher_IdentityCipher_firstName_Maybe =
+    Cipher_IdentityCipher_firstName_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_firstName_Maybe :: Newtype Cipher_IdentityCipher_firstName_Maybe _
+instance encodeJsonCipher_IdentityCipher_firstName_Maybe :: EncodeJson Cipher_IdentityCipher_firstName_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_firstName_Maybe :: DecodeJson Cipher_IdentityCipher_firstName_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_firstName_Maybe :: Generic Cipher_IdentityCipher_firstName_Maybe _
+derive instance eqCipher_IdentityCipher_firstName_Maybe :: Eq Cipher_IdentityCipher_firstName_Maybe
+derive instance ordCipher_IdentityCipher_firstName_Maybe :: Ord Cipher_IdentityCipher_firstName_Maybe
+
+newtype Cipher_IdentityCipher_lastName_Maybe =
+    Cipher_IdentityCipher_lastName_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_lastName_Maybe :: Newtype Cipher_IdentityCipher_lastName_Maybe _
+instance encodeJsonCipher_IdentityCipher_lastName_Maybe :: EncodeJson Cipher_IdentityCipher_lastName_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_lastName_Maybe :: DecodeJson Cipher_IdentityCipher_lastName_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_lastName_Maybe :: Generic Cipher_IdentityCipher_lastName_Maybe _
+derive instance eqCipher_IdentityCipher_lastName_Maybe :: Eq Cipher_IdentityCipher_lastName_Maybe
+derive instance ordCipher_IdentityCipher_lastName_Maybe :: Ord Cipher_IdentityCipher_lastName_Maybe
+
+newtype Cipher_IdentityCipher_licenseNumber_Maybe =
+    Cipher_IdentityCipher_licenseNumber_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_licenseNumber_Maybe :: Newtype Cipher_IdentityCipher_licenseNumber_Maybe _
+instance encodeJsonCipher_IdentityCipher_licenseNumber_Maybe :: EncodeJson Cipher_IdentityCipher_licenseNumber_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_licenseNumber_Maybe :: DecodeJson Cipher_IdentityCipher_licenseNumber_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_licenseNumber_Maybe :: Generic Cipher_IdentityCipher_licenseNumber_Maybe _
+derive instance eqCipher_IdentityCipher_licenseNumber_Maybe :: Eq Cipher_IdentityCipher_licenseNumber_Maybe
+derive instance ordCipher_IdentityCipher_licenseNumber_Maybe :: Ord Cipher_IdentityCipher_licenseNumber_Maybe
+
+newtype Cipher_IdentityCipher_middleName_Maybe =
+    Cipher_IdentityCipher_middleName_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_middleName_Maybe :: Newtype Cipher_IdentityCipher_middleName_Maybe _
+instance encodeJsonCipher_IdentityCipher_middleName_Maybe :: EncodeJson Cipher_IdentityCipher_middleName_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_middleName_Maybe :: DecodeJson Cipher_IdentityCipher_middleName_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_middleName_Maybe :: Generic Cipher_IdentityCipher_middleName_Maybe _
+derive instance eqCipher_IdentityCipher_middleName_Maybe :: Eq Cipher_IdentityCipher_middleName_Maybe
+derive instance ordCipher_IdentityCipher_middleName_Maybe :: Ord Cipher_IdentityCipher_middleName_Maybe
+
+newtype Cipher_IdentityCipher_passportNumber_Maybe =
+    Cipher_IdentityCipher_passportNumber_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_passportNumber_Maybe :: Newtype Cipher_IdentityCipher_passportNumber_Maybe _
+instance encodeJsonCipher_IdentityCipher_passportNumber_Maybe :: EncodeJson Cipher_IdentityCipher_passportNumber_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_passportNumber_Maybe :: DecodeJson Cipher_IdentityCipher_passportNumber_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_passportNumber_Maybe :: Generic Cipher_IdentityCipher_passportNumber_Maybe _
+derive instance eqCipher_IdentityCipher_passportNumber_Maybe :: Eq Cipher_IdentityCipher_passportNumber_Maybe
+derive instance ordCipher_IdentityCipher_passportNumber_Maybe :: Ord Cipher_IdentityCipher_passportNumber_Maybe
+
+newtype Cipher_IdentityCipher_phone_Maybe =
+    Cipher_IdentityCipher_phone_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_phone_Maybe :: Newtype Cipher_IdentityCipher_phone_Maybe _
+instance encodeJsonCipher_IdentityCipher_phone_Maybe :: EncodeJson Cipher_IdentityCipher_phone_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_phone_Maybe :: DecodeJson Cipher_IdentityCipher_phone_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_phone_Maybe :: Generic Cipher_IdentityCipher_phone_Maybe _
+derive instance eqCipher_IdentityCipher_phone_Maybe :: Eq Cipher_IdentityCipher_phone_Maybe
+derive instance ordCipher_IdentityCipher_phone_Maybe :: Ord Cipher_IdentityCipher_phone_Maybe
+
+newtype Cipher_IdentityCipher_postalCode_Maybe =
+    Cipher_IdentityCipher_postalCode_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_postalCode_Maybe :: Newtype Cipher_IdentityCipher_postalCode_Maybe _
+instance encodeJsonCipher_IdentityCipher_postalCode_Maybe :: EncodeJson Cipher_IdentityCipher_postalCode_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_postalCode_Maybe :: DecodeJson Cipher_IdentityCipher_postalCode_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_postalCode_Maybe :: Generic Cipher_IdentityCipher_postalCode_Maybe _
+derive instance eqCipher_IdentityCipher_postalCode_Maybe :: Eq Cipher_IdentityCipher_postalCode_Maybe
+derive instance ordCipher_IdentityCipher_postalCode_Maybe :: Ord Cipher_IdentityCipher_postalCode_Maybe
+
+newtype Cipher_IdentityCipher_ssn_Maybe =
+    Cipher_IdentityCipher_ssn_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_ssn_Maybe :: Newtype Cipher_IdentityCipher_ssn_Maybe _
+instance encodeJsonCipher_IdentityCipher_ssn_Maybe :: EncodeJson Cipher_IdentityCipher_ssn_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_ssn_Maybe :: DecodeJson Cipher_IdentityCipher_ssn_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_ssn_Maybe :: Generic Cipher_IdentityCipher_ssn_Maybe _
+derive instance eqCipher_IdentityCipher_ssn_Maybe :: Eq Cipher_IdentityCipher_ssn_Maybe
+derive instance ordCipher_IdentityCipher_ssn_Maybe :: Ord Cipher_IdentityCipher_ssn_Maybe
+
+newtype Cipher_IdentityCipher_state_Maybe =
+    Cipher_IdentityCipher_state_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_state_Maybe :: Newtype Cipher_IdentityCipher_state_Maybe _
+instance encodeJsonCipher_IdentityCipher_state_Maybe :: EncodeJson Cipher_IdentityCipher_state_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_state_Maybe :: DecodeJson Cipher_IdentityCipher_state_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_state_Maybe :: Generic Cipher_IdentityCipher_state_Maybe _
+derive instance eqCipher_IdentityCipher_state_Maybe :: Eq Cipher_IdentityCipher_state_Maybe
+derive instance ordCipher_IdentityCipher_state_Maybe :: Ord Cipher_IdentityCipher_state_Maybe
+
+newtype Cipher_IdentityCipher_title_Maybe =
+    Cipher_IdentityCipher_title_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_title_Maybe :: Newtype Cipher_IdentityCipher_title_Maybe _
+instance encodeJsonCipher_IdentityCipher_title_Maybe :: EncodeJson Cipher_IdentityCipher_title_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_title_Maybe :: DecodeJson Cipher_IdentityCipher_title_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_title_Maybe :: Generic Cipher_IdentityCipher_title_Maybe _
+derive instance eqCipher_IdentityCipher_title_Maybe :: Eq Cipher_IdentityCipher_title_Maybe
+derive instance ordCipher_IdentityCipher_title_Maybe :: Ord Cipher_IdentityCipher_title_Maybe
+
+newtype Cipher_IdentityCipher_username_Maybe =
+    Cipher_IdentityCipher_username_Maybe (Maybe String)
+
+derive instance newtypeCipher_IdentityCipher_username_Maybe :: Newtype Cipher_IdentityCipher_username_Maybe _
+instance encodeJsonCipher_IdentityCipher_username_Maybe :: EncodeJson Cipher_IdentityCipher_username_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher_username_Maybe :: DecodeJson Cipher_IdentityCipher_username_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher_username_Maybe :: Generic Cipher_IdentityCipher_username_Maybe _
+derive instance eqCipher_IdentityCipher_username_Maybe :: Eq Cipher_IdentityCipher_username_Maybe
+derive instance ordCipher_IdentityCipher_username_Maybe :: Ord Cipher_IdentityCipher_username_Maybe
+
+newtype Cipher_IdentityCipher =
+    Cipher_IdentityCipher {
+      address1 :: Cipher_IdentityCipher_address1_Maybe
+    , address2 :: Cipher_IdentityCipher_address2_Maybe
+    , address3 :: Cipher_IdentityCipher_address3_Maybe
+    , city :: Cipher_IdentityCipher_city_Maybe
+    , company :: Cipher_IdentityCipher_company_Maybe
+    , country :: Cipher_IdentityCipher_country_Maybe
+    , email :: Cipher_IdentityCipher_email_Maybe
+    , firstName :: Cipher_IdentityCipher_firstName_Maybe
+    , lastName :: Cipher_IdentityCipher_lastName_Maybe
+    , licenseNumber :: Cipher_IdentityCipher_licenseNumber_Maybe
+    , middleName :: Cipher_IdentityCipher_middleName_Maybe
+    , passportNumber :: Cipher_IdentityCipher_passportNumber_Maybe
+    , phone :: Cipher_IdentityCipher_phone_Maybe
+    , postalCode :: Cipher_IdentityCipher_postalCode_Maybe
+    , ssn :: Cipher_IdentityCipher_ssn_Maybe
+    , state :: Cipher_IdentityCipher_state_Maybe
+    , title :: Cipher_IdentityCipher_title_Maybe
+    , username :: Cipher_IdentityCipher_username_Maybe
+    }
+
+derive instance newtypeCipher_IdentityCipher :: Newtype Cipher_IdentityCipher _
+instance encodeJsonCipher_IdentityCipher :: EncodeJson Cipher_IdentityCipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_IdentityCipher :: DecodeJson Cipher_IdentityCipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_IdentityCipher :: Generic Cipher_IdentityCipher _
+derive instance eqCipher_IdentityCipher :: Eq Cipher_IdentityCipher
+derive instance ordCipher_IdentityCipher :: Ord Cipher_IdentityCipher
+
+newtype Cipher_LoginCipher_password_Maybe =
+    Cipher_LoginCipher_password_Maybe (Maybe String)
+
+derive instance newtypeCipher_LoginCipher_password_Maybe :: Newtype Cipher_LoginCipher_password_Maybe _
+instance encodeJsonCipher_LoginCipher_password_Maybe :: EncodeJson Cipher_LoginCipher_password_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_LoginCipher_password_Maybe :: DecodeJson Cipher_LoginCipher_password_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_LoginCipher_password_Maybe :: Generic Cipher_LoginCipher_password_Maybe _
+derive instance eqCipher_LoginCipher_password_Maybe :: Eq Cipher_LoginCipher_password_Maybe
+derive instance ordCipher_LoginCipher_password_Maybe :: Ord Cipher_LoginCipher_password_Maybe
+
+newtype Cipher_LoginCipher_uris_List =
+    Cipher_LoginCipher_uris_List (Array String)
+
+derive instance newtypeCipher_LoginCipher_uris_List :: Newtype Cipher_LoginCipher_uris_List _
+instance encodeJsonCipher_LoginCipher_uris_List :: EncodeJson Cipher_LoginCipher_uris_List where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_LoginCipher_uris_List :: DecodeJson Cipher_LoginCipher_uris_List where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_LoginCipher_uris_List :: Generic Cipher_LoginCipher_uris_List _
+derive instance eqCipher_LoginCipher_uris_List :: Eq Cipher_LoginCipher_uris_List
+derive instance ordCipher_LoginCipher_uris_List :: Ord Cipher_LoginCipher_uris_List
+
+newtype Cipher_LoginCipher_username_Maybe =
+    Cipher_LoginCipher_username_Maybe (Maybe String)
+
+derive instance newtypeCipher_LoginCipher_username_Maybe :: Newtype Cipher_LoginCipher_username_Maybe _
+instance encodeJsonCipher_LoginCipher_username_Maybe :: EncodeJson Cipher_LoginCipher_username_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_LoginCipher_username_Maybe :: DecodeJson Cipher_LoginCipher_username_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_LoginCipher_username_Maybe :: Generic Cipher_LoginCipher_username_Maybe _
+derive instance eqCipher_LoginCipher_username_Maybe :: Eq Cipher_LoginCipher_username_Maybe
+derive instance ordCipher_LoginCipher_username_Maybe :: Ord Cipher_LoginCipher_username_Maybe
+
+newtype Cipher_LoginCipher =
+    Cipher_LoginCipher {
+      password :: Cipher_LoginCipher_password_Maybe
+    , uris :: Cipher_LoginCipher_uris_List
+    , username :: Cipher_LoginCipher_username_Maybe
+    }
+
+derive instance newtypeCipher_LoginCipher :: Newtype Cipher_LoginCipher _
+instance encodeJsonCipher_LoginCipher :: EncodeJson Cipher_LoginCipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_LoginCipher :: DecodeJson Cipher_LoginCipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_LoginCipher :: Generic Cipher_LoginCipher _
+derive instance eqCipher_LoginCipher :: Eq Cipher_LoginCipher
+derive instance ordCipher_LoginCipher :: Ord Cipher_LoginCipher
+
+data Cipher =
+    CardCipher Cipher_CardCipher
+  | IdentityCipher Cipher_IdentityCipher
+  | LoginCipher Cipher_LoginCipher
+  | NoteCipher String
+
+instance encodeJsonCipher :: EncodeJson Cipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher :: DecodeJson Cipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher :: Generic Cipher _
+derive instance eqCipher :: Eq Cipher
+derive instance ordCipher :: Ord Cipher
+
+data CipherType =
+    CardType
+  | IdentityType
+  | LoginType
+  | NoteType
+
+instance encodeJsonCipherType :: EncodeJson CipherType where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipherType :: DecodeJson CipherType where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipherType :: Generic CipherType _
+derive instance eqCipherType :: Eq CipherType
+derive instance ordCipherType :: Ord CipherType
+
 newtype Cmd_Login =
     Cmd_Login {
       email :: String
@@ -47,413 +465,9 @@ derive instance genericCmd :: Generic Cmd _
 derive instance eqCmd :: Eq Cmd
 derive instance ordCmd :: Ord Cmd
 
-newtype Sub_LoadCipher_cipherType_CardCipher_brand_Maybe =
-    Sub_LoadCipher_cipherType_CardCipher_brand_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_CardCipher_brand_Maybe :: Newtype Sub_LoadCipher_cipherType_CardCipher_brand_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_CardCipher_brand_Maybe :: EncodeJson Sub_LoadCipher_cipherType_CardCipher_brand_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_CardCipher_brand_Maybe :: DecodeJson Sub_LoadCipher_cipherType_CardCipher_brand_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_CardCipher_brand_Maybe :: Generic Sub_LoadCipher_cipherType_CardCipher_brand_Maybe _
-derive instance eqSub_LoadCipher_cipherType_CardCipher_brand_Maybe :: Eq Sub_LoadCipher_cipherType_CardCipher_brand_Maybe
-derive instance ordSub_LoadCipher_cipherType_CardCipher_brand_Maybe :: Ord Sub_LoadCipher_cipherType_CardCipher_brand_Maybe
-
-newtype Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe =
-    Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe :: Newtype Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe :: EncodeJson Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe :: DecodeJson Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe :: Generic Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe _
-derive instance eqSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe :: Eq Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe
-derive instance ordSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe :: Ord Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe
-
-newtype Sub_LoadCipher_cipherType_CardCipher_code_Maybe =
-    Sub_LoadCipher_cipherType_CardCipher_code_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_CardCipher_code_Maybe :: Newtype Sub_LoadCipher_cipherType_CardCipher_code_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_CardCipher_code_Maybe :: EncodeJson Sub_LoadCipher_cipherType_CardCipher_code_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_CardCipher_code_Maybe :: DecodeJson Sub_LoadCipher_cipherType_CardCipher_code_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_CardCipher_code_Maybe :: Generic Sub_LoadCipher_cipherType_CardCipher_code_Maybe _
-derive instance eqSub_LoadCipher_cipherType_CardCipher_code_Maybe :: Eq Sub_LoadCipher_cipherType_CardCipher_code_Maybe
-derive instance ordSub_LoadCipher_cipherType_CardCipher_code_Maybe :: Ord Sub_LoadCipher_cipherType_CardCipher_code_Maybe
-
-newtype Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe =
-    Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe :: Newtype Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe :: EncodeJson Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe :: DecodeJson Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe :: Generic Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe _
-derive instance eqSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe :: Eq Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe
-derive instance ordSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe :: Ord Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe
-
-newtype Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe =
-    Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_CardCipher_expYear_Maybe :: Newtype Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_CardCipher_expYear_Maybe :: EncodeJson Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_CardCipher_expYear_Maybe :: DecodeJson Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_CardCipher_expYear_Maybe :: Generic Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe _
-derive instance eqSub_LoadCipher_cipherType_CardCipher_expYear_Maybe :: Eq Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe
-derive instance ordSub_LoadCipher_cipherType_CardCipher_expYear_Maybe :: Ord Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe
-
-newtype Sub_LoadCipher_cipherType_CardCipher_number_Maybe =
-    Sub_LoadCipher_cipherType_CardCipher_number_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_CardCipher_number_Maybe :: Newtype Sub_LoadCipher_cipherType_CardCipher_number_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_CardCipher_number_Maybe :: EncodeJson Sub_LoadCipher_cipherType_CardCipher_number_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_CardCipher_number_Maybe :: DecodeJson Sub_LoadCipher_cipherType_CardCipher_number_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_CardCipher_number_Maybe :: Generic Sub_LoadCipher_cipherType_CardCipher_number_Maybe _
-derive instance eqSub_LoadCipher_cipherType_CardCipher_number_Maybe :: Eq Sub_LoadCipher_cipherType_CardCipher_number_Maybe
-derive instance ordSub_LoadCipher_cipherType_CardCipher_number_Maybe :: Ord Sub_LoadCipher_cipherType_CardCipher_number_Maybe
-
-newtype Sub_LoadCipher_cipherType_CardCipher =
-    Sub_LoadCipher_cipherType_CardCipher {
-      brand :: Sub_LoadCipher_cipherType_CardCipher_brand_Maybe
-    , cardholderName :: Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe
-    , code :: Sub_LoadCipher_cipherType_CardCipher_code_Maybe
-    , expMonth :: Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe
-    , expYear :: Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe
-    , number :: Sub_LoadCipher_cipherType_CardCipher_number_Maybe
-    }
-
-derive instance newtypeSub_LoadCipher_cipherType_CardCipher :: Newtype Sub_LoadCipher_cipherType_CardCipher _
-instance encodeJsonSub_LoadCipher_cipherType_CardCipher :: EncodeJson Sub_LoadCipher_cipherType_CardCipher where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_CardCipher :: DecodeJson Sub_LoadCipher_cipherType_CardCipher where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_CardCipher :: Generic Sub_LoadCipher_cipherType_CardCipher _
-derive instance eqSub_LoadCipher_cipherType_CardCipher :: Eq Sub_LoadCipher_cipherType_CardCipher
-derive instance ordSub_LoadCipher_cipherType_CardCipher :: Ord Sub_LoadCipher_cipherType_CardCipher
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_city_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_city_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_city_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_city_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_city_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_city_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_company_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_company_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_company_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_company_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_company_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_company_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_country_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_country_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_country_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_country_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_country_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_country_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_email_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_email_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_email_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_email_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_email_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_email_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_state_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_state_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_state_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_state_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_state_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_state_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_title_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_title_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_title_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_title_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_title_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_title_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe =
-    Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher_username_Maybe :: Newtype Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher_username_Maybe :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher_username_Maybe :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher_username_Maybe :: Generic Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher_username_Maybe :: Eq Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher_username_Maybe :: Ord Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe
-
-newtype Sub_LoadCipher_cipherType_IdentityCipher =
-    Sub_LoadCipher_cipherType_IdentityCipher {
-      address1 :: Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe
-    , address2 :: Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe
-    , address3 :: Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe
-    , city :: Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe
-    , company :: Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe
-    , country :: Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe
-    , email :: Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe
-    , firstName :: Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe
-    , lastName :: Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe
-    , licenseNumber :: Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe
-    , middleName :: Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe
-    , passportNumber :: Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe
-    , phone :: Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe
-    , postalCode :: Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe
-    , ssn :: Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe
-    , state :: Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe
-    , title :: Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe
-    , username :: Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe
-    }
-
-derive instance newtypeSub_LoadCipher_cipherType_IdentityCipher :: Newtype Sub_LoadCipher_cipherType_IdentityCipher _
-instance encodeJsonSub_LoadCipher_cipherType_IdentityCipher :: EncodeJson Sub_LoadCipher_cipherType_IdentityCipher where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_IdentityCipher :: DecodeJson Sub_LoadCipher_cipherType_IdentityCipher where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_IdentityCipher :: Generic Sub_LoadCipher_cipherType_IdentityCipher _
-derive instance eqSub_LoadCipher_cipherType_IdentityCipher :: Eq Sub_LoadCipher_cipherType_IdentityCipher
-derive instance ordSub_LoadCipher_cipherType_IdentityCipher :: Ord Sub_LoadCipher_cipherType_IdentityCipher
-
-newtype Sub_LoadCipher_cipherType_LoginCipher_password_Maybe =
-    Sub_LoadCipher_cipherType_LoginCipher_password_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_LoginCipher_password_Maybe :: Newtype Sub_LoadCipher_cipherType_LoginCipher_password_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_LoginCipher_password_Maybe :: EncodeJson Sub_LoadCipher_cipherType_LoginCipher_password_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_LoginCipher_password_Maybe :: DecodeJson Sub_LoadCipher_cipherType_LoginCipher_password_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_LoginCipher_password_Maybe :: Generic Sub_LoadCipher_cipherType_LoginCipher_password_Maybe _
-derive instance eqSub_LoadCipher_cipherType_LoginCipher_password_Maybe :: Eq Sub_LoadCipher_cipherType_LoginCipher_password_Maybe
-derive instance ordSub_LoadCipher_cipherType_LoginCipher_password_Maybe :: Ord Sub_LoadCipher_cipherType_LoginCipher_password_Maybe
-
-newtype Sub_LoadCipher_cipherType_LoginCipher_uris_List =
-    Sub_LoadCipher_cipherType_LoginCipher_uris_List (Array String)
-
-derive instance newtypeSub_LoadCipher_cipherType_LoginCipher_uris_List :: Newtype Sub_LoadCipher_cipherType_LoginCipher_uris_List _
-instance encodeJsonSub_LoadCipher_cipherType_LoginCipher_uris_List :: EncodeJson Sub_LoadCipher_cipherType_LoginCipher_uris_List where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_LoginCipher_uris_List :: DecodeJson Sub_LoadCipher_cipherType_LoginCipher_uris_List where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_LoginCipher_uris_List :: Generic Sub_LoadCipher_cipherType_LoginCipher_uris_List _
-derive instance eqSub_LoadCipher_cipherType_LoginCipher_uris_List :: Eq Sub_LoadCipher_cipherType_LoginCipher_uris_List
-derive instance ordSub_LoadCipher_cipherType_LoginCipher_uris_List :: Ord Sub_LoadCipher_cipherType_LoginCipher_uris_List
-
-newtype Sub_LoadCipher_cipherType_LoginCipher_username_Maybe =
-    Sub_LoadCipher_cipherType_LoginCipher_username_Maybe (Maybe String)
-
-derive instance newtypeSub_LoadCipher_cipherType_LoginCipher_username_Maybe :: Newtype Sub_LoadCipher_cipherType_LoginCipher_username_Maybe _
-instance encodeJsonSub_LoadCipher_cipherType_LoginCipher_username_Maybe :: EncodeJson Sub_LoadCipher_cipherType_LoginCipher_username_Maybe where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_LoginCipher_username_Maybe :: DecodeJson Sub_LoadCipher_cipherType_LoginCipher_username_Maybe where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_LoginCipher_username_Maybe :: Generic Sub_LoadCipher_cipherType_LoginCipher_username_Maybe _
-derive instance eqSub_LoadCipher_cipherType_LoginCipher_username_Maybe :: Eq Sub_LoadCipher_cipherType_LoginCipher_username_Maybe
-derive instance ordSub_LoadCipher_cipherType_LoginCipher_username_Maybe :: Ord Sub_LoadCipher_cipherType_LoginCipher_username_Maybe
-
-newtype Sub_LoadCipher_cipherType_LoginCipher =
-    Sub_LoadCipher_cipherType_LoginCipher {
-      password :: Sub_LoadCipher_cipherType_LoginCipher_password_Maybe
-    , uris :: Sub_LoadCipher_cipherType_LoginCipher_uris_List
-    , username :: Sub_LoadCipher_cipherType_LoginCipher_username_Maybe
-    }
-
-derive instance newtypeSub_LoadCipher_cipherType_LoginCipher :: Newtype Sub_LoadCipher_cipherType_LoginCipher _
-instance encodeJsonSub_LoadCipher_cipherType_LoginCipher :: EncodeJson Sub_LoadCipher_cipherType_LoginCipher where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType_LoginCipher :: DecodeJson Sub_LoadCipher_cipherType_LoginCipher where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType_LoginCipher :: Generic Sub_LoadCipher_cipherType_LoginCipher _
-derive instance eqSub_LoadCipher_cipherType_LoginCipher :: Eq Sub_LoadCipher_cipherType_LoginCipher
-derive instance ordSub_LoadCipher_cipherType_LoginCipher :: Ord Sub_LoadCipher_cipherType_LoginCipher
-
-data Sub_LoadCipher_cipherType =
-    CardCipher Sub_LoadCipher_cipherType_CardCipher
-  | IdentityCipher Sub_LoadCipher_cipherType_IdentityCipher
-  | LoginCipher Sub_LoadCipher_cipherType_LoginCipher
-  | NoteCipher String
-
-instance encodeJsonSub_LoadCipher_cipherType :: EncodeJson Sub_LoadCipher_cipherType where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher_cipherType :: DecodeJson Sub_LoadCipher_cipherType where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher_cipherType :: Generic Sub_LoadCipher_cipherType _
-derive instance eqSub_LoadCipher_cipherType :: Eq Sub_LoadCipher_cipherType
-derive instance ordSub_LoadCipher_cipherType :: Ord Sub_LoadCipher_cipherType
-
 newtype Sub_LoadCipher =
     Sub_LoadCipher {
-      cipherType :: Sub_LoadCipher_cipherType
+      cipherType :: Cipher
     , id :: String
     , name :: String
     }
@@ -467,23 +481,9 @@ derive instance genericSub_LoadCipher :: Generic Sub_LoadCipher _
 derive instance eqSub_LoadCipher :: Eq Sub_LoadCipher
 derive instance ordSub_LoadCipher :: Ord Sub_LoadCipher
 
-data Sub_LoadCiphers_cipherType =
-    CardType
-  | IdentityType
-  | LoginType
-  | NoteType
-
-instance encodeJsonSub_LoadCiphers_cipherType :: EncodeJson Sub_LoadCiphers_cipherType where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCiphers_cipherType :: DecodeJson Sub_LoadCiphers_cipherType where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCiphers_cipherType :: Generic Sub_LoadCiphers_cipherType _
-derive instance eqSub_LoadCiphers_cipherType :: Eq Sub_LoadCiphers_cipherType
-derive instance ordSub_LoadCiphers_cipherType :: Ord Sub_LoadCiphers_cipherType
-
 newtype Sub_LoadCiphers =
     Sub_LoadCiphers {
-      cipherType :: Sub_LoadCiphers_cipherType
+      cipherType :: CipherType
     , date :: String
     , id :: String
     , name :: String

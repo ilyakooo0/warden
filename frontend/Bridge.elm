@@ -8,6 +8,475 @@ import Dict exposing (Dict)
 import Set exposing (Set)
 
 
+type alias Cipher_CardCipher_brand_Maybe  = (Maybe String)
+
+jsonDecCipher_CardCipher_brand_Maybe : Json.Decode.Decoder ( Cipher_CardCipher_brand_Maybe )
+jsonDecCipher_CardCipher_brand_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_CardCipher_brand_Maybe : Cipher_CardCipher_brand_Maybe -> Value
+jsonEncCipher_CardCipher_brand_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_CardCipher_cardholderName_Maybe  = (Maybe String)
+
+jsonDecCipher_CardCipher_cardholderName_Maybe : Json.Decode.Decoder ( Cipher_CardCipher_cardholderName_Maybe )
+jsonDecCipher_CardCipher_cardholderName_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_CardCipher_cardholderName_Maybe : Cipher_CardCipher_cardholderName_Maybe -> Value
+jsonEncCipher_CardCipher_cardholderName_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_CardCipher_code_Maybe  = (Maybe String)
+
+jsonDecCipher_CardCipher_code_Maybe : Json.Decode.Decoder ( Cipher_CardCipher_code_Maybe )
+jsonDecCipher_CardCipher_code_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_CardCipher_code_Maybe : Cipher_CardCipher_code_Maybe -> Value
+jsonEncCipher_CardCipher_code_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_CardCipher_expMonth_Maybe  = (Maybe String)
+
+jsonDecCipher_CardCipher_expMonth_Maybe : Json.Decode.Decoder ( Cipher_CardCipher_expMonth_Maybe )
+jsonDecCipher_CardCipher_expMonth_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_CardCipher_expMonth_Maybe : Cipher_CardCipher_expMonth_Maybe -> Value
+jsonEncCipher_CardCipher_expMonth_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_CardCipher_expYear_Maybe  = (Maybe String)
+
+jsonDecCipher_CardCipher_expYear_Maybe : Json.Decode.Decoder ( Cipher_CardCipher_expYear_Maybe )
+jsonDecCipher_CardCipher_expYear_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_CardCipher_expYear_Maybe : Cipher_CardCipher_expYear_Maybe -> Value
+jsonEncCipher_CardCipher_expYear_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_CardCipher_number_Maybe  = (Maybe String)
+
+jsonDecCipher_CardCipher_number_Maybe : Json.Decode.Decoder ( Cipher_CardCipher_number_Maybe )
+jsonDecCipher_CardCipher_number_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_CardCipher_number_Maybe : Cipher_CardCipher_number_Maybe -> Value
+jsonEncCipher_CardCipher_number_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_CardCipher  =
+   { brand: Cipher_CardCipher_brand_Maybe
+   , cardholderName: Cipher_CardCipher_cardholderName_Maybe
+   , code: Cipher_CardCipher_code_Maybe
+   , expMonth: Cipher_CardCipher_expMonth_Maybe
+   , expYear: Cipher_CardCipher_expYear_Maybe
+   , number: Cipher_CardCipher_number_Maybe
+   }
+
+jsonDecCipher_CardCipher : Json.Decode.Decoder ( Cipher_CardCipher )
+jsonDecCipher_CardCipher =
+   Json.Decode.succeed (\pbrand pcardholderName pcode pexpMonth pexpYear pnumber -> {brand = pbrand, cardholderName = pcardholderName, code = pcode, expMonth = pexpMonth, expYear = pexpYear, number = pnumber})
+   |> required "brand" (jsonDecCipher_CardCipher_brand_Maybe)
+   |> required "cardholderName" (jsonDecCipher_CardCipher_cardholderName_Maybe)
+   |> required "code" (jsonDecCipher_CardCipher_code_Maybe)
+   |> required "expMonth" (jsonDecCipher_CardCipher_expMonth_Maybe)
+   |> required "expYear" (jsonDecCipher_CardCipher_expYear_Maybe)
+   |> required "number" (jsonDecCipher_CardCipher_number_Maybe)
+
+jsonEncCipher_CardCipher : Cipher_CardCipher -> Value
+jsonEncCipher_CardCipher  val =
+   Json.Encode.object
+   [ ("brand", jsonEncCipher_CardCipher_brand_Maybe val.brand)
+   , ("cardholderName", jsonEncCipher_CardCipher_cardholderName_Maybe val.cardholderName)
+   , ("code", jsonEncCipher_CardCipher_code_Maybe val.code)
+   , ("expMonth", jsonEncCipher_CardCipher_expMonth_Maybe val.expMonth)
+   , ("expYear", jsonEncCipher_CardCipher_expYear_Maybe val.expYear)
+   , ("number", jsonEncCipher_CardCipher_number_Maybe val.number)
+   ]
+
+
+
+type alias Cipher_IdentityCipher_address1_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_address1_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_address1_Maybe )
+jsonDecCipher_IdentityCipher_address1_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_address1_Maybe : Cipher_IdentityCipher_address1_Maybe -> Value
+jsonEncCipher_IdentityCipher_address1_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_address2_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_address2_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_address2_Maybe )
+jsonDecCipher_IdentityCipher_address2_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_address2_Maybe : Cipher_IdentityCipher_address2_Maybe -> Value
+jsonEncCipher_IdentityCipher_address2_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_address3_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_address3_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_address3_Maybe )
+jsonDecCipher_IdentityCipher_address3_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_address3_Maybe : Cipher_IdentityCipher_address3_Maybe -> Value
+jsonEncCipher_IdentityCipher_address3_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_city_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_city_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_city_Maybe )
+jsonDecCipher_IdentityCipher_city_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_city_Maybe : Cipher_IdentityCipher_city_Maybe -> Value
+jsonEncCipher_IdentityCipher_city_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_company_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_company_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_company_Maybe )
+jsonDecCipher_IdentityCipher_company_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_company_Maybe : Cipher_IdentityCipher_company_Maybe -> Value
+jsonEncCipher_IdentityCipher_company_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_country_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_country_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_country_Maybe )
+jsonDecCipher_IdentityCipher_country_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_country_Maybe : Cipher_IdentityCipher_country_Maybe -> Value
+jsonEncCipher_IdentityCipher_country_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_email_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_email_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_email_Maybe )
+jsonDecCipher_IdentityCipher_email_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_email_Maybe : Cipher_IdentityCipher_email_Maybe -> Value
+jsonEncCipher_IdentityCipher_email_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_firstName_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_firstName_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_firstName_Maybe )
+jsonDecCipher_IdentityCipher_firstName_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_firstName_Maybe : Cipher_IdentityCipher_firstName_Maybe -> Value
+jsonEncCipher_IdentityCipher_firstName_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_lastName_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_lastName_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_lastName_Maybe )
+jsonDecCipher_IdentityCipher_lastName_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_lastName_Maybe : Cipher_IdentityCipher_lastName_Maybe -> Value
+jsonEncCipher_IdentityCipher_lastName_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_licenseNumber_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_licenseNumber_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_licenseNumber_Maybe )
+jsonDecCipher_IdentityCipher_licenseNumber_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_licenseNumber_Maybe : Cipher_IdentityCipher_licenseNumber_Maybe -> Value
+jsonEncCipher_IdentityCipher_licenseNumber_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_middleName_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_middleName_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_middleName_Maybe )
+jsonDecCipher_IdentityCipher_middleName_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_middleName_Maybe : Cipher_IdentityCipher_middleName_Maybe -> Value
+jsonEncCipher_IdentityCipher_middleName_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_passportNumber_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_passportNumber_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_passportNumber_Maybe )
+jsonDecCipher_IdentityCipher_passportNumber_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_passportNumber_Maybe : Cipher_IdentityCipher_passportNumber_Maybe -> Value
+jsonEncCipher_IdentityCipher_passportNumber_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_phone_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_phone_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_phone_Maybe )
+jsonDecCipher_IdentityCipher_phone_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_phone_Maybe : Cipher_IdentityCipher_phone_Maybe -> Value
+jsonEncCipher_IdentityCipher_phone_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_postalCode_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_postalCode_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_postalCode_Maybe )
+jsonDecCipher_IdentityCipher_postalCode_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_postalCode_Maybe : Cipher_IdentityCipher_postalCode_Maybe -> Value
+jsonEncCipher_IdentityCipher_postalCode_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_ssn_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_ssn_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_ssn_Maybe )
+jsonDecCipher_IdentityCipher_ssn_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_ssn_Maybe : Cipher_IdentityCipher_ssn_Maybe -> Value
+jsonEncCipher_IdentityCipher_ssn_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_state_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_state_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_state_Maybe )
+jsonDecCipher_IdentityCipher_state_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_state_Maybe : Cipher_IdentityCipher_state_Maybe -> Value
+jsonEncCipher_IdentityCipher_state_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_title_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_title_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_title_Maybe )
+jsonDecCipher_IdentityCipher_title_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_title_Maybe : Cipher_IdentityCipher_title_Maybe -> Value
+jsonEncCipher_IdentityCipher_title_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher_username_Maybe  = (Maybe String)
+
+jsonDecCipher_IdentityCipher_username_Maybe : Json.Decode.Decoder ( Cipher_IdentityCipher_username_Maybe )
+jsonDecCipher_IdentityCipher_username_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_IdentityCipher_username_Maybe : Cipher_IdentityCipher_username_Maybe -> Value
+jsonEncCipher_IdentityCipher_username_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_IdentityCipher  =
+   { address1: Cipher_IdentityCipher_address1_Maybe
+   , address2: Cipher_IdentityCipher_address2_Maybe
+   , address3: Cipher_IdentityCipher_address3_Maybe
+   , city: Cipher_IdentityCipher_city_Maybe
+   , company: Cipher_IdentityCipher_company_Maybe
+   , country: Cipher_IdentityCipher_country_Maybe
+   , email: Cipher_IdentityCipher_email_Maybe
+   , firstName: Cipher_IdentityCipher_firstName_Maybe
+   , lastName: Cipher_IdentityCipher_lastName_Maybe
+   , licenseNumber: Cipher_IdentityCipher_licenseNumber_Maybe
+   , middleName: Cipher_IdentityCipher_middleName_Maybe
+   , passportNumber: Cipher_IdentityCipher_passportNumber_Maybe
+   , phone: Cipher_IdentityCipher_phone_Maybe
+   , postalCode: Cipher_IdentityCipher_postalCode_Maybe
+   , ssn: Cipher_IdentityCipher_ssn_Maybe
+   , state: Cipher_IdentityCipher_state_Maybe
+   , title: Cipher_IdentityCipher_title_Maybe
+   , username: Cipher_IdentityCipher_username_Maybe
+   }
+
+jsonDecCipher_IdentityCipher : Json.Decode.Decoder ( Cipher_IdentityCipher )
+jsonDecCipher_IdentityCipher =
+   Json.Decode.succeed (\paddress1 paddress2 paddress3 pcity pcompany pcountry pemail pfirstName plastName plicenseNumber pmiddleName ppassportNumber pphone ppostalCode pssn pstate ptitle pusername -> {address1 = paddress1, address2 = paddress2, address3 = paddress3, city = pcity, company = pcompany, country = pcountry, email = pemail, firstName = pfirstName, lastName = plastName, licenseNumber = plicenseNumber, middleName = pmiddleName, passportNumber = ppassportNumber, phone = pphone, postalCode = ppostalCode, ssn = pssn, state = pstate, title = ptitle, username = pusername})
+   |> required "address1" (jsonDecCipher_IdentityCipher_address1_Maybe)
+   |> required "address2" (jsonDecCipher_IdentityCipher_address2_Maybe)
+   |> required "address3" (jsonDecCipher_IdentityCipher_address3_Maybe)
+   |> required "city" (jsonDecCipher_IdentityCipher_city_Maybe)
+   |> required "company" (jsonDecCipher_IdentityCipher_company_Maybe)
+   |> required "country" (jsonDecCipher_IdentityCipher_country_Maybe)
+   |> required "email" (jsonDecCipher_IdentityCipher_email_Maybe)
+   |> required "firstName" (jsonDecCipher_IdentityCipher_firstName_Maybe)
+   |> required "lastName" (jsonDecCipher_IdentityCipher_lastName_Maybe)
+   |> required "licenseNumber" (jsonDecCipher_IdentityCipher_licenseNumber_Maybe)
+   |> required "middleName" (jsonDecCipher_IdentityCipher_middleName_Maybe)
+   |> required "passportNumber" (jsonDecCipher_IdentityCipher_passportNumber_Maybe)
+   |> required "phone" (jsonDecCipher_IdentityCipher_phone_Maybe)
+   |> required "postalCode" (jsonDecCipher_IdentityCipher_postalCode_Maybe)
+   |> required "ssn" (jsonDecCipher_IdentityCipher_ssn_Maybe)
+   |> required "state" (jsonDecCipher_IdentityCipher_state_Maybe)
+   |> required "title" (jsonDecCipher_IdentityCipher_title_Maybe)
+   |> required "username" (jsonDecCipher_IdentityCipher_username_Maybe)
+
+jsonEncCipher_IdentityCipher : Cipher_IdentityCipher -> Value
+jsonEncCipher_IdentityCipher  val =
+   Json.Encode.object
+   [ ("address1", jsonEncCipher_IdentityCipher_address1_Maybe val.address1)
+   , ("address2", jsonEncCipher_IdentityCipher_address2_Maybe val.address2)
+   , ("address3", jsonEncCipher_IdentityCipher_address3_Maybe val.address3)
+   , ("city", jsonEncCipher_IdentityCipher_city_Maybe val.city)
+   , ("company", jsonEncCipher_IdentityCipher_company_Maybe val.company)
+   , ("country", jsonEncCipher_IdentityCipher_country_Maybe val.country)
+   , ("email", jsonEncCipher_IdentityCipher_email_Maybe val.email)
+   , ("firstName", jsonEncCipher_IdentityCipher_firstName_Maybe val.firstName)
+   , ("lastName", jsonEncCipher_IdentityCipher_lastName_Maybe val.lastName)
+   , ("licenseNumber", jsonEncCipher_IdentityCipher_licenseNumber_Maybe val.licenseNumber)
+   , ("middleName", jsonEncCipher_IdentityCipher_middleName_Maybe val.middleName)
+   , ("passportNumber", jsonEncCipher_IdentityCipher_passportNumber_Maybe val.passportNumber)
+   , ("phone", jsonEncCipher_IdentityCipher_phone_Maybe val.phone)
+   , ("postalCode", jsonEncCipher_IdentityCipher_postalCode_Maybe val.postalCode)
+   , ("ssn", jsonEncCipher_IdentityCipher_ssn_Maybe val.ssn)
+   , ("state", jsonEncCipher_IdentityCipher_state_Maybe val.state)
+   , ("title", jsonEncCipher_IdentityCipher_title_Maybe val.title)
+   , ("username", jsonEncCipher_IdentityCipher_username_Maybe val.username)
+   ]
+
+
+
+type alias Cipher_LoginCipher_password_Maybe  = (Maybe String)
+
+jsonDecCipher_LoginCipher_password_Maybe : Json.Decode.Decoder ( Cipher_LoginCipher_password_Maybe )
+jsonDecCipher_LoginCipher_password_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_LoginCipher_password_Maybe : Cipher_LoginCipher_password_Maybe -> Value
+jsonEncCipher_LoginCipher_password_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_LoginCipher_uris_List  = (List String)
+
+jsonDecCipher_LoginCipher_uris_List : Json.Decode.Decoder ( Cipher_LoginCipher_uris_List )
+jsonDecCipher_LoginCipher_uris_List =
+    Json.Decode.list (Json.Decode.string)
+
+jsonEncCipher_LoginCipher_uris_List : Cipher_LoginCipher_uris_List -> Value
+jsonEncCipher_LoginCipher_uris_List  val = (Json.Encode.list Json.Encode.string) val
+
+
+
+type alias Cipher_LoginCipher_username_Maybe  = (Maybe String)
+
+jsonDecCipher_LoginCipher_username_Maybe : Json.Decode.Decoder ( Cipher_LoginCipher_username_Maybe )
+jsonDecCipher_LoginCipher_username_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_LoginCipher_username_Maybe : Cipher_LoginCipher_username_Maybe -> Value
+jsonEncCipher_LoginCipher_username_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
+type alias Cipher_LoginCipher  =
+   { password: Cipher_LoginCipher_password_Maybe
+   , uris: Cipher_LoginCipher_uris_List
+   , username: Cipher_LoginCipher_username_Maybe
+   }
+
+jsonDecCipher_LoginCipher : Json.Decode.Decoder ( Cipher_LoginCipher )
+jsonDecCipher_LoginCipher =
+   Json.Decode.succeed (\ppassword puris pusername -> {password = ppassword, uris = puris, username = pusername})
+   |> required "password" (jsonDecCipher_LoginCipher_password_Maybe)
+   |> required "uris" (jsonDecCipher_LoginCipher_uris_List)
+   |> required "username" (jsonDecCipher_LoginCipher_username_Maybe)
+
+jsonEncCipher_LoginCipher : Cipher_LoginCipher -> Value
+jsonEncCipher_LoginCipher  val =
+   Json.Encode.object
+   [ ("password", jsonEncCipher_LoginCipher_password_Maybe val.password)
+   , ("uris", jsonEncCipher_LoginCipher_uris_List val.uris)
+   , ("username", jsonEncCipher_LoginCipher_username_Maybe val.username)
+   ]
+
+
+
+type Cipher  =
+    CardCipher Cipher_CardCipher
+    | IdentityCipher Cipher_IdentityCipher
+    | LoginCipher Cipher_LoginCipher
+    | NoteCipher String
+
+jsonDecCipher : Json.Decode.Decoder ( Cipher )
+jsonDecCipher =
+    let jsonDecDictCipher = Dict.fromList
+            [ ("CardCipher", Json.Decode.lazy (\_ -> Json.Decode.map CardCipher (jsonDecCipher_CardCipher)))
+            , ("IdentityCipher", Json.Decode.lazy (\_ -> Json.Decode.map IdentityCipher (jsonDecCipher_IdentityCipher)))
+            , ("LoginCipher", Json.Decode.lazy (\_ -> Json.Decode.map LoginCipher (jsonDecCipher_LoginCipher)))
+            , ("NoteCipher", Json.Decode.lazy (\_ -> Json.Decode.map NoteCipher (Json.Decode.string)))
+            ]
+        jsonDecObjectSetCipher = Set.fromList []
+    in  decodeSumTaggedObject "Cipher" "tag" "contents" jsonDecDictCipher jsonDecObjectSetCipher
+
+jsonEncCipher : Cipher -> Value
+jsonEncCipher  val =
+    let keyval v = case v of
+                    CardCipher v1 -> ("CardCipher", encodeValue (jsonEncCipher_CardCipher v1))
+                    IdentityCipher v1 -> ("IdentityCipher", encodeValue (jsonEncCipher_IdentityCipher v1))
+                    LoginCipher v1 -> ("LoginCipher", encodeValue (jsonEncCipher_LoginCipher v1))
+                    NoteCipher v1 -> ("NoteCipher", encodeValue (Json.Encode.string v1))
+    in encodeSumTaggedObject "tag" "contents" keyval val
+
+
+
+type CipherType  =
+    CardType 
+    | IdentityType 
+    | LoginType 
+    | NoteType 
+
+jsonDecCipherType : Json.Decode.Decoder ( CipherType )
+jsonDecCipherType = 
+    let jsonDecDictCipherType = Dict.fromList [("CardType", CardType), ("IdentityType", IdentityType), ("LoginType", LoginType), ("NoteType", NoteType)]
+    in  decodeSumUnaries "CipherType" jsonDecDictCipherType
+
+jsonEncCipherType : CipherType -> Value
+jsonEncCipherType  val =
+    case val of
+        CardType -> Json.Encode.string "CardType"
+        IdentityType -> Json.Encode.string "IdentityType"
+        LoginType -> Json.Encode.string "LoginType"
+        NoteType -> Json.Encode.string "NoteType"
+
+
+
 type alias Cmd_Login  =
    { email: String
    , password: String
@@ -74,456 +543,8 @@ jsonEncCmd  val =
 
 
 
-type alias Sub_LoadCipher_cipherType_CardCipher_brand_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_CardCipher_brand_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_CardCipher_brand_Maybe )
-jsonDecSub_LoadCipher_cipherType_CardCipher_brand_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_CardCipher_brand_Maybe : Sub_LoadCipher_cipherType_CardCipher_brand_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_CardCipher_brand_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe )
-jsonDecSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe : Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_CardCipher_code_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_CardCipher_code_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_CardCipher_code_Maybe )
-jsonDecSub_LoadCipher_cipherType_CardCipher_code_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_CardCipher_code_Maybe : Sub_LoadCipher_cipherType_CardCipher_code_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_CardCipher_code_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe )
-jsonDecSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe : Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_CardCipher_expYear_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe )
-jsonDecSub_LoadCipher_cipherType_CardCipher_expYear_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_CardCipher_expYear_Maybe : Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_CardCipher_expYear_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_CardCipher_number_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_CardCipher_number_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_CardCipher_number_Maybe )
-jsonDecSub_LoadCipher_cipherType_CardCipher_number_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_CardCipher_number_Maybe : Sub_LoadCipher_cipherType_CardCipher_number_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_CardCipher_number_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_CardCipher  =
-   { brand: Sub_LoadCipher_cipherType_CardCipher_brand_Maybe
-   , cardholderName: Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe
-   , code: Sub_LoadCipher_cipherType_CardCipher_code_Maybe
-   , expMonth: Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe
-   , expYear: Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe
-   , number: Sub_LoadCipher_cipherType_CardCipher_number_Maybe
-   }
-
-jsonDecSub_LoadCipher_cipherType_CardCipher : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_CardCipher )
-jsonDecSub_LoadCipher_cipherType_CardCipher =
-   Json.Decode.succeed (\pbrand pcardholderName pcode pexpMonth pexpYear pnumber -> {brand = pbrand, cardholderName = pcardholderName, code = pcode, expMonth = pexpMonth, expYear = pexpYear, number = pnumber})
-   |> required "brand" (jsonDecSub_LoadCipher_cipherType_CardCipher_brand_Maybe)
-   |> required "cardholderName" (jsonDecSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe)
-   |> required "code" (jsonDecSub_LoadCipher_cipherType_CardCipher_code_Maybe)
-   |> required "expMonth" (jsonDecSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe)
-   |> required "expYear" (jsonDecSub_LoadCipher_cipherType_CardCipher_expYear_Maybe)
-   |> required "number" (jsonDecSub_LoadCipher_cipherType_CardCipher_number_Maybe)
-
-jsonEncSub_LoadCipher_cipherType_CardCipher : Sub_LoadCipher_cipherType_CardCipher -> Value
-jsonEncSub_LoadCipher_cipherType_CardCipher  val =
-   Json.Encode.object
-   [ ("brand", jsonEncSub_LoadCipher_cipherType_CardCipher_brand_Maybe val.brand)
-   , ("cardholderName", jsonEncSub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe val.cardholderName)
-   , ("code", jsonEncSub_LoadCipher_cipherType_CardCipher_code_Maybe val.code)
-   , ("expMonth", jsonEncSub_LoadCipher_cipherType_CardCipher_expMonth_Maybe val.expMonth)
-   , ("expYear", jsonEncSub_LoadCipher_cipherType_CardCipher_expYear_Maybe val.expYear)
-   , ("number", jsonEncSub_LoadCipher_cipherType_CardCipher_number_Maybe val.number)
-   ]
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_city_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_city_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_city_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_city_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_company_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_company_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_company_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_company_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_country_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_country_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_country_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_country_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_email_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_email_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_email_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_email_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_state_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_state_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_state_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_state_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_title_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_title_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_title_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_title_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_username_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher_username_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_username_Maybe : Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher_username_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_IdentityCipher  =
-   { address1: Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe
-   , address2: Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe
-   , address3: Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe
-   , city: Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe
-   , company: Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe
-   , country: Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe
-   , email: Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe
-   , firstName: Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe
-   , lastName: Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe
-   , licenseNumber: Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe
-   , middleName: Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe
-   , passportNumber: Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe
-   , phone: Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe
-   , postalCode: Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe
-   , ssn: Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe
-   , state: Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe
-   , title: Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe
-   , username: Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe
-   }
-
-jsonDecSub_LoadCipher_cipherType_IdentityCipher : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_IdentityCipher )
-jsonDecSub_LoadCipher_cipherType_IdentityCipher =
-   Json.Decode.succeed (\paddress1 paddress2 paddress3 pcity pcompany pcountry pemail pfirstName plastName plicenseNumber pmiddleName ppassportNumber pphone ppostalCode pssn pstate ptitle pusername -> {address1 = paddress1, address2 = paddress2, address3 = paddress3, city = pcity, company = pcompany, country = pcountry, email = pemail, firstName = pfirstName, lastName = plastName, licenseNumber = plicenseNumber, middleName = pmiddleName, passportNumber = ppassportNumber, phone = pphone, postalCode = ppostalCode, ssn = pssn, state = pstate, title = ptitle, username = pusername})
-   |> required "address1" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe)
-   |> required "address2" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe)
-   |> required "address3" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe)
-   |> required "city" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_city_Maybe)
-   |> required "company" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_company_Maybe)
-   |> required "country" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_country_Maybe)
-   |> required "email" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_email_Maybe)
-   |> required "firstName" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe)
-   |> required "lastName" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe)
-   |> required "licenseNumber" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe)
-   |> required "middleName" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe)
-   |> required "passportNumber" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe)
-   |> required "phone" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe)
-   |> required "postalCode" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe)
-   |> required "ssn" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe)
-   |> required "state" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_state_Maybe)
-   |> required "title" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_title_Maybe)
-   |> required "username" (jsonDecSub_LoadCipher_cipherType_IdentityCipher_username_Maybe)
-
-jsonEncSub_LoadCipher_cipherType_IdentityCipher : Sub_LoadCipher_cipherType_IdentityCipher -> Value
-jsonEncSub_LoadCipher_cipherType_IdentityCipher  val =
-   Json.Encode.object
-   [ ("address1", jsonEncSub_LoadCipher_cipherType_IdentityCipher_address1_Maybe val.address1)
-   , ("address2", jsonEncSub_LoadCipher_cipherType_IdentityCipher_address2_Maybe val.address2)
-   , ("address3", jsonEncSub_LoadCipher_cipherType_IdentityCipher_address3_Maybe val.address3)
-   , ("city", jsonEncSub_LoadCipher_cipherType_IdentityCipher_city_Maybe val.city)
-   , ("company", jsonEncSub_LoadCipher_cipherType_IdentityCipher_company_Maybe val.company)
-   , ("country", jsonEncSub_LoadCipher_cipherType_IdentityCipher_country_Maybe val.country)
-   , ("email", jsonEncSub_LoadCipher_cipherType_IdentityCipher_email_Maybe val.email)
-   , ("firstName", jsonEncSub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe val.firstName)
-   , ("lastName", jsonEncSub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe val.lastName)
-   , ("licenseNumber", jsonEncSub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe val.licenseNumber)
-   , ("middleName", jsonEncSub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe val.middleName)
-   , ("passportNumber", jsonEncSub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe val.passportNumber)
-   , ("phone", jsonEncSub_LoadCipher_cipherType_IdentityCipher_phone_Maybe val.phone)
-   , ("postalCode", jsonEncSub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe val.postalCode)
-   , ("ssn", jsonEncSub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe val.ssn)
-   , ("state", jsonEncSub_LoadCipher_cipherType_IdentityCipher_state_Maybe val.state)
-   , ("title", jsonEncSub_LoadCipher_cipherType_IdentityCipher_title_Maybe val.title)
-   , ("username", jsonEncSub_LoadCipher_cipherType_IdentityCipher_username_Maybe val.username)
-   ]
-
-
-
-type alias Sub_LoadCipher_cipherType_LoginCipher_password_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_LoginCipher_password_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_LoginCipher_password_Maybe )
-jsonDecSub_LoadCipher_cipherType_LoginCipher_password_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_LoginCipher_password_Maybe : Sub_LoadCipher_cipherType_LoginCipher_password_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_LoginCipher_password_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_LoginCipher_uris_List  = (List String)
-
-jsonDecSub_LoadCipher_cipherType_LoginCipher_uris_List : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_LoginCipher_uris_List )
-jsonDecSub_LoadCipher_cipherType_LoginCipher_uris_List =
-    Json.Decode.list (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_LoginCipher_uris_List : Sub_LoadCipher_cipherType_LoginCipher_uris_List -> Value
-jsonEncSub_LoadCipher_cipherType_LoginCipher_uris_List  val = (Json.Encode.list Json.Encode.string) val
-
-
-
-type alias Sub_LoadCipher_cipherType_LoginCipher_username_Maybe  = (Maybe String)
-
-jsonDecSub_LoadCipher_cipherType_LoginCipher_username_Maybe : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_LoginCipher_username_Maybe )
-jsonDecSub_LoadCipher_cipherType_LoginCipher_username_Maybe =
-    Json.Decode.maybe (Json.Decode.string)
-
-jsonEncSub_LoadCipher_cipherType_LoginCipher_username_Maybe : Sub_LoadCipher_cipherType_LoginCipher_username_Maybe -> Value
-jsonEncSub_LoadCipher_cipherType_LoginCipher_username_Maybe  val = (maybeEncode (Json.Encode.string)) val
-
-
-
-type alias Sub_LoadCipher_cipherType_LoginCipher  =
-   { password: Sub_LoadCipher_cipherType_LoginCipher_password_Maybe
-   , uris: Sub_LoadCipher_cipherType_LoginCipher_uris_List
-   , username: Sub_LoadCipher_cipherType_LoginCipher_username_Maybe
-   }
-
-jsonDecSub_LoadCipher_cipherType_LoginCipher : Json.Decode.Decoder ( Sub_LoadCipher_cipherType_LoginCipher )
-jsonDecSub_LoadCipher_cipherType_LoginCipher =
-   Json.Decode.succeed (\ppassword puris pusername -> {password = ppassword, uris = puris, username = pusername})
-   |> required "password" (jsonDecSub_LoadCipher_cipherType_LoginCipher_password_Maybe)
-   |> required "uris" (jsonDecSub_LoadCipher_cipherType_LoginCipher_uris_List)
-   |> required "username" (jsonDecSub_LoadCipher_cipherType_LoginCipher_username_Maybe)
-
-jsonEncSub_LoadCipher_cipherType_LoginCipher : Sub_LoadCipher_cipherType_LoginCipher -> Value
-jsonEncSub_LoadCipher_cipherType_LoginCipher  val =
-   Json.Encode.object
-   [ ("password", jsonEncSub_LoadCipher_cipherType_LoginCipher_password_Maybe val.password)
-   , ("uris", jsonEncSub_LoadCipher_cipherType_LoginCipher_uris_List val.uris)
-   , ("username", jsonEncSub_LoadCipher_cipherType_LoginCipher_username_Maybe val.username)
-   ]
-
-
-
-type Sub_LoadCipher_cipherType  =
-    CardCipher Sub_LoadCipher_cipherType_CardCipher
-    | IdentityCipher Sub_LoadCipher_cipherType_IdentityCipher
-    | LoginCipher Sub_LoadCipher_cipherType_LoginCipher
-    | NoteCipher String
-
-jsonDecSub_LoadCipher_cipherType : Json.Decode.Decoder ( Sub_LoadCipher_cipherType )
-jsonDecSub_LoadCipher_cipherType =
-    let jsonDecDictSub_LoadCipher_cipherType = Dict.fromList
-            [ ("CardCipher", Json.Decode.lazy (\_ -> Json.Decode.map CardCipher (jsonDecSub_LoadCipher_cipherType_CardCipher)))
-            , ("IdentityCipher", Json.Decode.lazy (\_ -> Json.Decode.map IdentityCipher (jsonDecSub_LoadCipher_cipherType_IdentityCipher)))
-            , ("LoginCipher", Json.Decode.lazy (\_ -> Json.Decode.map LoginCipher (jsonDecSub_LoadCipher_cipherType_LoginCipher)))
-            , ("NoteCipher", Json.Decode.lazy (\_ -> Json.Decode.map NoteCipher (Json.Decode.string)))
-            ]
-        jsonDecObjectSetSub_LoadCipher_cipherType = Set.fromList []
-    in  decodeSumTaggedObject "Sub_LoadCipher_cipherType" "tag" "contents" jsonDecDictSub_LoadCipher_cipherType jsonDecObjectSetSub_LoadCipher_cipherType
-
-jsonEncSub_LoadCipher_cipherType : Sub_LoadCipher_cipherType -> Value
-jsonEncSub_LoadCipher_cipherType  val =
-    let keyval v = case v of
-                    CardCipher v1 -> ("CardCipher", encodeValue (jsonEncSub_LoadCipher_cipherType_CardCipher v1))
-                    IdentityCipher v1 -> ("IdentityCipher", encodeValue (jsonEncSub_LoadCipher_cipherType_IdentityCipher v1))
-                    LoginCipher v1 -> ("LoginCipher", encodeValue (jsonEncSub_LoadCipher_cipherType_LoginCipher v1))
-                    NoteCipher v1 -> ("NoteCipher", encodeValue (Json.Encode.string v1))
-    in encodeSumTaggedObject "tag" "contents" keyval val
-
-
-
 type alias Sub_LoadCipher  =
-   { cipherType: Sub_LoadCipher_cipherType
+   { cipherType: Cipher
    , id: String
    , name: String
    }
@@ -531,43 +552,22 @@ type alias Sub_LoadCipher  =
 jsonDecSub_LoadCipher : Json.Decode.Decoder ( Sub_LoadCipher )
 jsonDecSub_LoadCipher =
    Json.Decode.succeed (\pcipherType pid pname -> {cipherType = pcipherType, id = pid, name = pname})
-   |> required "cipherType" (jsonDecSub_LoadCipher_cipherType)
+   |> required "cipherType" (jsonDecCipher)
    |> required "id" (Json.Decode.string)
    |> required "name" (Json.Decode.string)
 
 jsonEncSub_LoadCipher : Sub_LoadCipher -> Value
 jsonEncSub_LoadCipher  val =
    Json.Encode.object
-   [ ("cipherType", jsonEncSub_LoadCipher_cipherType val.cipherType)
+   [ ("cipherType", jsonEncCipher val.cipherType)
    , ("id", Json.Encode.string val.id)
    , ("name", Json.Encode.string val.name)
    ]
 
 
 
-type Sub_LoadCiphers_cipherType  =
-    CardType 
-    | IdentityType 
-    | LoginType 
-    | NoteType 
-
-jsonDecSub_LoadCiphers_cipherType : Json.Decode.Decoder ( Sub_LoadCiphers_cipherType )
-jsonDecSub_LoadCiphers_cipherType = 
-    let jsonDecDictSub_LoadCiphers_cipherType = Dict.fromList [("CardType", CardType), ("IdentityType", IdentityType), ("LoginType", LoginType), ("NoteType", NoteType)]
-    in  decodeSumUnaries "Sub_LoadCiphers_cipherType" jsonDecDictSub_LoadCiphers_cipherType
-
-jsonEncSub_LoadCiphers_cipherType : Sub_LoadCiphers_cipherType -> Value
-jsonEncSub_LoadCiphers_cipherType  val =
-    case val of
-        CardType -> Json.Encode.string "CardType"
-        IdentityType -> Json.Encode.string "IdentityType"
-        LoginType -> Json.Encode.string "LoginType"
-        NoteType -> Json.Encode.string "NoteType"
-
-
-
 type alias Sub_LoadCiphers  =
-   { cipherType: Sub_LoadCiphers_cipherType
+   { cipherType: CipherType
    , date: String
    , id: String
    , name: String
@@ -576,7 +576,7 @@ type alias Sub_LoadCiphers  =
 jsonDecSub_LoadCiphers : Json.Decode.Decoder ( Sub_LoadCiphers )
 jsonDecSub_LoadCiphers =
    Json.Decode.succeed (\pcipherType pdate pid pname -> {cipherType = pcipherType, date = pdate, id = pid, name = pname})
-   |> required "cipherType" (jsonDecSub_LoadCiphers_cipherType)
+   |> required "cipherType" (jsonDecCipherType)
    |> required "date" (Json.Decode.string)
    |> required "id" (Json.Decode.string)
    |> required "name" (Json.Decode.string)
@@ -584,7 +584,7 @@ jsonDecSub_LoadCiphers =
 jsonEncSub_LoadCiphers : Sub_LoadCiphers -> Value
 jsonEncSub_LoadCiphers  val =
    Json.Encode.object
-   [ ("cipherType", jsonEncSub_LoadCiphers_cipherType val.cipherType)
+   [ ("cipherType", jsonEncCipherType val.cipherType)
    , ("date", Json.Encode.string val.date)
    , ("id", Json.Encode.string val.id)
    , ("name", Json.Encode.string val.name)

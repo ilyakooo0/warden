@@ -6,11 +6,7 @@ Sub:
         name: String
         date: String
         id: String
-        cipherType:
-            - LoginType
-            - CardType
-            - NoteType
-            - IdentityType
+        cipherType: CipherType
 - LoginSuccessful
 - NeedsMasterPassword:
     server: String
@@ -19,64 +15,7 @@ Sub:
 - LoadCipher:
     id: String
     name: String
-    cipherType:
-        - LoginCipher:
-            uris: {List: String}
-            username:
-                Maybe: String
-            password:
-                Maybe: String
-        - NoteCipher: String
-        - CardCipher:
-            cardholderName:
-                Maybe: String
-            brand:
-                Maybe: String
-            number:
-                Maybe: String
-            expMonth:
-                Maybe: String
-            expYear:
-                Maybe: String
-            code:
-                Maybe: String
-        - IdentityCipher:
-            title:
-                Maybe: String
-            firstName:
-                Maybe: String
-            middleName:
-                Maybe: String
-            lastName:
-                Maybe: String
-            address1:
-                Maybe: String
-            address2:
-                Maybe: String
-            address3:
-                Maybe: String
-            city:
-                Maybe: String
-            state:
-                Maybe: String
-            postalCode:
-                Maybe: String
-            country:
-                Maybe: String
-            company:
-                Maybe: String
-            email:
-                Maybe: String
-            phone:
-                Maybe: String
-            ssn:
-                Maybe: String
-            username:
-                Maybe: String
-            passportNumber:
-                Maybe: String
-            licenseNumber:
-                Maybe: String
+    cipherType: Cipher
 - RecieveEmail: String
 
 Cmd:
@@ -92,3 +31,69 @@ Cmd:
 - NeedEmail
 - Copy: String
 - Open: String
+
+
+Cipher:
+- LoginCipher:
+    uris: {List: String}
+    username:
+        Maybe: String
+    password:
+        Maybe: String
+- NoteCipher: String
+- CardCipher:
+    cardholderName:
+        Maybe: String
+    brand:
+        Maybe: String
+    number:
+        Maybe: String
+    expMonth:
+        Maybe: String
+    expYear:
+        Maybe: String
+    code:
+        Maybe: String
+- IdentityCipher:
+    title:
+        Maybe: String
+    firstName:
+        Maybe: String
+    middleName:
+        Maybe: String
+    lastName:
+        Maybe: String
+    address1:
+        Maybe: String
+    address2:
+        Maybe: String
+    address3:
+        Maybe: String
+    city:
+        Maybe: String
+    state:
+        Maybe: String
+    postalCode:
+        Maybe: String
+    country:
+        Maybe: String
+    company:
+        Maybe: String
+    email:
+        Maybe: String
+    phone:
+        Maybe: String
+    ssn:
+        Maybe: String
+    username:
+        Maybe: String
+    passportNumber:
+        Maybe: String
+    licenseNumber:
+        Maybe: String
+
+CipherType:
+- LoginType
+- CardType
+- NoteType
+- IdentityType

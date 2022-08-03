@@ -25,7 +25,7 @@ type alias Model =
 
 type CiphersFilter
     = AllCiphers
-    | SpecificCiphers Bridge.Sub_LoadCiphers_cipherType
+    | SpecificCiphers Bridge.CipherType
 
 
 applyCipherFilter : CiphersFilter -> Bridge.Sub_LoadCiphers_List -> Bridge.Sub_LoadCiphers_List
