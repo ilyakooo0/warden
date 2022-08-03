@@ -91,26 +91,26 @@ main = do
           sync <- liftPromise $ api.getSync unit
           hash <- hashPassword (Password password)
           log $ show sync
-          liftEffect $ Ref.write (Just masterKey) masterKeyRef
-          liftEffect $ Storage.store storage UrlsKey server
-          liftEffect $ Storage.store storage MasterPasswordHashKey hash
-          liftEffect $ Storage.store storage PreloginResponseKey prelogin
-          liftEffect $ Storage.store storage SyncKey sync
-          liftEffect $ Storage.store storage TokenKey token
-          liftEffect $ Elm.send app Bridge.LoginSuccessful
+          liftEffect do
+            Ref.write (Just masterKey) masterKeyRef
+            Storage.store storage UrlsKey server
+            Storage.store storage MasterPasswordHashKey hash
+            Storage.store storage PreloginResponseKey prelogin
+            Storage.store storage SyncKey sync
+            Storage.store storage TokenKey token
+            Elm.send app Bridge.LoginSuccessful
     Bridge.NeedCiphersList ->
       run do
         sync <- getOrReset SyncKey
         ciphers <- traverse processCipher sync.ciphers
         let
           sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
-        liftEffect $ Elm.send app $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
-        liftEffect $ Storage.store storage SyncKey sync
-        pure unit
+        liftEffect do
+          Elm.send app $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
+          Storage.store storage SyncKey sync
     Bridge.NeedsReset -> do
       WebStorage.clear storage
       Elm.send app Bridge.Reset
-      pure unit
     Bridge.SendMasterPassword masterPassword ->
       runElmAff app
         $ do
@@ -122,17 +122,18 @@ main = do
                     sync <- getOrReset SyncKey
                     prelogin <- getOrReset PreloginResponseKey
                     masterKey <- Logic.makePreloginKey prelogin (Email sync.profile.email) (Password masterPassword)
-                    liftEffect $ Ref.write (Just masterKey) masterKeyRef
-                    liftEffect $ Elm.send app Bridge.LoginSuccessful
+                    liftEffect do
+                      Ref.write (Just masterKey) masterKeyRef
+                      Elm.send app Bridge.LoginSuccessful
                   else do
                     liftEffect $ Elm.send app $ Bridge.Error "The password is wrong. Please try again."
                     requestMasterPassword
-                  pure unit
     Bridge.Init -> do
       liftEffect $ Storage.get storage TokenKey
-        >>= \x -> case x of
-            Just _ -> do liftEffect $ Elm.send app Bridge.LoginSuccessful
-            Nothing -> Elm.send app Bridge.NeedsLogin
+        >>= \x ->
+            Elm.send app case x of
+              Just _ -> Bridge.LoginSuccessful
+              Nothing -> Bridge.NeedsLogin
     Bridge.RequestCipher id ->
       run do
         sync <- getOrReset SyncKey

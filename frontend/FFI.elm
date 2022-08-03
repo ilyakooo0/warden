@@ -2,7 +2,6 @@ port module FFI exposing (getBridge, sendBridge)
 
 import Bridge
 import Json.Decode as D
-import Json.Encode as E
 
 
 port bridgeSub : (D.Value -> msg) -> Sub msg
