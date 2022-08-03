@@ -7,10 +7,10 @@ import BW (ApiService, CryptoService, Services)
 import BW as WB
 import BW.Logic (decodeCipher, decrypt, hashPassword, liftPromise)
 import BW.Logic as Logic
-import BW.Types (CipherResponse, Email(..), Password(..), PreloginResponse, Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
+import BW.Types (CipherResponse, Email(..), Password(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
 import Bridge as Bridge
 import Control.El (class HasL, Al, L(..), l)
-import Control.Monad.Error.Class (throwError)
+import Control.Monad.Error.Class (catchError, throwError)
 import Control.Monad.Reader (runReaderT)
 import Data.Argonaut (class DecodeJson)
 import Data.Array as Array
@@ -56,15 +56,15 @@ main = do
       runElmAff app $ flip runReaderT { app: app, crypto: services.crypto, storage: storage }
         $ case maybeKey of
             Just masterKey -> do
-              token <- getOrReset storage TokenKey
+              token <- getOrReset TokenKey
               key <- Logic.makeDecryptionKey masterKey token.key
               liftEffect $ runElmAff app
                 $ runReaderT act
-                    { app: app
-                    , storage: storage
-                    , services: services
+                    { app
+                    , storage
+                    , services
                     , crypto: services.crypto
-                    , key: key
+                    , key
                     }
             Nothing -> requestMasterPassword
   Elm.subscribe app \cmd -> case cmd of
@@ -73,23 +73,19 @@ main = do
         urls = baseUrl server
       runElmAff app do
         unauthedApi <- liftPromise $ services.getApi urls jnull
-        flip runReaderT
-          { api: unauthedApi
-          , crypto: services.crypto
-          , storage:
-              storage
-          , cryptoFunctions: services.cryptoFunctions
-          } do
-          { token, prelogin: (prelogin :: PreloginResponse) } <-
-            try
-              ( do
-                  prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
-                  token <- (Logic.getLogInRequestToken prelogin (Email email) (Password password))
-                  pure { token, prelogin }
-              )
-              >>= \et -> case et of
-                  Left _ -> liftEffect $ Exc.throw "Could not log in. Please check your data and try again."
-                  Right t -> pure t
+        let
+          env =
+            { api: unauthedApi
+            , crypto: services.crypto
+            , storage
+            , cryptoFunctions: services.cryptoFunctions
+            }
+        flip runReaderT env do
+          prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
+          token <-
+            catchError
+              (Logic.getLogInRequestToken prelogin (Email email) (Password password))
+              (const $ liftEffect $ Exc.throw "Could not log in. Please check your data and try again.")
           masterKey <- Logic.makePreloginKey prelogin (Email email) (Password password)
           api <- liftPromise $ services.getApi urls (nullify token)
           sync <- liftPromise $ api.getSync unit
@@ -102,11 +98,9 @@ main = do
           liftEffect $ Storage.store storage SyncKey sync
           liftEffect $ Storage.store storage TokenKey token
           liftEffect $ Elm.send app Bridge.LoginSuccessful
-          pure unit
-        pure unit
     Bridge.NeedCiphersList ->
       run do
-        sync <- getOrReset storage SyncKey
+        sync <- getOrReset SyncKey
         ciphers <- traverse processCipher sync.ciphers
         let
           sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
@@ -122,11 +116,11 @@ main = do
         $ do
             flip runReaderT { app: app, storage: storage, crypto: services.crypto, cryptoFunctions: services.cryptoFunctions }
               $ do
-                  hash <- getOrReset storage MasterPasswordHashKey
+                  hash <- getOrReset MasterPasswordHashKey
                   newHash <- hashPassword (Password masterPassword)
                   if hash == newHash then do
-                    sync <- getOrReset storage SyncKey
-                    prelogin <- getOrReset storage PreloginResponseKey
+                    sync <- getOrReset SyncKey
+                    prelogin <- getOrReset PreloginResponseKey
                     masterKey <- Logic.makePreloginKey prelogin (Email sync.profile.email) (Password masterPassword)
                     liftEffect $ Ref.write (Just masterKey) masterKeyRef
                     liftEffect $ Elm.send app Bridge.LoginSuccessful
@@ -141,7 +135,7 @@ main = do
             Nothing -> Elm.send app Bridge.NeedsLogin
     Bridge.RequestCipher id ->
       run do
-        sync <- getOrReset storage SyncKey
+        sync <- getOrReset SyncKey
         case Array.find (\c -> c.id == id) sync.ciphers of
           Nothing -> pure unit
           Just cipherResponse -> do
@@ -151,7 +145,7 @@ main = do
         pure unit
     Bridge.NeedEmail ->
       run do
-        sync <- getOrReset storage SyncKey
+        sync <- getOrReset SyncKey
         send $ Bridge.RecieveEmail sync.profile.email
         pure unit
     Bridge.Copy text ->
@@ -213,8 +207,12 @@ baseUrl server =
 getOrReset ::
   forall k t r.
   HasL "app" Elm r =>
-  StorageKey k t => DecodeJson t => Storage -> k -> Al r t
-getOrReset storage key = do
+  HasL "storage" Storage r =>
+  StorageKey k t =>
+  DecodeJson t =>
+  k -> Al r t
+getOrReset key = do
+  storage <- l (L :: L "storage")
   let
     handleError = do
       app <- l (L :: L "app")
@@ -236,18 +234,16 @@ getAuthedApi ::
   HasL "app" Elm r =>
   Al r ApiService
 getAuthedApi = do
-  storage <- l (L :: L "storage")
   services <- l (L :: L "services")
-  token <- getOrReset storage TokenKey
-  url <- getOrReset storage UrlsKey
+  token <- getOrReset TokenKey
+  url <- getOrReset UrlsKey
   liftPromise $ services.getApi (baseUrl url) (nullify token)
 
 requestMasterPassword :: forall r. HasL "storage" Storage r => HasL "app" Elm r => Al r Unit
 requestMasterPassword = do
-  storage <- l (L :: L "storage")
   app <- l (L :: L "app")
-  url <- getOrReset storage UrlsKey
-  sync <- getOrReset storage SyncKey
+  url <- getOrReset UrlsKey
+  sync <- getOrReset SyncKey
   liftEffect $ Elm.send app $ Bridge.NeedsMasterPassword
     $ Bridge.Sub_NeedsMasterPassword { server: url, login: sync.profile.email }
 
