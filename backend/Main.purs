@@ -23,6 +23,7 @@ import Data.JNullable (fromJNullable, jnull, nullify)
 import Data.JNullable as JNullable
 import Data.JOpt (fromJOpt)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (wrap)
 import Data.OpenURL (openURL)
 import Data.Ord.Down (Down(..))
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
@@ -139,49 +140,49 @@ main = do
                 case JNullable.toMaybe cipher.login of
                   Nothing -> throwError $ error "Login data is missing"
                   Just login -> do
-                    username <- Bridge.Sub_LoadCipher_cipherType_LoginCipher_username_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt login.username)
-                    password <- Bridge.Sub_LoadCipher_cipherType_LoginCipher_password_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt login.password)
+                    username <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt login.username)
+                    password <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt login.password)
                     uris <- fromJOpt [] <$> ((traverse >>> traverse) (_.uri >>> decrypt) login.uris)
                     pure $ Bridge.LoginCipher $ Bridge.Sub_LoadCipher_cipherType_LoginCipher
                       { username
                       , password
-                      , uris: Bridge.Sub_LoadCipher_cipherType_LoginCipher_uris_List uris
+                      , uris: wrap uris
                       }
               n | cipherTypeCard == n -> do
                 case JNullable.toMaybe cipher.card of
                   Nothing -> throwError $ error "Card data is missing"
                   Just card -> do
-                    cardholderName <- Bridge.Sub_LoadCipher_cipherType_CardCipher_cardholderName_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.cardholderName)
-                    number <- Bridge.Sub_LoadCipher_cipherType_CardCipher_number_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.number)
-                    code <- Bridge.Sub_LoadCipher_cipherType_CardCipher_code_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.code)
-                    brand <- Bridge.Sub_LoadCipher_cipherType_CardCipher_brand_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.brand)
-                    expMonth <- Bridge.Sub_LoadCipher_cipherType_CardCipher_expMonth_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.expMonth)
-                    expYear <- Bridge.Sub_LoadCipher_cipherType_CardCipher_expYear_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.expYear)
+                    cardholderName <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.cardholderName)
+                    number <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.number)
+                    code <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.code)
+                    brand <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.brand)
+                    expMonth <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.expMonth)
+                    expYear <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt card.expYear)
                     pure $ Bridge.CardCipher $ Bridge.Sub_LoadCipher_cipherType_CardCipher
                       { brand, cardholderName, code, expMonth, expYear, number }
               n | cipherTypeIdentity == n -> do
                 case JNullable.toMaybe cipher.identity of
                   Nothing -> throwError $ error "Identity data is missing"
                   Just identity -> do
-                    firstName <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_firstName_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.firstName)
-                    middleName <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_middleName_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.middleName)
-                    lastName <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_lastName_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.lastName)
-                    address1 <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_address1_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.address1)
-                    address2 <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_address2_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.address2)
-                    address3 <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_address3_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.address3)
-                    city <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_city_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.city)
-                    company <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_company_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.company)
-                    country <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_country_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.country)
-                    email <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_email_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.email)
-                    licenseNumber <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_licenseNumber_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.licenseNumber)
-                    passportNumber <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_passportNumber_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.passportNumber)
-                    phone <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_phone_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.phone)
-                    postalCode <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_postalCode_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.postalCode)
-                    ssn <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_ssn_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.ssn)
-                    state <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_state_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.state)
-                    title <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_title_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.title)
-                    username <- Bridge.Sub_LoadCipher_cipherType_IdentityCipher_username_Maybe <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.username)
-                    pure $ Bridge.IdentityCipher $ Bridge.Sub_LoadCipher_cipherType_IdentityCipher
+                    firstName <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.firstName)
+                    middleName <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.middleName)
+                    lastName <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.lastName)
+                    address1 <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.address1)
+                    address2 <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.address2)
+                    address3 <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.address3)
+                    city <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.city)
+                    company <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.company)
+                    country <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.country)
+                    email <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.email)
+                    licenseNumber <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.licenseNumber)
+                    passportNumber <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.passportNumber)
+                    phone <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.phone)
+                    postalCode <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.postalCode)
+                    ssn <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.ssn)
+                    state <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.state)
+                    title <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.title)
+                    username <- wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt identity.username)
+                    pure $ Bridge.IdentityCipher $ wrap
                       { firstName,
                         middleName,
                         lastName,
