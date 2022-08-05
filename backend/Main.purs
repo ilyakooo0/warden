@@ -20,7 +20,6 @@ import Data.Either (Either(..))
 import Data.HCaptcha (bindHCaptchToken)
 import Data.JNullable (jnull, nullify)
 import Data.Maybe (Maybe(..))
-import Data.Newtype (wrap)
 import Data.OpenURL (openURL)
 import Data.Ord.Down (Down(..))
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
@@ -86,6 +85,7 @@ main = do
             , crypto: services.crypto
             , storage
             , cryptoFunctions: services.cryptoFunctions
+            , app
             }
         flip runReaderT env do
           prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
@@ -94,9 +94,7 @@ main = do
               (Logic.getLogInRequestToken prelogin (Email email) (Password password) captchaToken)
               (const $ liftEffect $ Exc.throw "Could not log in. Please check your data and try again.")
           case toEither1 loginResponse of
-            Left { siteKey } ->
-              liftEffect do
-                Elm.send app $ Bridge.NeedsCaptcha siteKey
+            Left { siteKey } -> send $ Bridge.NeedsCaptcha siteKey
             Right token -> do
               masterKey <- Logic.makePreloginKey prelogin (Email email) (Password password)
               api <- liftPromise $ services.getApi urls (nullify token)
@@ -110,16 +108,15 @@ main = do
                 Storage.store storage PreloginResponseKey prelogin
                 Storage.store storage SyncKey sync
                 Storage.store storage TokenKey token
-                Elm.send app Bridge.LoginSuccessful
+              send Bridge.LoginSuccessful
     Bridge.NeedCiphersList ->
       run do
         sync <- getOrReset SyncKey
         ciphers <- traverse processCipher sync.ciphers
         let
           sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
-        liftEffect do
-          Elm.send app $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
-          Storage.store storage SyncKey sync
+        send $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
+        liftEffect $ Storage.store storage SyncKey sync
     Bridge.NeedsReset -> do
       WebStorage.clear storage
       Elm.send app Bridge.Reset
@@ -134,11 +131,10 @@ main = do
                     sync <- getOrReset SyncKey
                     prelogin <- getOrReset PreloginResponseKey
                     masterKey <- Logic.makePreloginKey prelogin (Email sync.profile.email) (Password masterPassword)
-                    liftEffect do
-                      Ref.write (Just masterKey) masterKeyRef
-                      Elm.send app Bridge.LoginSuccessful
+                    liftEffect $ Ref.write (Just masterKey) masterKeyRef
+                    send Bridge.LoginSuccessful
                   else do
-                    liftEffect $ Elm.send app $ Bridge.Error "The password is wrong. Please try again."
+                    send $ Bridge.Error "The password is wrong. Please try again."
                     requestMasterPassword
     Bridge.Init -> do
       liftEffect $ Storage.get storage TokenKey
@@ -254,11 +250,9 @@ getAuthedApi = do
 
 requestMasterPassword :: forall r. HasL "storage" Storage r => HasL "app" Elm r => Al r Unit
 requestMasterPassword = do
-  app <- l (L :: L "app")
   url <- getOrReset UrlsKey
   sync <- getOrReset SyncKey
-  liftEffect $ Elm.send app $ Bridge.NeedsMasterPassword
-    $ Bridge.Sub_NeedsMasterPassword { server: url, login: sync.profile.email }
+  send $ Bridge.NeedsMasterPassword $ Bridge.Sub_NeedsMasterPassword { server: url, login: sync.profile.email }
 
 send :: forall r. HasL "app" Elm r => Bridge.Sub -> Al r Unit
 send sub = do
