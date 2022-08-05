@@ -3,15 +3,13 @@ module Main
   ) where
 
 import Prelude
-import BW (ApiService, CryptoService, Services)
+import BW (ApiService, CryptoService, Services, CryptoFunctions)
 import BW as WB
 import BW.Logic (decodeCipher, decrypt, hashPassword, liftPromise)
 import BW.Logic as Logic
 import BW.Types (CipherResponse, Email(..), Password(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
 import Bridge as Bridge
-import Control.El (class HasL, Al, L(..), l)
 import Control.Monad.Error.Class (catchError, throwError)
-import Control.Monad.Reader (runReaderT)
 import Data.Argonaut (class DecodeJson)
 import Data.Array as Array
 import Data.Clipboard as Clipboard
@@ -37,7 +35,11 @@ import FFI (Elm)
 import FFI as FFI
 import Localstorage (class StorageKey)
 import Localstorage as Storage
+import Run (AFF, EFFECT, Run, liftAff, runBaseAff')
+import Run.Reader (Reader, askAt, runReaderAt)
 import Storage (MasterPasswordHashKey(..), PreloginResponseKey(..), SyncKey(..), TokenKey(..), UrlsKey(..))
+import Type.Prelude (Proxy(..))
+import Type.Row (type (+))
 import Untagged.Union (toEither1)
 import Web.HTML as Html
 import Web.HTML.Window as Window
@@ -55,21 +57,50 @@ main = do
     Ref.write (Just captchaToken) hCaptchaTokenRef
     Elm.send app Bridge.CaptchaDone
   let
-    run act = do
+    runAff act = runElmAff app $ run $ act
+
+    run ::
+      forall a.
+      Run
+        ( app :: Reader Elm
+        , aff :: Aff
+        , effect :: Effect
+        , crypto :: Reader CryptoService
+        , storage :: Reader Storage
+        , services :: Reader Services
+        , cryptoFunctions :: Reader CryptoFunctions
+        )
+        a ->
+      Run (EFFECT + AFF + ()) a
+    run act =
+      runReaderAt (Proxy :: _ "app") app
+        $ runReaderAt (Proxy :: _ "crypto") services.crypto
+        $ runReaderAt (Proxy :: _ "storage") storage
+        $ runReaderAt (Proxy :: _ "services") services
+        $ runReaderAt (Proxy :: _ "cryptoFunctions") services.cryptoFunctions
+        $ act
+
+    runWithDecryptionKey ::
+      Run
+        ( app :: Reader Elm
+        , aff :: Aff
+        , effect :: Effect
+        , key :: Reader SymmetricCryptoKey
+        , crypto :: Reader CryptoService
+        , storage :: Reader Storage
+        , services :: Reader Services
+        , cryptoFunctions :: Reader CryptoFunctions
+        )
+        Unit ->
+      Effect Unit
+    runWithDecryptionKey act = do
       maybeKey <- Ref.read masterKeyRef
-      runElmAff app $ flip runReaderT { app: app, crypto: services.crypto, storage: storage }
+      runAff
         $ case maybeKey of
             Just masterKey -> do
               token <- getOrReset TokenKey
               key <- Logic.makeDecryptionKey masterKey token.key
-              liftEffect $ runElmAff app
-                $ runReaderT act
-                    { app
-                    , storage
-                    , services
-                    , crypto: services.crypto
-                    , key
-                    }
+              runReaderAt (Proxy :: _ "key") key $ act
             Nothing -> requestMasterPassword
   Elm.subscribe app \cmd -> case cmd of
     Bridge.Login (Bridge.Cmd_Login { email, server, password }) -> do
@@ -77,22 +108,17 @@ main = do
       Ref.write Nothing hCaptchaTokenRef
       let
         urls = baseUrl server
-      runElmAff app do
+      runAff do
         unauthedApi <- liftPromise $ services.getApi urls jnull
-        let
-          env =
-            { api: unauthedApi
-            , crypto: services.crypto
-            , storage
-            , cryptoFunctions: services.cryptoFunctions
-            , app
-            }
-        flip runReaderT env do
-          prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
+        prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
+        runReaderAt (Proxy :: _ "api") unauthedApi do
           loginResponse <-
-            catchError
-              (Logic.getLogInRequestToken prelogin (Email email) (Password password) captchaToken)
-              (const $ liftEffect $ Exc.throw "Could not log in. Please check your data and try again.")
+            liftAff
+              $ catchError
+                  ( runBaseAff' $ run $ runReaderAt (Proxy :: _ "api") unauthedApi
+                      $ Logic.getLogInRequestToken prelogin (Email email) (Password password) captchaToken
+                  )
+                  (const $ liftEffect $ Exc.throw "Could not log in. Please check your data and try again.")
           case toEither1 loginResponse of
             Left { siteKey } -> send $ Bridge.NeedsCaptcha siteKey
             Right token -> do
@@ -110,7 +136,7 @@ main = do
                 Storage.store storage TokenKey token
               send Bridge.LoginSuccessful
     Bridge.NeedCiphersList ->
-      run do
+      runWithDecryptionKey do
         sync <- getOrReset SyncKey
         ciphers <- traverse processCipher sync.ciphers
         let
@@ -121,21 +147,18 @@ main = do
       WebStorage.clear storage
       Elm.send app Bridge.Reset
     Bridge.SendMasterPassword masterPassword ->
-      runElmAff app
-        $ do
-            flip runReaderT { app: app, storage: storage, crypto: services.crypto, cryptoFunctions: services.cryptoFunctions }
-              $ do
-                  hash <- getOrReset MasterPasswordHashKey
-                  newHash <- hashPassword (Password masterPassword)
-                  if hash == newHash then do
-                    sync <- getOrReset SyncKey
-                    prelogin <- getOrReset PreloginResponseKey
-                    masterKey <- Logic.makePreloginKey prelogin (Email sync.profile.email) (Password masterPassword)
-                    liftEffect $ Ref.write (Just masterKey) masterKeyRef
-                    send Bridge.LoginSuccessful
-                  else do
-                    send $ Bridge.Error "The password is wrong. Please try again."
-                    requestMasterPassword
+      runAff do
+        hash <- getOrReset MasterPasswordHashKey
+        newHash <- hashPassword (Password masterPassword)
+        if hash == newHash then do
+          sync <- getOrReset SyncKey
+          prelogin <- getOrReset PreloginResponseKey
+          masterKey <- Logic.makePreloginKey prelogin (Email sync.profile.email) (Password masterPassword)
+          liftEffect $ Ref.write (Just masterKey) masterKeyRef
+          send Bridge.LoginSuccessful
+        else do
+          send $ Bridge.Error "The password is wrong. Please try again."
+          requestMasterPassword
     Bridge.Init -> do
       liftEffect $ Storage.get storage TokenKey
         >>= \x ->
@@ -143,7 +166,7 @@ main = do
               Just _ -> Bridge.LoginSuccessful
               Nothing -> Bridge.NeedsLogin
     Bridge.RequestCipher id ->
-      run do
+      runWithDecryptionKey do
         sync <- getOrReset SyncKey
         case Array.find (\c -> c.id == id) sync.ciphers of
           Nothing -> pure unit
@@ -153,20 +176,26 @@ main = do
             pure unit
         pure unit
     Bridge.NeedEmail ->
-      run do
+      runWithDecryptionKey do
         sync <- getOrReset SyncKey
         send $ Bridge.RecieveEmail sync.profile.email
         pure unit
     Bridge.Copy text ->
-      run do
+      runWithDecryptionKey do
         liftPromise $ Clipboard.clipboard text
     Bridge.Open uri -> openURL uri
 
 processCipher ::
   forall r.
-  HasL "crypto" CryptoService r =>
-  HasL "key" SymmetricCryptoKey r =>
-  CipherResponse -> Al r { cipher :: Bridge.Sub_LoadCiphers, date :: DateTime }
+  CipherResponse ->
+  Run
+    ( crypto :: Reader CryptoService
+    , key :: Reader SymmetricCryptoKey
+    , aff :: Aff
+    , effect :: Effect
+    | r
+    )
+    { cipher :: Bridge.Sub_LoadCiphers, date :: DateTime }
 processCipher cipher = do
   name <- decrypt cipher.name
   cipherType <- case cipher.type of
@@ -178,7 +207,7 @@ processCipher cipher = do
       | n == cipherTypeCard -> pure Bridge.CardType
     n
       | n == cipherTypeIdentity -> pure Bridge.IdentityType
-    n -> throwError $ error $ "Unsupported cipher type: " <> show n
+    n -> liftEffect $ throwError $ error $ "Unsupported cipher type: " <> show n
   date <- liftEffect $ Timestamp.toDateTime cipher.revisionDate
   pure
     $ { cipher:
@@ -191,15 +220,17 @@ processCipher cipher = do
       , date
       }
 
-runElmAff :: FFI.Elm -> Aff Unit -> Effect Unit
+runElmAff :: FFI.Elm -> Run (AFF + EFFECT + ()) Unit -> Effect Unit
 runElmAff app =
   runAff_
-    $ \res -> do
+    ( \res -> do
         case res of
           Left e -> do
             log $ show e
             Elm.send app (Bridge.Error $ Exc.message e)
           Right unit -> pure unit
+    )
+    <<< runBaseAff'
 
 baseUrl :: String -> Urls
 baseUrl server =
@@ -215,46 +246,72 @@ baseUrl server =
 
 getOrReset ::
   forall k t r.
-  HasL "app" Elm r =>
-  HasL "storage" Storage r =>
   StorageKey k t =>
   DecodeJson t =>
-  k -> Al r t
+  k ->
+  Run
+    ( storage :: Reader Storage
+    , app :: Reader Elm
+    , effect :: Effect
+    | r
+    )
+    t
 getOrReset key = do
-  storage <- l (L :: L "storage")
+  storage <- askAt (Proxy :: _ "storage")
+  app <- askAt (Proxy :: _ "app")
   let
     handleError = do
-      app <- l (L :: L "app")
-      liftEffect $ WebStorage.clear storage
-      liftEffect $ Elm.send app Bridge.Reset
-      liftEffect $ Exc.throw "Encountered an internal error. Resetting the app."
-  try (liftEffect $ Storage.get storage key)
+      WebStorage.clear storage
+      Elm.send app Bridge.Reset
+      Exc.throw "Encountered an internal error. Resetting the app."
+  liftEffect $ try (Storage.get storage key)
     >>= \x -> case x of
         Left err -> do
-          liftEffect $ log $ show err
+          log $ show err
           handleError
         Right Nothing -> handleError
         Right (Just y) -> pure y
 
 getAuthedApi ::
   forall r.
-  HasL "services" Services r =>
-  HasL "storage" Storage r =>
-  HasL "app" Elm r =>
-  Al r ApiService
+  Run
+    ( storage :: Reader Storage
+    , app :: Reader Elm
+    , aff :: Aff
+    , effect :: Effect
+    , services :: Reader Services
+    | r
+    )
+    ApiService
 getAuthedApi = do
-  services <- l (L :: L "services")
+  services <- askAt (Proxy :: _ "services")
   token <- getOrReset TokenKey
   url <- getOrReset UrlsKey
   liftPromise $ services.getApi (baseUrl url) (nullify token)
 
-requestMasterPassword :: forall r. HasL "storage" Storage r => HasL "app" Elm r => Al r Unit
+requestMasterPassword ::
+  forall r.
+  Run
+    ( storage :: Reader Storage
+    , app :: Reader Elm
+    , effect :: Effect
+    | r
+    )
+    Unit
 requestMasterPassword = do
   url <- getOrReset UrlsKey
   sync <- getOrReset SyncKey
   send $ Bridge.NeedsMasterPassword $ Bridge.Sub_NeedsMasterPassword { server: url, login: sync.profile.email }
 
-send :: forall r. HasL "app" Elm r => Bridge.Sub -> Al r Unit
+send ::
+  forall r.
+  Bridge.Sub ->
+  Run
+    ( app :: Reader Elm
+    , effect :: Effect
+    | r
+    )
+    Unit
 send sub = do
-  app <- l (L :: L "app")
+  app <- askAt (Proxy :: _ "app")
   liftEffect $ Elm.send app sub

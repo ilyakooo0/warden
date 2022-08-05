@@ -103,7 +103,6 @@ let upstream =
         sha256:7a24ebdbacb2bfa27b2fc6ce3da96f048093d64e54369965a2a7b5d9892b6031
 
 in  upstream
-  with el = ./el/spago.dhall as Location
   with argonaut-aeson-generic =
     { dependencies =
       [ "argonaut-codecs"

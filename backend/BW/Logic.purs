@@ -2,7 +2,6 @@ module BW.Logic where
 
 import BW
 import BW.Types
-import Control.El
 import Prelude
 import Bridge as Bridge
 import Control.Monad.Error.Class (throwError)
@@ -13,38 +12,57 @@ import Data.Function.Uncurried (runFn2, runFn3, runFn4)
 import Data.JNullable (JNullable, fromJNullable, jnull, nullify)
 import Data.JNullable as JNullable
 import Data.JOpt (fromJOpt)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Newtype (class Newtype, wrap)
-import Data.JNullable (jnull, nullify)
-import Data.Maybe (Maybe, fromMaybe)
 import Data.String as String
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.SymmetricCryptoKey as SymmetricCryptoKey
 import Data.Traversable (traverse)
+import Effect (Effect)
+import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Effect.Exception (error)
 import Effect.Exception as Exc
+import Run (Run)
+import Run.Reader (Reader, askAt)
+import Type.Prelude (Proxy(..))
 import Untagged.Union (type (|+|))
 
 -- | Creates the master key
 makePreloginKey ::
   forall r.
-  HasL "crypto" CryptoService r =>
-  PreloginResponse -> Email -> Password -> Al r SymmetricCryptoKey
+  PreloginResponse ->
+  Email ->
+  Password ->
+  Run
+    ( crypto ::
+        Reader CryptoService
+    , effect :: Effect
+    , aff :: Aff
+    | r
+    )
+    SymmetricCryptoKey
 makePreloginKey { kdf, kdfIterations } (Email email') password = do
-  crypto <- l (L :: L "crypto")
+  crypto <- askAt (Proxy :: _ "crypto")
   let
     email = (String.trim >>> String.toLower) email'
   liftPromise $ runFn4 crypto.makeKey password email kdf kdfIterations
 
 makeDecryptionKey ::
   forall r.
-  HasL "crypto" CryptoService r =>
   -- | Matser key (prelogin key)
-  SymmetricCryptoKey -> EncryptedString -> Al r SymmetricCryptoKey
+  SymmetricCryptoKey ->
+  EncryptedString ->
+  Run
+    ( crypto :: Reader CryptoService
+    , effect :: Effect
+    , aff :: Aff
+    | r
+    )
+    SymmetricCryptoKey
 makeDecryptionKey masterKey str = do
-  crypto <- l (L :: L "crypto")
+  crypto <- askAt (Proxy :: _ "crypto")
   let
     encryptedKeyString = EncString.fromString str
 
@@ -61,13 +79,22 @@ makeDecryptionKey masterKey str = do
 
 getLogInRequestToken ::
   forall r.
-  HasL "api" ApiService r =>
-  HasL "crypto" CryptoService r =>
-  PreloginResponse -> Email -> Password -> Maybe String -> Al r (IdentityCaptchaResponse |+| IdentityTokenResponse)
+  PreloginResponse ->
+  Email ->
+  Password ->
+  Maybe String ->
+  Run
+    ( api :: Reader ApiService
+    , crypto :: Reader CryptoService
+    , effect :: Effect
+    , aff :: Aff
+    | r
+    )
+    (IdentityCaptchaResponse |+| IdentityTokenResponse)
 getLogInRequestToken prelogin email password captchaResponse = do
   key <- makePreloginKey prelogin email password
-  crypto <- l (L :: L "crypto")
-  api :: ApiService <- l (L :: L "api")
+  crypto <- askAt (Proxy :: _ "crypto")
+  api :: ApiService <- askAt (Proxy :: _ "api")
   _localHashedPassword <-
     liftPromise
       $ runFn3 crypto.hashPassword password key (nullify hashPurposeLocalAuthorization)
@@ -90,20 +117,34 @@ getLogInRequestToken prelogin email password captchaResponse = do
             }
         }
 
-hashPassword :: forall r. HasL "cryptoFunctions" CryptoFunctions r => Password -> Al r Hash
+hashPassword ::
+  forall r.
+  Password ->
+  Run
+    ( cryptoFunctions :: Reader CryptoFunctions
+    , aff :: Aff
+    , effect :: Effect
+    | r
+    )
+    Hash
 hashPassword (Password password) = do
-  cryptoFunctions <- l (L :: L "cryptoFunctions")
+  cryptoFunctions <- askAt (Proxy :: _ "cryptoFunctions")
   liftPromise $ runFn2 cryptoFunctions.hash password cryptoFunctionsTypeSha512
 
 decrypt ::
   forall r.
-  HasL "crypto" CryptoService r =>
-  HasL "key" SymmetricCryptoKey r =>
   EncryptedString ->
-  Al r String
+  Run
+    ( key :: Reader SymmetricCryptoKey
+    , crypto :: Reader CryptoService
+    , aff :: Aff
+    , effect :: Effect
+    | r
+    )
+    String
 decrypt input = do
-  crypto <- l (L :: L "crypto")
-  key <- l (L :: L "key")
+  crypto <- askAt (Proxy :: _ "crypto")
+  key <- askAt (Proxy :: _ "key")
   liftPromise $ runFn2 crypto.decryptToUtf8 (EncString.fromString input) key
 
 liftPromise ∷ forall m a. MonadAff m ⇒ Promise a → m a
@@ -111,9 +152,15 @@ liftPromise = liftAff <<< Promise.toAff
 
 decodeCipher ::
   forall r.
-  HasL "crypto" CryptoService r =>
-  HasL "key" SymmetricCryptoKey r =>
-  CipherResponse -> Al r Bridge.Sub_LoadCipher
+  CipherResponse ->
+  Run
+    ( key :: Reader SymmetricCryptoKey
+    , crypto :: Reader CryptoService
+    , aff :: Aff
+    , effect :: Effect
+    | r
+    )
+    Bridge.Sub_LoadCipher
 decodeCipher cipher = do
   name <- decrypt cipher.name
   cipherType <- case cipher.type of
@@ -124,7 +171,7 @@ decodeCipher cipher = do
     n
       | cipherTypeLogin == n -> do
         case JNullable.toMaybe cipher.login of
-          Nothing -> throwError $ error "Login data is missing"
+          Nothing -> liftEffect $ throwError $ error "Login data is missing"
           Just login -> do
             username <- decryptNullable login.username
             password <- decryptNullable login.password
@@ -138,7 +185,7 @@ decodeCipher cipher = do
     n
       | cipherTypeCard == n -> do
         case JNullable.toMaybe cipher.card of
-          Nothing -> throwError $ error "Card data is missing"
+          Nothing -> liftEffect $ throwError $ error "Card data is missing"
           Just card -> do
             cardholderName <- decryptNullable card.cardholderName
             number <- decryptNullable card.number
@@ -152,7 +199,7 @@ decodeCipher cipher = do
     n
       | cipherTypeIdentity == n -> do
         case JNullable.toMaybe cipher.identity of
-          Nothing -> throwError $ error "Identity data is missing"
+          Nothing -> liftEffect $ throwError $ error "Identity data is missing"
           Just identity -> do
             firstName <- decryptNullable identity.firstName
             middleName <- decryptNullable identity.middleName
@@ -193,14 +240,19 @@ decodeCipher cipher = do
                   , title
                   , username
                   }
-    n -> throwError $ error $ "Unsupported cipher type: " <> show n
+    n -> liftEffect $ throwError $ error $ "Unsupported cipher type: " <> show n
   pure $ Bridge.Sub_LoadCipher { cipherType, name, id: cipher.id }
 
 decryptNullable ::
   forall x r.
   Newtype x (Maybe String) =>
-  HasL "crypto" CryptoService r =>
-  HasL "key" SymmetricCryptoKey r =>
   JNullable EncryptedString ->
-  Al r x
+  Run
+    ( key :: Reader SymmetricCryptoKey
+    , crypto :: Reader CryptoService
+    , aff :: Aff
+    , effect :: Effect
+    | r
+    )
+    x
 decryptNullable x = wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt x)
