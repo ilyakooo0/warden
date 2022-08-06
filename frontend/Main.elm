@@ -14,7 +14,14 @@ import Pages.Loader exposing (loader)
 import Pages.Login as Login
 import Pages.MasterPassword as MasterPassword
 import Pages.Navigation as Navigation exposing (TopButton(..))
+import Task
+import Time
 import Utils exposing (..)
+
+
+notificationLingerSeconds : Int
+notificationLingerSeconds =
+    15
 
 
 type Msg
@@ -41,6 +48,8 @@ type Msg
     | Open String
     | CaptchaMsg Captcha.Msg
     | ShowCaptcha Captcha.HCaptchSiteKey
+    | ClearNotification { currentTime : Time.Posix }
+    | UpdateLastNotificatioTime Time.Posix
 
 
 type alias CipherId =
@@ -51,12 +60,13 @@ type alias Model =
     { notifications : List Notification.Config
     , pageStack : Navigation.PageStack PageModel
     , userEmail : Maybe String
+    , lastNotificationTime : Time.Posix
     }
 
 
-appendNotification : Notification.Config -> Model -> Model
+appendNotification : Notification.Config -> Model -> ( Model, Cmd Msg )
 appendNotification cfg model =
-    { model | notifications = cfg :: model.notifications }
+    ( { model | notifications = cfg :: model.notifications }, Task.perform UpdateLastNotificatioTime Time.now )
 
 
 type PageModel
@@ -150,39 +160,43 @@ main =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    getBridge ShowError
-        (\msg ->
-            case msg of
-                Bridge.NeedsLogin ->
-                    ShowLoginPage
+subscriptions model =
+    Sub.batch
+        ([ getBridge ShowError
+            (\msg ->
+                case msg of
+                    Bridge.NeedsLogin ->
+                        ShowLoginPage
 
-                Bridge.Error err ->
-                    ShowError err
+                    Bridge.Error err ->
+                        ShowError err
 
-                Bridge.LoadCiphers ciphers ->
-                    LoadCiphers ciphers
+                    Bridge.LoadCiphers ciphers ->
+                        LoadCiphers ciphers
 
-                Bridge.LoginSuccessful ->
-                    OpenCiphersScreen
+                    Bridge.LoginSuccessful ->
+                        OpenCiphersScreen
 
-                Bridge.Reset ->
-                    Reset
+                    Bridge.Reset ->
+                        Reset
 
-                Bridge.NeedsMasterPassword { server, login } ->
-                    ShowMasterPasswordPage { server = server, login = login }
+                    Bridge.NeedsMasterPassword { server, login } ->
+                        ShowMasterPasswordPage { server = server, login = login }
 
-                Bridge.LoadCipher cipher ->
-                    ShowCipherPage cipher
+                    Bridge.LoadCipher cipher ->
+                        ShowCipherPage cipher
 
-                Bridge.RecieveEmail email ->
-                    RecieveEmail email
+                    Bridge.RecieveEmail email ->
+                        RecieveEmail email
 
-                Bridge.NeedsCaptcha uri ->
-                    ShowCaptcha uri
+                    Bridge.NeedsCaptcha uri ->
+                        ShowCaptcha uri
 
-                Bridge.CaptchaDone ->
-                    PopView
+                    Bridge.CaptchaDone ->
+                        PopView
+            )
+         ]
+            ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
         )
 
 
@@ -191,6 +205,7 @@ init =
     ( { notifications = []
       , pageStack = Nonempty.singleton LoadingPage
       , userEmail = Nothing
+      , lastNotificationTime = Time.millisToPosix 0
       }
     , FFI.sendBridge Bridge.Init
     )
@@ -235,14 +250,12 @@ update msg model =
                     ( { model | pageStack = mapHead (always (liftModel mdl)) model.pageStack }, cmd )
 
                 Err err ->
-                    ( appendNotification
+                    appendNotification
                         { title = "An error had occured"
                         , message = err
                         , severity = Notification.Error
                         }
                         model
-                    , cmd
-                    )
 
         appendPageStack : PageModel -> Model
         appendPageStack mdl =
@@ -257,24 +270,20 @@ update msg model =
     in
     case msg of
         RecieveMessage x ->
-            ( appendNotification
+            appendNotification
                 { title = "Got a message!"
                 , message = x
                 , severity = Notification.Info
                 }
                 model
-            , Cmd.none
-            )
 
         ShowError err ->
-            ( appendNotification
+            appendNotification
                 { title = "Something went wrong"
                 , message = err
                 , severity = Notification.Error
                 }
                 model
-            , Cmd.none
-            )
 
         CloseNotification ->
             ( { model | notifications = tailEmpty model.notifications }
@@ -374,6 +383,18 @@ update msg model =
 
                 _ ->
                     ( model, Cmd.none )
+
+        ClearNotification { currentTime } ->
+            if Time.posixToMillis model.lastNotificationTime + notificationLingerSeconds * 1000 > Time.posixToMillis currentTime then
+                ( model, Cmd.none )
+
+            else
+                ( { model | notifications = List.tail model.notifications |> Maybe.withDefault [] }
+                , Task.perform UpdateLastNotificatioTime Time.now
+                )
+
+        UpdateLastNotificatioTime time ->
+            ( { model | lastNotificationTime = time }, Cmd.none )
 
 
 loginCallbacks : Login.Callbacks Msg

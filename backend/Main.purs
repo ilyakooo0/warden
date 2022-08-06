@@ -160,7 +160,7 @@ main = do
           send $ Bridge.Error "The password is wrong. Please try again."
           requestMasterPassword
     Bridge.Init -> do
-      liftEffect $ Storage.get storage TokenKey
+      Storage.get storage TokenKey
         >>= \x ->
             Elm.send app case x of
               Just _ -> Bridge.LoginSuccessful
