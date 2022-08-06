@@ -21,12 +21,26 @@ nav.p-tabs__list {
   transform: rotate(90deg);
 }
 
+@keyframes floating-notification-animation {
+  from {
+    transform: translateY(-60px)  ;
+    opacity: 0
+  }
+
+  to {
+    transform: none;
+    opacity: 1
+  }
+}
+
 .floating-notifications {
   position: fixed;
   top: 1rem;
   right: 1rem;
   left: 1rem;
   z-index: 9999;
+  animation-duration: 0.5s;
+  animation-name: floating-notification-animation;
 }
 
 .simple-flex-center {
