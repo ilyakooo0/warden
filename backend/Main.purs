@@ -118,7 +118,11 @@ main = do
                   ( runBaseAff' $ run $ runReaderAt (Proxy :: _ "api") unauthedApi
                       $ Logic.getLogInRequestToken prelogin (Email email) (Password password) captchaToken
                   )
-                  (const $ liftEffect $ Exc.throw "Could not log in. Please check your data and try again.")
+                  ( const
+                      $ liftEffect do
+                          Elm.send app Bridge.NeedsLogin
+                          Exc.throw "Could not log in. Please check your data and try again."
+                  )
           case toEither1 loginResponse of
             Left { siteKey } -> send $ Bridge.NeedsCaptcha siteKey
             Right token -> do

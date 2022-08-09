@@ -291,7 +291,7 @@ update msg model =
             )
 
         SubmitLogin data ->
-            ( model
+            ( appendPageStack <| LoadingPage
             , FFI.sendBridge (Bridge.Login data)
             )
 
