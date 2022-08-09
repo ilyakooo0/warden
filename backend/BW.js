@@ -16,6 +16,9 @@ import { I18nService } from "../../deps/bw/libs/shared/dist/src/services/i18n.se
 import { StateService as BaseStateService } from "../../deps/bw/libs/shared/dist/src/services/state.service";
 import { PasswordTokenRequest } from "../../deps/bw/libs/shared/dist/src/models/request/identityToken/passwordTokenRequest";
 import { TokenRequestTwoFactor } from "../../deps/bw/libs/common/src/models/request/identityToken/tokenRequestTwoFactor.ts";
+import { CipherRequest } from "../../deps/bw/libs/common/src/models/request/cipherRequest";
+import { Cipher } from "../../deps/bw/libs/common/src/models/domain/cipher";
+import { CipherData } from "../../deps/bw/libs/common/src/models/data/cipherData";
 
 function sanitize(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -72,11 +75,17 @@ export function getServices() {
           )
         ),
         getSync: () => api.getSync().then(sanitize),
+        postCipher: (cipher) => api.postCipher(makeCipherRequest(cipher)),
+        putCipher: (id) => (cipher) => api.putCipher(id, makeCipherRequest(cipher)),
       }
     },
     crypto: bg.cryptoService,
     cryptoFunctions: bg.cryptoFunctionService
   }
+}
+
+function makeCipherRequest(cipher) {
+  return new CipherRequest(new Cipher(new CipherData(cipher)))
 }
 
 class MainBackground {

@@ -385,8 +385,11 @@ type CollectionDetailsResponse
     , readOnly :: Boolean
     }
 
+
+type CipherId = String
+
 type CipherResponse
-  = { id :: String
+  = { id :: CipherId
     , organizationId :: JNullable String
     , folderId :: JNullable String
     , type :: CipherType
