@@ -142,7 +142,9 @@ main = do
         let
           sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
         send $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
-        liftEffect $ Storage.store storage SyncKey sync
+        api <- getAuthedApi
+        newSync <- liftPromise $ api.getSync unit
+        liftEffect $ Storage.store storage SyncKey newSync
     Bridge.NeedsReset -> do
       WebStorage.clear storage
       Elm.send app Bridge.Reset
