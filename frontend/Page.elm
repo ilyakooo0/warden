@@ -18,5 +18,5 @@ type alias InitializedPage init model imsg emsg =
     , view : model -> List (Html emsg)
     , update : imsg -> model -> ( Result String model, Cmd emsg )
     , subscriptions : model -> Sub emsg
-    , title : model -> String
+    , title : model -> List (Html emsg)
     }

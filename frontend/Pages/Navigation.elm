@@ -24,7 +24,7 @@ type TopButton msg
 
 type alias Config msg =
     { topButton : Maybe (TopButton msg)
-    , title : String
+    , title : List (Html msg)
     }
 
 
@@ -40,7 +40,7 @@ navigation { topButton, title } =
          )
             ++ [ nav [ Attr.class "p-tabs p-tabs__list no-scroll-bar" ]
                     [ h3 []
-                        [ case topButton of
+                        ([ case topButton of
                             Nothing ->
                                 button
                                     [ Attr.class "p-button--base is-inline u-no-margin", Attr.style "visibility" "hidden" ]
@@ -55,8 +55,9 @@ navigation { topButton, title } =
                                 button
                                     [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick cfg.toggle ]
                                     [ i [ Attr.class "p-icon--menu" ] [] ]
-                        , text title
-                        ]
+                         ]
+                            ++ title
+                        )
                     ]
                ]
         )
@@ -143,7 +144,7 @@ showNavigationView :
     ->
         (model
          ->
-            { title : String
+            { title : List (Html msg)
             , body : List (Html msg)
             , topButton : Maybe (TopButton msg)
             }

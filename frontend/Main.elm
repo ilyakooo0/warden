@@ -82,7 +82,7 @@ showPage :
     String
     -> PageModel
     ->
-        { title : String
+        { title : List (Html Msg)
         , body : List (Html Msg)
         , topButton : Maybe (Navigation.TopButton Msg)
         }
@@ -113,7 +113,7 @@ showPage email page =
             }
 
         LoadingPage ->
-            { title = ""
+            { title = []
             , body = [ loader ]
             , topButton = Just (BackButton PopView)
             }

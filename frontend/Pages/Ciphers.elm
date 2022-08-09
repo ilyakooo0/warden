@@ -98,23 +98,26 @@ page callbacks liftMsg =
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
     , title =
         \{ ciphersListFilter } ->
-            case ciphersListFilter of
-                AllCiphers ->
-                    "All items"
+            [ text
+                (case ciphersListFilter of
+                    AllCiphers ->
+                        "All items"
 
-                SpecificCiphers cipherType ->
-                    case cipherType of
-                        Bridge.CardType ->
-                            "Cards"
+                    SpecificCiphers cipherType ->
+                        case cipherType of
+                            Bridge.CardType ->
+                                "Cards"
 
-                        Bridge.IdentityType ->
-                            "Identities"
+                            Bridge.IdentityType ->
+                                "Identities"
 
-                        Bridge.LoginType ->
-                            "Passwords"
+                            Bridge.LoginType ->
+                                "Passwords"
 
-                        Bridge.NoteType ->
-                            "Notes"
+                            Bridge.NoteType ->
+                                "Notes"
+                )
+            ]
     }
 
 

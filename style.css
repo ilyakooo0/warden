@@ -13,8 +13,13 @@ nav.p-tabs__list {
   position: sticky;
   background-color: white;
   padding-bottom: 1rem;
+  padding-right: 1rem;
   padding-bottom: 0;
   z-index: 10;
+}
+
+nav h3 {
+  width: 100%;
 }
 
 .ninety-counter {

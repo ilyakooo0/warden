@@ -29,7 +29,7 @@ page callbacks liftMsg =
     , view = \model -> view model |> List.map (Html.map liftMsg)
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title = always "Captcha"
+    , title = always [ text "Captcha" ]
     }
 
 
