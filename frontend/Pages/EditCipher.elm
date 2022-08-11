@@ -1,10 +1,12 @@
 module Pages.EditCipher exposing (..)
 
 import Bridge
+import GlobalEvents
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
 import Page exposing (..)
+import Types exposing (CipherId)
 import Utils exposing (..)
 
 
@@ -23,7 +25,7 @@ type alias Callbacks msg =
 
 page : Callbacks emsg -> Page Bridge.FullCipher Model Msg emsg
 page callbacks liftMsg =
-    { init = \cipher -> Tuple.mapSecond (Cmd.map liftMsg) (init cipher)
+    { init = \data -> Tuple.mapSecond (Cmd.map liftMsg) (init data)
     , view = \model -> view model |> List.map (Html.map liftMsg)
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
@@ -32,6 +34,18 @@ page callbacks liftMsg =
             [ text fullCipher.name
             , span [ Attr.class "u-float-right" ] [ iconButton "task-outstanding" (callbacks.save fullCipher) ]
             ]
+    , event =
+        \model ev ->
+            case ev of
+                GlobalEvents.UpdateCipher c ->
+                    { model
+                        | fullCipher =
+                            if c.id == model.fullCipher.id then
+                                c
+
+                            else
+                                model.fullCipher
+                    }
     }
 
 

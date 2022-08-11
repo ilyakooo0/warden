@@ -3,6 +3,7 @@ module Main exposing (..)
 import Bridge
 import Browser
 import FFI exposing (getBridge, sendBridge)
+import GlobalEvents exposing (Event)
 import Html exposing (..)
 import Html.Lazy as Lazy
 import List.Nonempty as Nonempty exposing (Nonempty(..))
@@ -17,6 +18,7 @@ import Pages.MasterPassword as MasterPassword
 import Pages.Navigation as Navigation exposing (TopButton(..))
 import Task
 import Time
+import Types exposing (CipherId)
 import Utils exposing (..)
 
 
@@ -30,6 +32,7 @@ type Msg
     | RecieveMessage String
     | ShowLoginPage
     | ShowError String
+    | ShowInfo String String
     | CloseNotification
     | SubmitLogin { email : String, password : String, server : String }
     | LoginMsg Login.Msg
@@ -42,7 +45,7 @@ type Msg
     | SendMasterPassword { password : String }
     | ShowMasterPasswordPage { server : String, login : String }
     | CipherMsg Cipher.Msg
-    | ShowCipherPage Bridge.Sub_LoadCipher
+    | ShowCipherPage Bridge.FullCipher
     | RequestCipher CipherId
     | PopView
     | RecieveEmail String
@@ -54,10 +57,8 @@ type Msg
     | ClearNotification { currentTime : Time.Posix }
     | UpdateLastNotificatioTime Time.Posix
     | EditCipher Bridge.FullCipher
-
-
-type alias CipherId =
-    String
+    | UpdateCipher Bridge.FullCipher
+    | FireGlobalEvent Event
 
 
 type alias Model =
@@ -213,6 +214,9 @@ subscriptions model =
 
                     Bridge.CaptchaDone ->
                         PopView
+
+                    Bridge.CipherChanged c ->
+                        ShowInfo "Entry updated" ("The entry \"" ++ c.name ++ "\" has been successfully updated.")
             )
          ]
             ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
@@ -304,6 +308,14 @@ update msg model =
                 }
                 model
 
+        ShowInfo title inf ->
+            appendNotification
+                { title = title
+                , message = inf
+                , severity = Notification.Info
+                }
+                model
+
         CloseNotification ->
             ( { model | notifications = tailEmpty model.notifications }
             , Cmd.none
@@ -335,9 +347,45 @@ update msg model =
                 |> Tuple.mapFirst (\pageModel -> appendPageStack <| LoginModel pageModel)
 
         LoadCiphers ciphers ->
-            (Ciphers.page ciphersCallbacks CiphersMsg).init ciphers
-                |> Tuple.mapFirst (\pageModel -> appendPageStack <| CiphersModel pageModel)
+            let
+                ciphersShown =
+                    model.pageStack
+                        |> Nonempty.toList
+                        |> List.any
+                            (\x ->
+                                case x of
+                                    CiphersModel _ ->
+                                        True
 
+                                    _ ->
+                                        False
+                            )
+
+                ( pageModel, cmd ) =
+                    (Ciphers.page ciphersCallbacks CiphersMsg).init ciphers
+            in
+            ( if ciphersShown then
+                { model
+                    | pageStack =
+                        model.pageStack
+                            |> Nonempty.map
+                                (\x ->
+                                    case x of
+                                        CiphersModel _ ->
+                                            CiphersModel pageModel
+
+                                        other ->
+                                            other
+                                )
+                }
+
+              else
+                appendPageStack <| CiphersModel pageModel
+            , cmd
+            )
+
+        -- (Ciphers.page ciphersCallbacks CiphersMsg).init ciphers
+        --     |> Tuple.mapFirst (\pageModel -> appendPageStack <| CiphersModel pageModel)
         OpenCiphersScreen ->
             ( appendPageStack <| LoadingPage, Cmd.batch [ sendBridge Bridge.NeedCiphersList, sendBridge Bridge.NeedEmail ] )
 
@@ -430,6 +478,47 @@ update msg model =
             (EditCipher.page editCipherCallbacks EditCipherMsg).init cipher
                 |> Tuple.mapFirst (\pageModel -> keepStackWith <| EditCipherModel pageModel)
 
+        UpdateCipher cipher ->
+            ( model
+            , Cmd.batch
+                [ Bridge.UpdateCipher cipher |> sendBridge
+                , cipher |> GlobalEvents.UpdateCipher |> FireGlobalEvent |> pureCmd
+                , PopView |> pureCmd
+                ]
+            )
+
+        FireGlobalEvent ev ->
+            ( { model
+                | pageStack =
+                    model.pageStack
+                        |> Nonempty.map
+                            (\page ->
+                                case page of
+                                    LoadingPage ->
+                                        LoadingPage
+
+                                    LoginModel m ->
+                                        (Login.page loginCallbacks LoginMsg).event m ev |> LoginModel
+
+                                    CiphersModel m ->
+                                        (Ciphers.page ciphersCallbacks CiphersMsg).event m ev |> CiphersModel
+
+                                    MasterPasswordModel m ->
+                                        (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).event m ev |> MasterPasswordModel
+
+                                    CipherModel m ->
+                                        (Cipher.page cipherCallbacks CipherMsg).event m ev |> CipherModel
+
+                                    EditCipherModel m ->
+                                        (EditCipher.page editCipherCallbacks EditCipherMsg).event m ev |> EditCipherModel
+
+                                    CaptchaModel m ->
+                                        (Captcha.page captchaCallbacks CaptchaMsg).event m ev |> CaptchaModel
+                            )
+              }
+            , Cmd.none
+            )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -448,7 +537,7 @@ cipherCallbacks =
 
 editCipherCallbacks : EditCipher.Callbacks Msg
 editCipherCallbacks =
-    { save = always Noop }
+    { save = UpdateCipher }
 
 
 captchaCallbacks : Captcha.Callbacks

@@ -401,10 +401,10 @@ type CipherResponse
     , identity :: JNullable IdentityApi
     , secureNote :: JNullable SecureNoteApi
     , favorite :: Boolean
-    , edit :: Boolean
-    , viewPassword :: Boolean
-    , organizationUseTotp :: Boolean
-    , revisionDate :: Timestamp
+    , edit :: JNullable Boolean
+    , viewPassword :: JNullable Boolean
+    , organizationUseTotp :: JNullable Boolean
+    , revisionDate :: JNullable Timestamp
     , attachments :: JNullable (Array AttachmentResponse)
     , passwordHistory :: JNullable (Array PasswordHistoryResponse)
     , collectionIds :: JNullable (Array String)

@@ -1,5 +1,6 @@
 module Page exposing (..)
 
+import GlobalEvents exposing (Event)
 import Html exposing (..)
 import Html.Events exposing (..)
 
@@ -19,4 +20,5 @@ type alias InitializedPage init model imsg emsg =
     , update : imsg -> model -> ( Result String model, Cmd emsg )
     , subscriptions : model -> Sub emsg
     , title : model -> List (Html emsg)
+    , event : model -> Event -> model
     }

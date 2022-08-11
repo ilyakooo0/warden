@@ -1,6 +1,7 @@
 module Pages.Cipher exposing (..)
 
 import Bridge
+import GlobalEvents
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
@@ -9,7 +10,7 @@ import Utils exposing (..)
 
 
 type alias Model =
-    { cipher : Bridge.Sub_LoadCipher
+    { cipher : Bridge.FullCipher
     , passwordHidden : Bool
     , cvvHidden : Bool
     }
@@ -23,24 +24,39 @@ type Msg
 
 
 type alias Callbacks msg =
-    { copy : String -> msg, open : String -> msg, edit : Bridge.FullCipher -> msg }
+    { copy : String -> msg
+    , open : String -> msg
+    , edit : Bridge.FullCipher -> msg
+    }
 
 
-page : Callbacks emsg -> Page Bridge.Sub_LoadCipher Model Msg emsg
+page : Callbacks emsg -> Page Bridge.FullCipher Model Msg emsg
 page callbacks liftMsg =
-    { init = \cipher -> Tuple.mapSecond (Cmd.map liftMsg) (init cipher)
+    { init = \data -> Tuple.mapSecond (Cmd.map liftMsg) (init data)
     , view = \model -> view model |> List.map (Html.map liftMsg)
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
     , title =
         \{ cipher } ->
-            [ text cipher.cipher.name
-            , span [ Attr.class "u-float-right" ] [ iconButton "edit" (callbacks.edit cipher.cipher) ]
+            [ text cipher.name
+            , span [ Attr.class "u-float-right" ] [ iconButton "edit" (callbacks.edit cipher) ]
             ]
+    , event =
+        \model ev ->
+            case ev of
+                GlobalEvents.UpdateCipher c ->
+                    { model
+                        | cipher =
+                            if c.id == model.cipher.id then
+                                c
+
+                            else
+                                model.cipher
+                    }
     }
 
 
-init : Bridge.Sub_LoadCipher -> ( Model, Cmd Msg )
+init : Bridge.FullCipher -> ( Model, Cmd Msg )
 init cipher =
     ( { cipher = cipher
       , passwordHidden = True
@@ -83,7 +99,7 @@ row { name, value, nameIcon, icons } =
 
 view : Model -> List (Html Msg)
 view { passwordHidden, cipher, cvvHidden } =
-    (case cipher.cipher.cipher of
+    (case cipher.cipher of
         Bridge.LoginCipher { username, password, uris } ->
             maybeList username
                 (\x ->

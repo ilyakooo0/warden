@@ -30,6 +30,7 @@ page callbacks liftMsg =
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
     , title = always [ text "Captcha" ]
+    , event = \model _ -> model
     }
 
 

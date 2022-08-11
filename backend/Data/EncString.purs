@@ -25,3 +25,5 @@ type EncryptionType
   = Int
 
 foreign import fromString :: EncryptedString -> EncString
+
+foreign import toString :: EncString -> EncryptedString

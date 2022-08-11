@@ -20,6 +20,7 @@ type CryptoService
     , hashPassword :: Fn3 Password SymmetricCryptoKey (JNullable HashPurpose) (Promise StringHash)
     , decryptToUtf8 :: Fn2 EncString SymmetricCryptoKey (Promise String)
     , decryptToBytes :: Fn2 EncString SymmetricCryptoKey (Promise ArrayBuffer)
+    , encrypt :: Fn2 String SymmetricCryptoKey (Promise EncString)
     , stretchKey :: SymmetricCryptoKey -> Promise SymmetricCryptoKey
     }
 
@@ -30,7 +31,7 @@ type ApiService
     , postIdentityToken :: PasswordTokenRequest -> Promise (IdentityCaptchaResponse |+| IdentityTokenResponse)
     , getSync :: Unit -> Promise SyncResponse
     , postCipher :: CipherResponse -> Promise CipherResponse
-    , putCipher :: CipherId -> CipherResponse -> Promise CipherResponse
+    , putCipher :: CipherResponse -> Promise CipherResponse
     }
 
 cryptoFunctionsTypeSha1 = "sha1" :: CryptoFunctionsType

@@ -14,10 +14,9 @@ Sub:
     server: String
     login: String
 - Reset
-- LoadCipher:
-    id: String
-    cipher: FullCipher
+- LoadCipher: FullCipher
 - RecieveEmail: String
+- CipherChanged: FullCipher
 
 Cmd:
 - Init
@@ -32,8 +31,12 @@ Cmd:
 - NeedEmail
 - Copy: String
 - Open: String
+- UpdateCipher: FullCipher
 
 FullCipher:
+    reprompt: Int
+    favorite: Bool
+    id: String
     name: String
     cipher: Cipher
 

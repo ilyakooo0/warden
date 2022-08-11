@@ -142,7 +142,10 @@ pushView model stack =
 
 popView : PageStack model -> PageStack model
 popView stack =
-    Nonempty.tail stack |> Nonempty.fromList |> Maybe.withDefault stack
+    stack
+        |> Nonempty.tail
+        |> Nonempty.fromList
+        |> Maybe.withDefault stack
 
 
 showNavigationView :

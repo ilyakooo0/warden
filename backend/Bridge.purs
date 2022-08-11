@@ -456,6 +456,7 @@ data Cmd =
   | Open String
   | RequestCipher String
   | SendMasterPassword String
+  | UpdateCipher FullCipher
 
 instance encodeJsonCmd :: EncodeJson Cmd where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions
@@ -468,7 +469,10 @@ derive instance ordCmd :: Ord Cmd
 newtype FullCipher =
     FullCipher {
       cipher :: Cipher
+    , favorite :: Boolean
+    , id :: String
     , name :: String
+    , reprompt :: Int
     }
 
 derive instance newtypeFullCipher :: Newtype FullCipher _
@@ -479,21 +483,6 @@ instance decodeJsonFullCipher :: DecodeJson FullCipher where
 derive instance genericFullCipher :: Generic FullCipher _
 derive instance eqFullCipher :: Eq FullCipher
 derive instance ordFullCipher :: Ord FullCipher
-
-newtype Sub_LoadCipher =
-    Sub_LoadCipher {
-      cipher :: FullCipher
-    , id :: String
-    }
-
-derive instance newtypeSub_LoadCipher :: Newtype Sub_LoadCipher _
-instance encodeJsonSub_LoadCipher :: EncodeJson Sub_LoadCipher where
-  encodeJson = genericEncodeAeson Argonaut.defaultOptions
-instance decodeJsonSub_LoadCipher :: DecodeJson Sub_LoadCipher where
-  decodeJson = genericDecodeAeson Argonaut.defaultOptions
-derive instance genericSub_LoadCipher :: Generic Sub_LoadCipher _
-derive instance eqSub_LoadCipher :: Eq Sub_LoadCipher
-derive instance ordSub_LoadCipher :: Ord Sub_LoadCipher
 
 newtype Sub_LoadCiphers =
     Sub_LoadCiphers {
@@ -541,8 +530,9 @@ derive instance ordSub_NeedsMasterPassword :: Ord Sub_NeedsMasterPassword
 
 data Sub =
     CaptchaDone
+  | CipherChanged FullCipher
   | Error String
-  | LoadCipher Sub_LoadCipher
+  | LoadCipher FullCipher
   | LoadCiphers Sub_LoadCiphers_List
   | LoginSuccessful
   | NeedsCaptcha String

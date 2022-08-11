@@ -1,6 +1,7 @@
 module Pages.Ciphers exposing (Callbacks, Model, Msg, menuConfig, page)
 
 import Bridge
+import GlobalEvents
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
@@ -118,6 +119,22 @@ page callbacks liftMsg =
                                 "Notes"
                 )
             ]
+    , event =
+        \model ev ->
+            case ev of
+                GlobalEvents.UpdateCipher c ->
+                    { model
+                        | ciphers =
+                            model.ciphers
+                                |> List.map
+                                    (\cipher ->
+                                        if cipher.id == c.id then
+                                            { cipher | name = c.name }
+
+                                        else
+                                            cipher
+                                    )
+                    }
     }
 
 

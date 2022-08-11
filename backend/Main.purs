@@ -3,9 +3,9 @@ module Main
   ) where
 
 import Prelude
-import BW (ApiService, CryptoService, Services, CryptoFunctions)
+import BW (ApiService, CryptoFunctions, Services, CryptoService)
 import BW as WB
-import BW.Logic (decodeCipher, decrypt, hashPassword, liftPromise)
+import BW.Logic (decodeCipher, decrypt, encodeCipher, hashPassword, liftPromise)
 import BW.Logic as Logic
 import BW.Types (CipherResponse, Email(..), Password(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
 import Bridge as Bridge
@@ -15,9 +15,12 @@ import Data.Array as Array
 import Data.Clipboard as Clipboard
 import Data.DateTime (DateTime)
 import Data.Either (Either(..))
+import Data.Function.Uncurried (runFn2)
 import Data.HCaptcha (bindHCaptchToken)
 import Data.JNullable (jnull, nullify)
-import Data.Maybe (Maybe(..))
+import Data.JNullable as JNullable
+import Data.Maybe (Maybe(..), maybe)
+import Data.Newtype (unwrap)
 import Data.OpenURL (openURL)
 import Data.Ord.Down (Down(..))
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
@@ -139,16 +142,7 @@ main = do
                 Storage.store storage SyncKey sync
                 Storage.store storage TokenKey token
               send Bridge.LoginSuccessful
-    Bridge.NeedCiphersList ->
-      runWithDecryptionKey do
-        sync <- getOrReset SyncKey
-        ciphers <- traverse processCipher sync.ciphers
-        let
-          sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
-        send $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
-        api <- getAuthedApi
-        newSync <- liftPromise $ api.getSync unit
-        liftEffect $ Storage.store storage SyncKey newSync
+    Bridge.NeedCiphersList -> runWithDecryptionKey performSync
     Bridge.NeedsReset -> do
       WebStorage.clear storage
       Elm.send app Bridge.Reset
@@ -190,6 +184,14 @@ main = do
       runWithDecryptionKey do
         liftPromise $ Clipboard.clipboard text
     Bridge.Open uri -> openURL uri
+    Bridge.UpdateCipher fullCipher ->
+      runWithDecryptionKey do
+        api <- getAuthedApi
+        cipher <- encodeCipher fullCipher
+        newCipher <- liftPromise (api.putCipher cipher) >>= decodeCipher
+        send $ Bridge.CipherChanged newCipher
+        performSync
+        pure unit
 
 processCipher ::
   forall r.
@@ -214,12 +216,12 @@ processCipher cipher = do
     n
       | n == cipherTypeIdentity -> pure Bridge.IdentityType
     n -> liftEffect $ throwError $ error $ "Unsupported cipher type: " <> show n
-  date <- liftEffect $ Timestamp.toDateTime cipher.revisionDate
+  date <- liftEffect $ maybe (pure bottom) (Timestamp.toDateTime) $ JNullable.toMaybe cipher.revisionDate
   pure
     $ { cipher:
           Bridge.Sub_LoadCiphers
             { name: name
-            , date: Timestamp.toLocalDateTimeString cipher.revisionDate
+            , date: maybe "" Timestamp.toLocalDateTimeString $ JNullable.toMaybe cipher.revisionDate
             , id: cipher.id
             , cipherType
             }
@@ -321,3 +323,26 @@ send ::
 send sub = do
   app <- askAt (Proxy :: _ "app")
   liftEffect $ Elm.send app sub
+
+performSync ::
+  forall r.
+  Run
+    ( storage :: Reader Storage
+    , app :: Reader Elm
+    , aff :: Aff
+    , effect :: Effect
+    , services :: Reader Services
+    , crypto :: Reader CryptoService
+    , key :: Reader SymmetricCryptoKey
+    | r
+    )
+    Unit
+performSync = do
+  api <- getAuthedApi
+  storage <- askAt (Proxy :: _ "storage")
+  newSync <- liftPromise $ api.getSync unit
+  liftEffect $ Storage.store storage SyncKey newSync
+  ciphers <- traverse processCipher newSync.ciphers
+  let
+    sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
+  send $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers

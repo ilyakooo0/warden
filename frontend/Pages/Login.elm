@@ -33,6 +33,7 @@ page callbacks liftMsg =
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
     , title = always [ text "Log into bitwarden" ]
+    , event = \model _ -> model
     }
 
 
@@ -98,7 +99,6 @@ view model =
             ]
             []
          ]
-            -- ++ maybeList model.siteKey (\siteKey -> iframe [ Attr.src ("https://iko.soy/warden/hcaptcha.html?" ++ siteKey) ] [])
             ++ [ alignRight [ button [ Attr.type_ "submit" ] [ text "Log in" ] ] ]
         )
     ]

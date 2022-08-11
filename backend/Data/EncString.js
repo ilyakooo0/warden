@@ -6,6 +6,10 @@ export function fromString(str) {
   return x
 }
 
+export function toString(encStr) {
+  return encStr.encryptedString
+}
+
 export function encryptionType(encStr) {
   return encStr.encryptionType
 }

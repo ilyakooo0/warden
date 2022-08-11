@@ -11,13 +11,14 @@ import Data.EncString as EncString
 import Data.Function.Uncurried (runFn2, runFn3, runFn4)
 import Data.JNullable (JNullable, fromJNullable, jnull, nullify)
 import Data.JNullable as JNullable
-import Data.JOpt (fromJOpt)
+import Data.JOpt (JOpt(..), fromJOpt)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Newtype (class Newtype, wrap)
+import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.String as String
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.SymmetricCryptoKey as SymmetricCryptoKey
 import Data.Traversable (traverse)
+import Data.Undefined.NoProblem (opt, undefined)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
@@ -147,8 +148,158 @@ decrypt input = do
   key <- askAt (Proxy :: _ "key")
   liftPromise $ runFn2 crypto.decryptToUtf8 (EncString.fromString input) key
 
+encrypt ::
+  forall r.
+  String ->
+  Run
+    ( key :: Reader SymmetricCryptoKey
+    , crypto :: Reader CryptoService
+    , aff :: Aff
+    , effect :: Effect
+    | r
+    )
+    EncryptedString
+encrypt input = do
+  crypto <- askAt (Proxy :: _ "crypto")
+  key <- askAt (Proxy :: _ "key")
+  map EncString.toString $ liftPromise $ runFn2 crypto.encrypt input key
+
 liftPromise ∷ forall m a. MonadAff m ⇒ Promise a → m a
 liftPromise = liftAff <<< Promise.toAff
+
+encodeCipher ::
+  forall r.
+  Bridge.FullCipher ->
+  Run
+    ( key :: Reader SymmetricCryptoKey
+    , crypto :: Reader CryptoService
+    , aff :: Aff
+    , effect :: Effect
+    | r
+    )
+    CipherResponse
+encodeCipher (Bridge.FullCipher { name, cipher, id, favorite, reprompt }) = do
+  let
+    f :: CipherResponse -> Run _ CipherResponse
+    f x = case cipher of
+      Bridge.CardCipher (Bridge.Cipher_CardCipher c) -> do
+        cardholderName <- encryptNullable c.cardholderName
+        brand <- encryptNullable c.brand
+        number <- encryptNullable c.number
+        expMonth <- encryptNullable c.expMonth
+        expYear <- encryptNullable c.expYear
+        code <- encryptNullable c.code
+        pure
+          x
+            { card =
+              nullify
+                { cardholderName
+                , brand
+                , number
+                , expMonth
+                , expYear
+                , code
+                }
+            , type = cipherTypeCard
+            }
+      Bridge.IdentityCipher (Bridge.Cipher_IdentityCipher identity) -> do
+        address1 <- encryptNullable identity.address1
+        address2 <- encryptNullable identity.address2
+        address3 <- encryptNullable identity.address3
+        city <- encryptNullable identity.city
+        company <- encryptNullable identity.company
+        country <- encryptNullable identity.country
+        email <- encryptNullable identity.email
+        firstName <- encryptNullable identity.firstName
+        lastName <- encryptNullable identity.lastName
+        licenseNumber <- encryptNullable identity.licenseNumber
+        middleName <- encryptNullable identity.middleName
+        passportNumber <- encryptNullable identity.passportNumber
+        phone <- encryptNullable identity.phone
+        postalCode <- encryptNullable identity.postalCode
+        ssn <- encryptNullable identity.ssn
+        state <- encryptNullable identity.state
+        title <- encryptNullable identity.title
+        username <- encryptNullable identity.username
+        pure
+          x
+            { identity =
+              nullify
+                { address1
+                , address2
+                , address3
+                , city
+                , company
+                , country
+                , email
+                , firstName
+                , lastName
+                , licenseNumber
+                , middleName
+                , passportNumber
+                , phone
+                , postalCode
+                , ssn
+                , state
+                , title
+                , username
+                }
+            , type = cipherTypeIdentity
+            }
+      Bridge.LoginCipher (Bridge.Cipher_LoginCipher login) -> do
+        password <- encryptNullable login.password
+        uris <-
+          traverse
+            ( \uri -> do
+                uriEnc <- encrypt uri
+                pure { uri: uriEnc, match: jnull }
+            )
+            (unwrap login.uris)
+        username <- encryptNullable login.username
+        pure
+          x
+            { login =
+              nullify
+                { password
+                , uris: JOpt $ opt uris
+                , username
+                , passwordRevisionDate: jnull
+                , totp: jnull
+                , autofillOnPageLoad: JOpt undefined
+                }
+            , type = cipherTypeLogin
+            }
+      Bridge.NoteCipher note -> do
+        encNote <- encrypt note
+        pure
+          x
+            { notes = nullify encNote
+            , type = cipherTypeSecureNote
+            }
+  encName <- encrypt name
+  f
+    { id
+    , organizationId: jnull
+    , folderId: jnull
+    , type: 0
+    , name: encName
+    , notes: jnull
+    , fields: jnull
+    , login: jnull
+    , card: jnull
+    , identity: jnull
+    , secureNote: jnull
+    , favorite: favorite
+    , edit: jnull
+    , viewPassword: jnull
+    , organizationUseTotp: jnull
+    , revisionDate: jnull
+    , attachments: jnull
+    , passwordHistory: jnull
+    , collectionIds: jnull
+    , deletedDate: jnull
+    , reprompt
+    }
 
 decodeCipher ::
   forall r.
@@ -160,7 +311,7 @@ decodeCipher ::
     , effect :: Effect
     | r
     )
-    Bridge.Sub_LoadCipher
+    Bridge.FullCipher
 decodeCipher cipher = do
   name <- decrypt cipher.name
   cipherType <- case cipher.type of
@@ -242,9 +393,12 @@ decodeCipher cipher = do
                   }
     n -> liftEffect $ throwError $ error $ "Unsupported cipher type: " <> show n
   pure
-    $ Bridge.Sub_LoadCipher
-        { cipher: Bridge.FullCipher { cipher: cipherType, name }
+    $ wrap
+        { cipher: cipherType
+        , name
         , id: cipher.id
+        , favorite: cipher.favorite
+        , reprompt: cipher.reprompt
         }
 
 decryptNullable ::
@@ -260,3 +414,19 @@ decryptNullable ::
     )
     x
 decryptNullable x = wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt x)
+
+encryptNullable ::
+  forall x r.
+  Newtype x (Maybe String) =>
+  x ->
+  Run
+    ( key :: Reader SymmetricCryptoKey
+    , crypto :: Reader CryptoService
+    , aff :: Aff
+    , effect :: Effect
+    | r
+    )
+    (JNullable EncryptedString)
+encryptNullable x = case unwrap x of
+  Nothing -> pure jnull
+  Just y -> nullify <$> encrypt y

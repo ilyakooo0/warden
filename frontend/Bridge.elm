@@ -510,6 +510,7 @@ type Cmd  =
     | Open String
     | RequestCipher String
     | SendMasterPassword String
+    | UpdateCipher FullCipher
 
 jsonDecCmd : Json.Decode.Decoder ( Cmd )
 jsonDecCmd =
@@ -523,6 +524,7 @@ jsonDecCmd =
             , ("Open", Json.Decode.lazy (\_ -> Json.Decode.map Open (Json.Decode.string)))
             , ("RequestCipher", Json.Decode.lazy (\_ -> Json.Decode.map RequestCipher (Json.Decode.string)))
             , ("SendMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map SendMasterPassword (Json.Decode.string)))
+            , ("UpdateCipher", Json.Decode.lazy (\_ -> Json.Decode.map UpdateCipher (jsonDecFullCipher)))
             ]
         jsonDecObjectSetCmd = Set.fromList []
     in  decodeSumTaggedObject "Cmd" "tag" "contents" jsonDecDictCmd jsonDecObjectSetCmd
@@ -539,46 +541,36 @@ jsonEncCmd  val =
                     Open v1 -> ("Open", encodeValue (Json.Encode.string v1))
                     RequestCipher v1 -> ("RequestCipher", encodeValue (Json.Encode.string v1))
                     SendMasterPassword v1 -> ("SendMasterPassword", encodeValue (Json.Encode.string v1))
+                    UpdateCipher v1 -> ("UpdateCipher", encodeValue (jsonEncFullCipher v1))
     in encodeSumTaggedObject "tag" "contents" keyval val
 
 
 
 type alias FullCipher  =
    { cipher: Cipher
+   , favorite: Bool
+   , id: String
    , name: String
+   , reprompt: Int
    }
 
 jsonDecFullCipher : Json.Decode.Decoder ( FullCipher )
 jsonDecFullCipher =
-   Json.Decode.succeed (\pcipher pname -> {cipher = pcipher, name = pname})
+   Json.Decode.succeed (\pcipher pfavorite pid pname preprompt -> {cipher = pcipher, favorite = pfavorite, id = pid, name = pname, reprompt = preprompt})
    |> required "cipher" (jsonDecCipher)
+   |> required "favorite" (Json.Decode.bool)
+   |> required "id" (Json.Decode.string)
    |> required "name" (Json.Decode.string)
+   |> required "reprompt" (Json.Decode.int)
 
 jsonEncFullCipher : FullCipher -> Value
 jsonEncFullCipher  val =
    Json.Encode.object
    [ ("cipher", jsonEncCipher val.cipher)
-   , ("name", Json.Encode.string val.name)
-   ]
-
-
-
-type alias Sub_LoadCipher  =
-   { cipher: FullCipher
-   , id: String
-   }
-
-jsonDecSub_LoadCipher : Json.Decode.Decoder ( Sub_LoadCipher )
-jsonDecSub_LoadCipher =
-   Json.Decode.succeed (\pcipher pid -> {cipher = pcipher, id = pid})
-   |> required "cipher" (jsonDecFullCipher)
-   |> required "id" (Json.Decode.string)
-
-jsonEncSub_LoadCipher : Sub_LoadCipher -> Value
-jsonEncSub_LoadCipher  val =
-   Json.Encode.object
-   [ ("cipher", jsonEncFullCipher val.cipher)
+   , ("favorite", Json.Encode.bool val.favorite)
    , ("id", Json.Encode.string val.id)
+   , ("name", Json.Encode.string val.name)
+   , ("reprompt", Json.Encode.int val.reprompt)
    ]
 
 
@@ -642,8 +634,9 @@ jsonEncSub_NeedsMasterPassword  val =
 
 type Sub  =
     CaptchaDone 
+    | CipherChanged FullCipher
     | Error String
-    | LoadCipher Sub_LoadCipher
+    | LoadCipher FullCipher
     | LoadCiphers Sub_LoadCiphers_List
     | LoginSuccessful 
     | NeedsCaptcha String
@@ -656,8 +649,9 @@ jsonDecSub : Json.Decode.Decoder ( Sub )
 jsonDecSub =
     let jsonDecDictSub = Dict.fromList
             [ ("CaptchaDone", Json.Decode.lazy (\_ -> Json.Decode.succeed CaptchaDone))
+            , ("CipherChanged", Json.Decode.lazy (\_ -> Json.Decode.map CipherChanged (jsonDecFullCipher)))
             , ("Error", Json.Decode.lazy (\_ -> Json.Decode.map Error (Json.Decode.string)))
-            , ("LoadCipher", Json.Decode.lazy (\_ -> Json.Decode.map LoadCipher (jsonDecSub_LoadCipher)))
+            , ("LoadCipher", Json.Decode.lazy (\_ -> Json.Decode.map LoadCipher (jsonDecFullCipher)))
             , ("LoadCiphers", Json.Decode.lazy (\_ -> Json.Decode.map LoadCiphers (jsonDecSub_LoadCiphers_List)))
             , ("LoginSuccessful", Json.Decode.lazy (\_ -> Json.Decode.succeed LoginSuccessful))
             , ("NeedsCaptcha", Json.Decode.lazy (\_ -> Json.Decode.map NeedsCaptcha (Json.Decode.string)))
@@ -673,8 +667,9 @@ jsonEncSub : Sub -> Value
 jsonEncSub  val =
     let keyval v = case v of
                     CaptchaDone  -> ("CaptchaDone", encodeValue (Json.Encode.list identity []))
+                    CipherChanged v1 -> ("CipherChanged", encodeValue (jsonEncFullCipher v1))
                     Error v1 -> ("Error", encodeValue (Json.Encode.string v1))
-                    LoadCipher v1 -> ("LoadCipher", encodeValue (jsonEncSub_LoadCipher v1))
+                    LoadCipher v1 -> ("LoadCipher", encodeValue (jsonEncFullCipher v1))
                     LoadCiphers v1 -> ("LoadCiphers", encodeValue (jsonEncSub_LoadCiphers_List v1))
                     LoginSuccessful  -> ("LoginSuccessful", encodeValue (Json.Encode.list identity []))
                     NeedsCaptcha v1 -> ("NeedsCaptcha", encodeValue (Json.Encode.string v1))
