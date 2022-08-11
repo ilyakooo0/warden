@@ -543,25 +543,42 @@ jsonEncCmd  val =
 
 
 
-type alias Sub_LoadCipher  =
-   { cipherType: Cipher
-   , id: String
+type alias FullCipher  =
+   { cipher: Cipher
    , name: String
+   }
+
+jsonDecFullCipher : Json.Decode.Decoder ( FullCipher )
+jsonDecFullCipher =
+   Json.Decode.succeed (\pcipher pname -> {cipher = pcipher, name = pname})
+   |> required "cipher" (jsonDecCipher)
+   |> required "name" (Json.Decode.string)
+
+jsonEncFullCipher : FullCipher -> Value
+jsonEncFullCipher  val =
+   Json.Encode.object
+   [ ("cipher", jsonEncCipher val.cipher)
+   , ("name", Json.Encode.string val.name)
+   ]
+
+
+
+type alias Sub_LoadCipher  =
+   { cipher: FullCipher
+   , id: String
    }
 
 jsonDecSub_LoadCipher : Json.Decode.Decoder ( Sub_LoadCipher )
 jsonDecSub_LoadCipher =
-   Json.Decode.succeed (\pcipherType pid pname -> {cipherType = pcipherType, id = pid, name = pname})
-   |> required "cipherType" (jsonDecCipher)
+   Json.Decode.succeed (\pcipher pid -> {cipher = pcipher, id = pid})
+   |> required "cipher" (jsonDecFullCipher)
    |> required "id" (Json.Decode.string)
-   |> required "name" (Json.Decode.string)
 
 jsonEncSub_LoadCipher : Sub_LoadCipher -> Value
 jsonEncSub_LoadCipher  val =
    Json.Encode.object
-   [ ("cipherType", jsonEncCipher val.cipherType)
+   [ ("cipher", jsonEncFullCipher val.cipher)
    , ("id", Json.Encode.string val.id)
-   , ("name", Json.Encode.string val.name)
    ]
 
 

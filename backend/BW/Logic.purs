@@ -241,7 +241,11 @@ decodeCipher cipher = do
                   , username
                   }
     n -> liftEffect $ throwError $ error $ "Unsupported cipher type: " <> show n
-  pure $ Bridge.Sub_LoadCipher { cipherType, name, id: cipher.id }
+  pure
+    $ Bridge.Sub_LoadCipher
+        { cipher: Bridge.FullCipher { cipher: cipherType, name }
+        , id: cipher.id
+        }
 
 decryptNullable ::
   forall x r.

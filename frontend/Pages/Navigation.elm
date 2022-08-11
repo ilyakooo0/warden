@@ -18,7 +18,7 @@ import Utils exposing (..)
 
 
 type TopButton msg
-    = BackButton msg
+    = BackButton { action : msg, icon : Maybe String }
     | MenuButton (MenuConfig msg)
 
 
@@ -46,10 +46,16 @@ navigation { topButton, title } =
                                     [ Attr.class "p-button--base is-inline u-no-margin", Attr.style "visibility" "hidden" ]
                                     []
 
-                            Just (BackButton msg) ->
+                            Just (BackButton { action, icon }) ->
                                 button
-                                    [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick msg ]
-                                    [ i [ Attr.class "p-icon--chevron-up ninety-counter" ] [] ]
+                                    [ Attr.class "p-button--base is-inline u-no-margin", Ev.onClick action ]
+                                    [ case icon of
+                                        Nothing ->
+                                            i [ Attr.class "p-icon--chevron-up ninety-counter" ] []
+
+                                        Just iconName ->
+                                            i [ Attr.class ("p-icon--" ++ iconName) ] []
+                                    ]
 
                             Just (MenuButton cfg) ->
                                 button

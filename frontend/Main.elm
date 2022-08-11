@@ -10,6 +10,7 @@ import Notification
 import Pages.Captcha as Captcha
 import Pages.Cipher as Cipher
 import Pages.Ciphers as Ciphers
+import Pages.EditCipher as EditCipher exposing (Msg(..))
 import Pages.Loader exposing (loader)
 import Pages.Login as Login
 import Pages.MasterPassword as MasterPassword
@@ -25,7 +26,8 @@ notificationLingerSeconds =
 
 
 type Msg
-    = RecieveMessage String
+    = Noop
+    | RecieveMessage String
     | ShowLoginPage
     | ShowError String
     | CloseNotification
@@ -47,9 +49,11 @@ type Msg
     | Copy String
     | Open String
     | CaptchaMsg Captcha.Msg
+    | EditCipherMsg EditCipher.Msg
     | ShowCaptcha Captcha.HCaptchSiteKey
     | ClearNotification { currentTime : Time.Posix }
     | UpdateLastNotificatioTime Time.Posix
+    | EditCipher Bridge.FullCipher
 
 
 type alias CipherId =
@@ -73,6 +77,7 @@ type PageModel
     = LoginModel Login.Model
     | LoadingPage
     | CiphersModel Ciphers.Model
+    | EditCipherModel EditCipher.Model
     | MasterPasswordModel MasterPassword.Model
     | CipherModel Cipher.Model
     | CaptchaModel Captcha.Model
@@ -87,6 +92,10 @@ showPage :
         , topButton : Maybe (Navigation.TopButton Msg)
         }
 showPage email page =
+    let
+        simpleBackButton =
+            BackButton { action = PopView, icon = Nothing }
+    in
     case page of
         LoginModel model ->
             let
@@ -115,7 +124,7 @@ showPage email page =
         LoadingPage ->
             { title = []
             , body = [ loader ]
-            , topButton = Just (BackButton PopView)
+            , topButton = Just simpleBackButton
             }
 
         MasterPasswordModel model ->
@@ -135,7 +144,7 @@ showPage email page =
             in
             { title = p.title model
             , body = p.view model
-            , topButton = Just (BackButton PopView)
+            , topButton = Just simpleBackButton
             }
 
         CaptchaModel model ->
@@ -145,7 +154,17 @@ showPage email page =
             in
             { title = p.title model
             , body = p.view model
-            , topButton = Just (BackButton PopView)
+            , topButton = Just simpleBackButton
+            }
+
+        EditCipherModel model ->
+            let
+                p =
+                    EditCipher.page editCipherCallbacks EditCipherMsg
+            in
+            { title = p.title model
+            , body = p.view model
+            , topButton = Just (BackButton { action = PopView, icon = Just "close" })
             }
 
 
@@ -351,6 +370,14 @@ update msg model =
                 _ ->
                     ( model, Cmd.none )
 
+        EditCipherMsg imsg ->
+            case currentPage of
+                EditCipherModel page ->
+                    (EditCipher.page editCipherCallbacks EditCipherMsg).update imsg page |> processPage EditCipherModel
+
+                _ ->
+                    ( model, Cmd.none )
+
         ShowCipherPage cipher ->
             (Cipher.page cipherCallbacks CipherMsg).init cipher
                 |> Tuple.mapFirst (\pageModel -> appendPageStack <| CipherModel pageModel)
@@ -396,6 +423,13 @@ update msg model =
         UpdateLastNotificatioTime time ->
             ( { model | lastNotificationTime = time }, Cmd.none )
 
+        Noop ->
+            ( model, Cmd.none )
+
+        EditCipher cipher ->
+            (EditCipher.page editCipherCallbacks EditCipherMsg).init cipher
+                |> Tuple.mapFirst (\pageModel -> keepStackWith <| EditCipherModel pageModel)
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -409,7 +443,12 @@ ciphersCallbacks =
 
 cipherCallbacks : Cipher.Callbacks Msg
 cipherCallbacks =
-    { copy = Copy, open = Open }
+    { copy = Copy, open = Open, edit = EditCipher }
+
+
+editCipherCallbacks : EditCipher.Callbacks Msg
+editCipherCallbacks =
+    { save = always Noop }
 
 
 captchaCallbacks : Captcha.Callbacks

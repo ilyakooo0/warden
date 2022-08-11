@@ -91,3 +91,7 @@ p {
 .no-scroll-bar::-webkit-scrollbar {
   display: none;
 }
+
+textarea {
+  resize: none;
+}

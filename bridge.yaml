@@ -16,8 +16,7 @@ Sub:
 - Reset
 - LoadCipher:
     id: String
-    name: String
-    cipherType: Cipher
+    cipher: FullCipher
 - RecieveEmail: String
 
 Cmd:
@@ -34,6 +33,9 @@ Cmd:
 - Copy: String
 - Open: String
 
+FullCipher:
+    name: String
+    cipher: Cipher
 
 Cipher:
 - LoginCipher:

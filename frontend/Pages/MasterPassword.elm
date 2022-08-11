@@ -83,7 +83,8 @@ view model =
             [ Attr.type_ "password"
             , Attr.value model.password
             , Ev.onInput UpdatePassword
-            , Attr.attribute "autocomplete" "current-password"
+            , Attr.attribute "autocomplete" "new-password"
+            , Attr.required True
             ]
             []
         , alignRight [ button [ Attr.type_ "submit" ] [ text "Log in" ] ]

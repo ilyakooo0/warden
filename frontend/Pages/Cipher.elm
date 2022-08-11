@@ -23,7 +23,7 @@ type Msg
 
 
 type alias Callbacks msg =
-    { copy : String -> msg, open : String -> msg }
+    { copy : String -> msg, open : String -> msg, edit : Bridge.FullCipher -> msg }
 
 
 page : Callbacks emsg -> Page Bridge.Sub_LoadCipher Model Msg emsg
@@ -32,7 +32,11 @@ page callbacks liftMsg =
     , view = \model -> view model |> List.map (Html.map liftMsg)
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title = \{ cipher } -> [ text cipher.name, span [ Attr.class "u-float-right" ] [ iconButton "edit" (callbacks.copy "") ] ]
+    , title =
+        \{ cipher } ->
+            [ text cipher.cipher.name
+            , span [ Attr.class "u-float-right" ] [ iconButton "edit" (callbacks.edit cipher.cipher) ]
+            ]
     }
 
 
@@ -79,7 +83,7 @@ row { name, value, nameIcon, icons } =
 
 view : Model -> List (Html Msg)
 view { passwordHidden, cipher, cvvHidden } =
-    (case cipher.cipherType of
+    (case cipher.cipher.cipher of
         Bridge.LoginCipher { username, password, uris } ->
             maybeList username
                 (\x ->
@@ -109,7 +113,7 @@ view { passwordHidden, cipher, cvvHidden } =
                    )
 
         Bridge.NoteCipher contents ->
-            [ row { name = "Note", value = contents, nameIcon = "edit", icons = [] }
+            [ row { name = "Note", value = contents, nameIcon = "switcher-environments", icons = [] }
             ]
 
         Bridge.CardCipher { number, code, cardholderName, expMonth, expYear } ->
@@ -179,7 +183,7 @@ view { passwordHidden, cipher, cvvHidden } =
                 ++ maybeList ssn
                     (\x ->
                         row
-                            { name = "Socia security number"
+                            { name = "Social security number"
                             , value = x
                             , nameIcon = ""
                             , icons = [ ( "copy", Copy x ) ]

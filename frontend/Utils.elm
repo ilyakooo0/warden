@@ -86,3 +86,61 @@ tailEmpty x =
 unwords : List String -> String
 unwords =
     String.join " "
+
+
+zip : List a -> List b -> List ( a, b )
+zip =
+    List.map2 (\a b -> ( a, b ))
+
+
+mapIndex : (a -> a) -> Int -> List a -> List a
+mapIndex f i xs =
+    case ( i, xs ) of
+        ( _, [] ) ->
+            []
+
+        ( 0, x :: xx ) ->
+            f x :: xx
+
+        ( j, x :: xx ) ->
+            x :: mapIndex f (j - 1) xx
+
+
+replace : Int -> a -> List a -> List a
+replace i a xs =
+    case ( i, xs ) of
+        ( 0, _ :: xx ) ->
+            a :: xx
+
+        ( j, x :: xx ) ->
+            x :: replace (j - 1) a xx
+
+        ( _, [] ) ->
+            []
+
+
+index : Int -> List a -> Maybe a
+index i xs =
+    case ( i, xs ) of
+        ( 0, x :: _ ) ->
+            Just x
+
+        ( j, _ :: xx ) ->
+            index (j - 1) xx
+
+        ( _, [] ) ->
+            Nothing
+
+
+spanList : (a -> Bool) -> List a -> ( List a, List a )
+spanList f aa =
+    case aa of
+        [] ->
+            ( aa, aa )
+
+        a :: rest ->
+            if f a then
+                spanList f rest |> Tuple.mapFirst ((::) a)
+
+            else
+                ( [], aa )

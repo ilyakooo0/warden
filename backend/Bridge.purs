@@ -465,11 +465,25 @@ derive instance genericCmd :: Generic Cmd _
 derive instance eqCmd :: Eq Cmd
 derive instance ordCmd :: Ord Cmd
 
+newtype FullCipher =
+    FullCipher {
+      cipher :: Cipher
+    , name :: String
+    }
+
+derive instance newtypeFullCipher :: Newtype FullCipher _
+instance encodeJsonFullCipher :: EncodeJson FullCipher where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonFullCipher :: DecodeJson FullCipher where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericFullCipher :: Generic FullCipher _
+derive instance eqFullCipher :: Eq FullCipher
+derive instance ordFullCipher :: Ord FullCipher
+
 newtype Sub_LoadCipher =
     Sub_LoadCipher {
-      cipherType :: Cipher
+      cipher :: FullCipher
     , id :: String
-    , name :: String
     }
 
 derive instance newtypeSub_LoadCipher :: Newtype Sub_LoadCipher _

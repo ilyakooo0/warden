@@ -76,6 +76,7 @@ view model =
             , Attr.value model.server
             , Ev.onInput UpdateServer
             , Attr.attribute "autocomplete" "url"
+            , Attr.required True
             ]
             []
          , label [] [ text "Email" ]
@@ -84,6 +85,7 @@ view model =
             , Attr.value model.email
             , Ev.onInput UpdateEmail
             , Attr.attribute "autocomplete" "email"
+            , Attr.required True
             ]
             []
          , label [] [ text "Password" ]
@@ -92,6 +94,7 @@ view model =
             , Attr.value model.password
             , Ev.onInput UpdatePassword
             , Attr.attribute "autocomplete" "current-password"
+            , Attr.required True
             ]
             []
          ]
