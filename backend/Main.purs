@@ -15,12 +15,10 @@ import Data.Array as Array
 import Data.Clipboard as Clipboard
 import Data.DateTime (DateTime)
 import Data.Either (Either(..))
-import Data.Function.Uncurried (runFn2)
 import Data.HCaptcha (bindHCaptchToken)
 import Data.JNullable (jnull, nullify)
 import Data.JNullable as JNullable
 import Data.Maybe (Maybe(..), maybe)
-import Data.Newtype (unwrap)
 import Data.OpenURL (openURL)
 import Data.Ord.Down (Down(..))
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
