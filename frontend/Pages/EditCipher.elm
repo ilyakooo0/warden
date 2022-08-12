@@ -137,7 +137,7 @@ view { fullCipher, passwordGenerator } =
                 , close = CloseGeneratePassword
                 , footer =
                     [ button
-                        [ Attr.class "p-button--positive"
+                        [ Attr.class "p-button--positive u-no-margin"
                         , Ev.onClick <| GeneratePassword x.passwordConfig
                         ]
                         [ text "Generate password" ]

@@ -107,3 +107,7 @@ textarea {
   min-width: 5rem;
   text-align: center;
 }
+
+.p-side-navigation__drawer {
+  max-width: initial;
+}

@@ -7,7 +7,7 @@ import BW (ApiService, CryptoFunctions, Services, CryptoService)
 import BW as WB
 import BW.Logic (decodeCipher, decrypt, encodeCipher, hashPassword, liftPromise)
 import BW.Logic as Logic
-import BW.Types (CipherResponse, Email(..), Password(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
+import BW.Types (CipherResponse, Email(..), Password(..), Urls, SyncResponse, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
 import Bridge as Bridge
 import Control.Monad.Error.Class (catchError, throwError)
 import Data.Argonaut (class DecodeJson)
@@ -140,7 +140,10 @@ main = do
                 Storage.store storage SyncKey sync
                 Storage.store storage TokenKey token
               send Bridge.LoginSuccessful
-    Bridge.NeedCiphersList -> runWithDecryptionKey performSync
+    Bridge.NeedCiphersList ->
+      runWithDecryptionKey do
+        sendCiphers
+        performSync
     Bridge.NeedsReset -> do
       WebStorage.clear storage
       Elm.send app Bridge.Reset
@@ -345,7 +348,25 @@ performSync = do
   storage <- askAt (Proxy :: _ "storage")
   newSync <- liftPromise $ api.getSync unit
   liftEffect $ Storage.store storage SyncKey newSync
-  ciphers <- traverse processCipher newSync.ciphers
+  sendCiphers
+
+sendCiphers ::
+  forall r.
+  Run
+    ( storage :: Reader Storage
+    , app :: Reader Elm
+    , aff :: Aff
+    , effect :: Effect
+    , services :: Reader Services
+    , crypto :: Reader CryptoService
+    , key :: Reader SymmetricCryptoKey
+    | r
+    )
+    Unit
+sendCiphers = do
+  sync <- getOrReset SyncKey
+  ciphers <- traverse processCipher sync.ciphers
   let
     sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
   send $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
+  pure unit
