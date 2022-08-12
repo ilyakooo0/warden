@@ -217,7 +217,7 @@ subscriptions model =
                         PopView
 
                     Bridge.CipherChanged c ->
-                        ShowInfo "Entry updated" ("The entry \"" ++ c.name ++ "\" has been successfully updated.")
+                        ShowInfo "Entry updated" ("The entry “" ++ c.name ++ "” has been successfully updated.")
 
                     Bridge.GeneratedPassword password ->
                         GlobalEvents.GeneratedPassword password |> FireGlobalEvent
