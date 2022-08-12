@@ -448,6 +448,7 @@ derive instance ordCmd_Login :: Ord Cmd_Login
 
 data Cmd =
     Copy String
+  | GeneratePassword PasswordGeneratorConfig
   | Init
   | Login Cmd_Login
   | NeedCiphersList
@@ -483,6 +484,34 @@ instance decodeJsonFullCipher :: DecodeJson FullCipher where
 derive instance genericFullCipher :: Generic FullCipher _
 derive instance eqFullCipher :: Eq FullCipher
 derive instance ordFullCipher :: Ord FullCipher
+
+newtype PasswordGeneratorConfig =
+    PasswordGeneratorConfig {
+      ambiguous :: Boolean
+    , capitalize :: Boolean
+    , includeNumber :: Boolean
+    , length :: Int
+    , lowercase :: Boolean
+    , minLowercase :: Int
+    , minNumber :: Int
+    , minSpecial :: Int
+    , minUppercase :: Int
+    , numWords :: Int
+    , number :: Boolean
+    , special :: Boolean
+    , type :: String
+    , uppercase :: Boolean
+    , wordSeparator :: String
+    }
+
+derive instance newtypePasswordGeneratorConfig :: Newtype PasswordGeneratorConfig _
+instance encodeJsonPasswordGeneratorConfig :: EncodeJson PasswordGeneratorConfig where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonPasswordGeneratorConfig :: DecodeJson PasswordGeneratorConfig where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericPasswordGeneratorConfig :: Generic PasswordGeneratorConfig _
+derive instance eqPasswordGeneratorConfig :: Eq PasswordGeneratorConfig
+derive instance ordPasswordGeneratorConfig :: Ord PasswordGeneratorConfig
 
 newtype Sub_LoadCiphers =
     Sub_LoadCiphers {
@@ -532,6 +561,7 @@ data Sub =
     CaptchaDone
   | CipherChanged FullCipher
   | Error String
+  | GeneratedPassword String
   | LoadCipher FullCipher
   | LoadCiphers Sub_LoadCiphers_List
   | LoginSuccessful

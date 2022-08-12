@@ -502,6 +502,7 @@ jsonEncCmd_Login  val =
 
 type Cmd  =
     Copy String
+    | GeneratePassword PasswordGeneratorConfig
     | Init 
     | Login Cmd_Login
     | NeedCiphersList 
@@ -516,6 +517,7 @@ jsonDecCmd : Json.Decode.Decoder ( Cmd )
 jsonDecCmd =
     let jsonDecDictCmd = Dict.fromList
             [ ("Copy", Json.Decode.lazy (\_ -> Json.Decode.map Copy (Json.Decode.string)))
+            , ("GeneratePassword", Json.Decode.lazy (\_ -> Json.Decode.map GeneratePassword (jsonDecPasswordGeneratorConfig)))
             , ("Init", Json.Decode.lazy (\_ -> Json.Decode.succeed Init))
             , ("Login", Json.Decode.lazy (\_ -> Json.Decode.map Login (jsonDecCmd_Login)))
             , ("NeedCiphersList", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedCiphersList))
@@ -533,6 +535,7 @@ jsonEncCmd : Cmd -> Value
 jsonEncCmd  val =
     let keyval v = case v of
                     Copy v1 -> ("Copy", encodeValue (Json.Encode.string v1))
+                    GeneratePassword v1 -> ("GeneratePassword", encodeValue (jsonEncPasswordGeneratorConfig v1))
                     Init  -> ("Init", encodeValue (Json.Encode.list identity []))
                     Login v1 -> ("Login", encodeValue (jsonEncCmd_Login v1))
                     NeedCiphersList  -> ("NeedCiphersList", encodeValue (Json.Encode.list identity []))
@@ -571,6 +574,65 @@ jsonEncFullCipher  val =
    , ("id", Json.Encode.string val.id)
    , ("name", Json.Encode.string val.name)
    , ("reprompt", Json.Encode.int val.reprompt)
+   ]
+
+
+
+type alias PasswordGeneratorConfig  =
+   { ambiguous: Bool
+   , capitalize: Bool
+   , includeNumber: Bool
+   , length: Int
+   , lowercase: Bool
+   , minLowercase: Int
+   , minNumber: Int
+   , minSpecial: Int
+   , minUppercase: Int
+   , numWords: Int
+   , number: Bool
+   , special: Bool
+   , type_: String
+   , uppercase: Bool
+   , wordSeparator: String
+   }
+
+jsonDecPasswordGeneratorConfig : Json.Decode.Decoder ( PasswordGeneratorConfig )
+jsonDecPasswordGeneratorConfig =
+   Json.Decode.succeed (\pambiguous pcapitalize pincludeNumber plength plowercase pminLowercase pminNumber pminSpecial pminUppercase pnumWords pnumber pspecial ptype puppercase pwordSeparator -> {ambiguous = pambiguous, capitalize = pcapitalize, includeNumber = pincludeNumber, length = plength, lowercase = plowercase, minLowercase = pminLowercase, minNumber = pminNumber, minSpecial = pminSpecial, minUppercase = pminUppercase, numWords = pnumWords, number = pnumber, special = pspecial, type_ = ptype, uppercase = puppercase, wordSeparator = pwordSeparator})
+   |> required "ambiguous" (Json.Decode.bool)
+   |> required "capitalize" (Json.Decode.bool)
+   |> required "includeNumber" (Json.Decode.bool)
+   |> required "length" (Json.Decode.int)
+   |> required "lowercase" (Json.Decode.bool)
+   |> required "minLowercase" (Json.Decode.int)
+   |> required "minNumber" (Json.Decode.int)
+   |> required "minSpecial" (Json.Decode.int)
+   |> required "minUppercase" (Json.Decode.int)
+   |> required "numWords" (Json.Decode.int)
+   |> required "number" (Json.Decode.bool)
+   |> required "special" (Json.Decode.bool)
+   |> required "type" (Json.Decode.string)
+   |> required "uppercase" (Json.Decode.bool)
+   |> required "wordSeparator" (Json.Decode.string)
+
+jsonEncPasswordGeneratorConfig : PasswordGeneratorConfig -> Value
+jsonEncPasswordGeneratorConfig  val =
+   Json.Encode.object
+   [ ("ambiguous", Json.Encode.bool val.ambiguous)
+   , ("capitalize", Json.Encode.bool val.capitalize)
+   , ("includeNumber", Json.Encode.bool val.includeNumber)
+   , ("length", Json.Encode.int val.length)
+   , ("lowercase", Json.Encode.bool val.lowercase)
+   , ("minLowercase", Json.Encode.int val.minLowercase)
+   , ("minNumber", Json.Encode.int val.minNumber)
+   , ("minSpecial", Json.Encode.int val.minSpecial)
+   , ("minUppercase", Json.Encode.int val.minUppercase)
+   , ("numWords", Json.Encode.int val.numWords)
+   , ("number", Json.Encode.bool val.number)
+   , ("special", Json.Encode.bool val.special)
+   , ("type", Json.Encode.string val.type_)
+   , ("uppercase", Json.Encode.bool val.uppercase)
+   , ("wordSeparator", Json.Encode.string val.wordSeparator)
    ]
 
 
@@ -636,6 +698,7 @@ type Sub  =
     CaptchaDone 
     | CipherChanged FullCipher
     | Error String
+    | GeneratedPassword String
     | LoadCipher FullCipher
     | LoadCiphers Sub_LoadCiphers_List
     | LoginSuccessful 
@@ -651,6 +714,7 @@ jsonDecSub =
             [ ("CaptchaDone", Json.Decode.lazy (\_ -> Json.Decode.succeed CaptchaDone))
             , ("CipherChanged", Json.Decode.lazy (\_ -> Json.Decode.map CipherChanged (jsonDecFullCipher)))
             , ("Error", Json.Decode.lazy (\_ -> Json.Decode.map Error (Json.Decode.string)))
+            , ("GeneratedPassword", Json.Decode.lazy (\_ -> Json.Decode.map GeneratedPassword (Json.Decode.string)))
             , ("LoadCipher", Json.Decode.lazy (\_ -> Json.Decode.map LoadCipher (jsonDecFullCipher)))
             , ("LoadCiphers", Json.Decode.lazy (\_ -> Json.Decode.map LoadCiphers (jsonDecSub_LoadCiphers_List)))
             , ("LoginSuccessful", Json.Decode.lazy (\_ -> Json.Decode.succeed LoginSuccessful))
@@ -669,6 +733,7 @@ jsonEncSub  val =
                     CaptchaDone  -> ("CaptchaDone", encodeValue (Json.Encode.list identity []))
                     CipherChanged v1 -> ("CipherChanged", encodeValue (jsonEncFullCipher v1))
                     Error v1 -> ("Error", encodeValue (Json.Encode.string v1))
+                    GeneratedPassword v1 -> ("GeneratedPassword", encodeValue (Json.Encode.string v1))
                     LoadCipher v1 -> ("LoadCipher", encodeValue (jsonEncFullCipher v1))
                     LoadCiphers v1 -> ("LoadCiphers", encodeValue (jsonEncSub_LoadCiphers_List v1))
                     LoginSuccessful  -> ("LoginSuccessful", encodeValue (Json.Encode.list identity []))

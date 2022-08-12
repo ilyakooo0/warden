@@ -59,6 +59,7 @@ type Msg
     | EditCipher Bridge.FullCipher
     | UpdateCipher Bridge.FullCipher
     | FireGlobalEvent Event
+    | GeneratePassword Bridge.PasswordGeneratorConfig
 
 
 type alias Model =
@@ -217,6 +218,9 @@ subscriptions model =
 
                     Bridge.CipherChanged c ->
                         ShowInfo "Entry updated" ("The entry \"" ++ c.name ++ "\" has been successfully updated.")
+
+                    Bridge.GeneratedPassword password ->
+                        GlobalEvents.GeneratedPassword password |> FireGlobalEvent
             )
          ]
             ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
@@ -519,6 +523,9 @@ update msg model =
             , Cmd.none
             )
 
+        GeneratePassword cfg ->
+            ( model, FFI.sendBridge (Bridge.GeneratePassword cfg) )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -537,7 +544,7 @@ cipherCallbacks =
 
 editCipherCallbacks : EditCipher.Callbacks Msg
 editCipherCallbacks =
-    { save = UpdateCipher }
+    { save = UpdateCipher, generatePassword = GeneratePassword }
 
 
 captchaCallbacks : Captcha.Callbacks

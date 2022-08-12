@@ -1,8 +1,10 @@
 module BW where
 
 import BW.Types
+import Bridge
 import Prelude
 
+import Bridge as Bridge
 import Control.Promise (Promise)
 import Data.Argonaut (class DecodeJson, class EncodeJson, decodeJson, encodeJson)
 import Data.ArrayBuffer.Typed as AB
@@ -33,6 +35,10 @@ type ApiService
     , postCipher :: CipherResponse -> Promise CipherResponse
     , putCipher :: CipherResponse -> Promise CipherResponse
     }
+
+type PasswordGeneration =
+  { generatePassword :: Bridge.PasswordGeneratorConfig -> Promise String
+  }
 
 cryptoFunctionsTypeSha1 = "sha1" :: CryptoFunctionsType
 
@@ -77,6 +83,7 @@ type Services
   = { crypto :: CryptoService
     , getApi :: Urls -> JNullable IdentityTokenResponse -> Promise ApiService
     , cryptoFunctions :: CryptoFunctions
+    , passwordGeneration :: PasswordGeneration
     }
 
 foreign import getServices :: Effect Services

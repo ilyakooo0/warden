@@ -15,10 +15,11 @@ import { CryptoService } from "../../deps/bw/libs/shared/dist/src/services/crypt
 import { I18nService } from "../../deps/bw/libs/shared/dist/src/services/i18n.service";
 import { StateService as BaseStateService } from "../../deps/bw/libs/shared/dist/src/services/state.service";
 import { PasswordTokenRequest } from "../../deps/bw/libs/shared/dist/src/models/request/identityToken/passwordTokenRequest";
-import { TokenRequestTwoFactor } from "../../deps/bw/libs/common/src/models/request/identityToken/tokenRequestTwoFactor.ts";
+import { TokenRequestTwoFactor } from "../../deps/bw/libs/common/src/models/request/identityToken/tokenRequestTwoFactor";
 import { CipherRequest } from "../../deps/bw/libs/common/src/models/request/cipherRequest";
 import { Cipher } from "../../deps/bw/libs/common/src/models/domain/cipher";
 import { CipherData } from "../../deps/bw/libs/common/src/models/data/cipherData";
+import { PasswordGenerationService } from "../../deps/bw/libs/common/src/services/passwordGeneration.service";
 
 function sanitize(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -80,7 +81,8 @@ export function getServices() {
       }
     },
     crypto: bg.cryptoService,
-    cryptoFunctions: bg.cryptoFunctionService
+    cryptoFunctions: bg.cryptoFunctionService,
+    passwordGeneration: bg.passwordGenerationService
   }
 }
 
@@ -161,6 +163,11 @@ class MainBackground {
       this.environmentService,
       this.appIdService,
       (expired) => this.logout(expired)
+    );
+    this.passwordGenerationService = new PasswordGenerationService(
+      this.cryptoService,
+      this.policyService,
+      this.stateService
     );
   }
 

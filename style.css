@@ -1,12 +1,10 @@
-
 :root {
-  --color-light: #F7F7F7;
+  --color-light: #f7f7f7;
 }
 
 main {
   margin: 1rem;
 }
-
 
 nav.p-tabs__list {
   top: 0;
@@ -28,13 +26,13 @@ nav h3 {
 
 @keyframes floating-notification-animation {
   from {
-    transform: translateY(-60px)  ;
-    opacity: 0
+    transform: translateY(-60px);
+    opacity: 0;
   }
 
   to {
     transform: none;
-    opacity: 1
+    opacity: 1;
   }
 }
 
@@ -57,17 +55,17 @@ nav h3 {
   align-content: center;
 }
 
-.spinner{
+.spinner {
   padding: 1rem;
 }
 
 .cipher-row-container {
-    display: flex;
-    width: 100%;
-    align-items: baseline;
-    justify-content: space-between;
-    flex-direction: row;
-    flex-wrap: wrap;
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .cipher-row p {
@@ -94,4 +92,18 @@ p {
 
 textarea {
   resize: none;
+}
+
+.password-generator-group {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.password-generator-group > input[type="number"] {
+  width: 5%;
+  margin-bottom: 0px;
+  min-width: 5rem;
+  text-align: center;
 }

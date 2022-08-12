@@ -1,0 +1,31 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Generate bridge",
+      "type": "process",
+      "command": "${workspaceFolder}/dev/generate-bridge.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build backend",
+      "type": "process",
+      "command": "${workspaceFolder}/dev/build-backend.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Chrome",
+      "type": "process",
+      "command": "${workspaceFolder}/dev/start-chrome.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Elm-live",
+      "type": "process",
+      "command": "${workspaceFolder}/dev/elm-live.sh",
+      "problemMatcher": []
+    }
+  ]
+}

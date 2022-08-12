@@ -135,6 +135,9 @@ page callbacks liftMsg =
                                             cipher
                                     )
                     }
+
+                _ ->
+                    model
     }
 
 

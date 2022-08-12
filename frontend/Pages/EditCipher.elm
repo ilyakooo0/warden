@@ -5,21 +5,30 @@ import GlobalEvents
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
+import Modal exposing (modal)
 import Page exposing (..)
+import Pages.PasswordGenerator as PasswordGenerator
 import Utils exposing (..)
 
 
 type alias Model =
     { fullCipher : Bridge.FullCipher
+    , passwordGenerator : Maybe PasswordGenerator.Model
     }
 
 
 type Msg
     = EditCipher Bridge.FullCipher
+    | PasswordGeneratorMsg PasswordGenerator.Msg
+    | OpenGeneratePasword
+    | CloseGeneratePassword
+    | GeneratePassword Bridge.PasswordGeneratorConfig
 
 
 type alias Callbacks msg =
-    { save : Bridge.FullCipher -> msg }
+    { save : Bridge.FullCipher -> msg
+    , generatePassword : Bridge.PasswordGeneratorConfig -> msg
+    }
 
 
 page : Callbacks emsg -> Page Bridge.FullCipher Model Msg emsg
@@ -45,22 +54,59 @@ page callbacks liftMsg =
                             else
                                 model.fullCipher
                     }
+
+                GlobalEvents.GeneratedPassword password ->
+                    let
+                        fullCipher =
+                            model.fullCipher
+                    in
+                    { model
+                        | passwordGenerator = Nothing
+                        , fullCipher =
+                            { fullCipher
+                                | cipher =
+                                    case fullCipher.cipher of
+                                        Bridge.LoginCipher c ->
+                                            Bridge.LoginCipher
+                                                { c | password = Just password }
+
+                                        c ->
+                                            c
+                            }
+                    }
     }
 
 
 init : Bridge.FullCipher -> ( Model, Cmd Msg )
 init cipher =
     ( { fullCipher = cipher
+      , passwordGenerator = Nothing
       }
     , Cmd.none
     )
 
 
 update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update _ _ msg model =
+update { generatePassword } _ msg model =
     case msg of
         EditCipher fullCipher ->
             ( Ok { model | fullCipher = fullCipher }, Cmd.none )
+
+        PasswordGeneratorMsg m ->
+            ( Ok { model | passwordGenerator = Maybe.map (PasswordGenerator.update m) model.passwordGenerator }
+            , Cmd.none
+            )
+
+        OpenGeneratePasword ->
+            ( Ok { model | passwordGenerator = Just PasswordGenerator.init }
+            , Cmd.none
+            )
+
+        CloseGeneratePassword ->
+            ( Ok { model | passwordGenerator = Nothing }, Cmd.none )
+
+        GeneratePassword cfg ->
+            ( Ok model, pureCmd (generatePassword cfg) )
 
 
 subscriptions : Model -> Sub Msg
@@ -83,18 +129,34 @@ row { name, nameIcon, attrs } =
 
 
 view : Model -> List (Html Msg)
-view { fullCipher } =
-    [ row
-        { name = "Entry name"
-        , nameIcon = ""
-        , attrs =
-            [ Attr.type_ "text"
-            , Attr.value fullCipher.name
-            , Ev.onInput (\x -> { fullCipher | name = x } |> EditCipher)
-            , Attr.attribute "autocomplete" "off"
-            ]
-        }
-    ]
+view { fullCipher, passwordGenerator } =
+    maybeList passwordGenerator
+        (\x ->
+            modal
+                { title = "Password generator"
+                , close = CloseGeneratePassword
+                , footer =
+                    [ button
+                        [ Attr.class "p-button--positive"
+                        , Ev.onClick <| GeneratePassword x.passwordConfig
+                        ]
+                        [ text "Generate password" ]
+                    ]
+                , body =
+                    PasswordGenerator.view x |> List.map (Html.map PasswordGeneratorMsg)
+                }
+        )
+        ++ [ row
+                { name = "Entry name"
+                , nameIcon = ""
+                , attrs =
+                    [ Attr.type_ "text"
+                    , Attr.value fullCipher.name
+                    , Ev.onInput (\x -> { fullCipher | name = x } |> EditCipher)
+                    , Attr.attribute "autocomplete" "off"
+                    ]
+                }
+           ]
         ++ (case fullCipher.cipher of
                 Bridge.LoginCipher cipher ->
                     let
@@ -114,16 +176,19 @@ view { fullCipher } =
                             , Attr.attribute "autocomplete" "username"
                             ]
                         }
-                    , row
-                        { name = "Password"
-                        , nameIcon = "security"
-                        , attrs =
+                    , p []
+                        [ heading "security" "Password"
+                        , br [] []
+                        , input
                             [ Attr.type_ "text"
                             , Attr.value (Maybe.withDefault "" password)
                             , Ev.onInput (\x -> edit { cipher | password = Just x })
                             , Attr.attribute "autocomplete" "new-password"
+                            , Attr.style "width" "calc(100% - 3.5rem)"
                             ]
-                        }
+                            []
+                        , iconButton "restart" OpenGeneratePasword
+                        ]
                     ]
                         ++ (uris
                                 |> List.indexedMap
@@ -367,26 +432,7 @@ view { fullCipher } =
            )
 
 
-hiddenPassword : String
-hiddenPassword =
-    String.repeat 12 "●"
-
-
-hiddenCvv : String
-hiddenCvv =
-    String.repeat 3 "●"
-
-
 iconButton : String -> msg -> Html msg
 iconButton name msg =
     button [ Attr.class "p-button is-inline is-dense has-icon", Ev.onClick msg ]
         [ i [ Attr.class ("p-icon--" ++ name) ] [] ]
-
-
-hiddenButtonIcon : Bool -> String
-hiddenButtonIcon hidden =
-    if hidden then
-        "show"
-
-    else
-        "hide"

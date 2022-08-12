@@ -190,6 +190,11 @@ main = do
         send $ Bridge.CipherChanged newCipher
         performSync
         pure unit
+    Bridge.GeneratePassword cfg ->
+      runWithDecryptionKey do
+        password <- liftPromise $ services.passwordGeneration.generatePassword cfg
+        send $ Bridge.GeneratedPassword password
+        pure unit
 
 processCipher ::
   forall r.

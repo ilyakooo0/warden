@@ -5,3 +5,4 @@ import Bridge
 
 type Event
     = UpdateCipher Bridge.FullCipher
+    | GeneratedPassword String

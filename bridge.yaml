@@ -17,6 +17,7 @@ Sub:
 - LoadCipher: FullCipher
 - RecieveEmail: String
 - CipherChanged: FullCipher
+- GeneratedPassword: String
 
 Cmd:
 - Init
@@ -32,6 +33,7 @@ Cmd:
 - Copy: String
 - Open: String
 - UpdateCipher: FullCipher
+- GeneratePassword: PasswordGeneratorConfig
 
 FullCipher:
     reprompt: Int
@@ -104,3 +106,20 @@ CipherType:
 - CardType
 - NoteType
 - IdentityType
+
+PasswordGeneratorConfig:
+    length: Int
+    ambiguous: Bool
+    number: Bool
+    minNumber: Int
+    uppercase: Bool
+    minUppercase: Int
+    lowercase: Bool
+    minLowercase: Int
+    special: Bool
+    minSpecial: Int
+    type: String
+    numWords: Int
+    wordSeparator: String
+    capitalize: Bool
+    includeNumber: Bool

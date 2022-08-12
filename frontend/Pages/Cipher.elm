@@ -53,6 +53,9 @@ page callbacks liftMsg =
                             else
                                 model.cipher
                     }
+
+                _ ->
+                    model
     }
 
 
