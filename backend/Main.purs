@@ -116,17 +116,17 @@ main = do
           loginResponse <-
             liftAff
               $ catchError
-                  ( runBaseAff' $ run $ runReaderAt (Proxy :: _ "api") unauthedApi
-                      $ Logic.getLogInRequestToken prelogin (Email email) (Password password) captchaToken
+                  ( do
+                      resp <-
+                        runBaseAff' $ run $ runReaderAt (Proxy :: _ "api") unauthedApi
+                          $ Logic.getLogInRequestToken prelogin (Email email) (Password password) captchaToken
+                      pure $ Right resp
                   )
-                  ( const
-                      $ liftEffect do
-                          Elm.send app Bridge.NeedsLogin
-                          Exc.throw "Could not log in. Please check your data and try again."
-                  )
-          case toEither1 loginResponse of
-            Left { siteKey } -> send $ Bridge.NeedsCaptcha siteKey
-            Right token -> do
+                  (const $ pure $ Left unit)
+          case map toEither1 loginResponse of
+            Left _ -> send Bridge.WrongPassword
+            Right (Left { siteKey }) -> send $ Bridge.NeedsCaptcha siteKey
+            Right (Right token) -> do
               masterKey <- Logic.makePreloginKey prelogin (Email email) (Password password)
               api <- liftPromise $ services.getApi urls (nullify token)
               sync <- liftPromise $ api.getSync unit

@@ -10,6 +10,7 @@ Sub:
         id: String
         cipherType: CipherType
 - LoginSuccessful
+- WrongPassword
 - NeedsMasterPassword:
     server: String
     login: String

@@ -571,6 +571,7 @@ data Sub =
   | NeedsMasterPassword Sub_NeedsMasterPassword
   | RecieveEmail String
   | Reset
+  | WrongPassword
 
 instance encodeJsonSub :: EncodeJson Sub where
   encodeJson = genericEncodeAeson Argonaut.defaultOptions

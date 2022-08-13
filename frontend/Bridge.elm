@@ -710,6 +710,7 @@ type Sub  =
     | NeedsMasterPassword Sub_NeedsMasterPassword
     | RecieveEmail String
     | Reset 
+    | WrongPassword 
 
 jsonDecSub : Json.Decode.Decoder ( Sub )
 jsonDecSub =
@@ -726,6 +727,7 @@ jsonDecSub =
             , ("NeedsMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map NeedsMasterPassword (jsonDecSub_NeedsMasterPassword)))
             , ("RecieveEmail", Json.Decode.lazy (\_ -> Json.Decode.map RecieveEmail (Json.Decode.string)))
             , ("Reset", Json.Decode.lazy (\_ -> Json.Decode.succeed Reset))
+            , ("WrongPassword", Json.Decode.lazy (\_ -> Json.Decode.succeed WrongPassword))
             ]
         jsonDecObjectSetSub = Set.fromList []
     in  decodeSumTaggedObject "Sub" "tag" "contents" jsonDecDictSub jsonDecObjectSetSub
@@ -745,5 +747,6 @@ jsonEncSub  val =
                     NeedsMasterPassword v1 -> ("NeedsMasterPassword", encodeValue (jsonEncSub_NeedsMasterPassword v1))
                     RecieveEmail v1 -> ("RecieveEmail", encodeValue (Json.Encode.string v1))
                     Reset  -> ("Reset", encodeValue (Json.Encode.list identity []))
+                    WrongPassword  -> ("WrongPassword", encodeValue (Json.Encode.list identity []))
     in encodeSumTaggedObject "tag" "contents" keyval val
 

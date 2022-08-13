@@ -31,7 +31,7 @@ type Msg
     = Noop
     | RecieveMessage String
     | ShowLoginPage
-    | ShowError String
+    | ShowError String String
     | ShowInfo String String
     | CloseNotification
     | SubmitLogin { email : String, password : String, server : String }
@@ -62,6 +62,7 @@ type Msg
     | FireGlobalEvent Event
     | GeneratePassword Bridge.PasswordGeneratorConfig
     | OpenNewCipherEditPage Bridge.CipherType
+    | WrongPassword
 
 
 type alias Model =
@@ -185,14 +186,14 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        ([ getBridge ShowError
+        ([ getBridge (ShowError "Something went wrong!")
             (\msg ->
                 case msg of
                     Bridge.NeedsLogin ->
                         ShowLoginPage
 
                     Bridge.Error err ->
-                        ShowError err
+                        ShowError "Something went wrong!" err
 
                     Bridge.LoadCiphers ciphers ->
                         LoadCiphers ciphers
@@ -223,6 +224,9 @@ subscriptions model =
 
                     Bridge.GeneratedPassword password ->
                         GlobalEvents.GeneratedPassword password |> FireGlobalEvent
+
+                    Bridge.WrongPassword ->
+                        WrongPassword
             )
          ]
             ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
@@ -306,9 +310,9 @@ update msg model =
                 }
                 model
 
-        ShowError err ->
+        ShowError title err ->
             appendNotification
-                { title = "Something went wrong"
+                { title = title
                 , message = err
                 , severity = Notification.Error
                 }
@@ -328,7 +332,7 @@ update msg model =
             )
 
         SubmitLogin data ->
-            ( appendPageStack <| LoadingPage
+            ( keepStackWith <| LoadingPage
             , FFI.sendBridge (Bridge.Login data)
             )
 
@@ -588,6 +592,14 @@ update msg model =
                     }
                 }
                 |> Tuple.mapFirst (\pageModel -> keepStackWith <| EditCipherModel pageModel)
+
+        WrongPassword ->
+            ( model
+            , Cmd.batch
+                [ pureCmd PopView
+                , pureCmd (ShowError "Login failed" "The login details you provided are not valid. Please try again.")
+                ]
+            )
 
 
 loginCallbacks : Login.Callbacks Msg
