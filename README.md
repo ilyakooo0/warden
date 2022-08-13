@@ -1,14 +1,15 @@
-# App Title
+<p align="center">
+  <img src="logo.png" style="width: 100px;" />
+  <h1>Warden</h1>
+</p>
 
-A short description of your app
+Warden is a [Bitwarden](https://bitwarden.com)/[Vaultwarden](https://github.com/dani-garcia/vaultwarden) client for [Ubuntu Touch](https://ubuntu-touch.io).
 
-## License
+## Features
 
-Copyright (C) 2022  Your FullName
+1. View and edit: passwords, contact, secure notes and credit cards
+2. Generate passwords
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License version 3, as published
-by the Free Software Foundation.
+## Porting
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranties of MERCHANTABILITY, SATISFACTORY QUALITY, or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>.
+Although Warden is intended for ubuntu touch it is written completely in web technologies. This means that, if there is demand, the app can be ported to virtually any platform. The biggest problem will be [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS).
