@@ -16,7 +16,6 @@ import Pages.Loader exposing (loader)
 import Pages.Login as Login
 import Pages.MasterPassword as MasterPassword
 import Pages.Navigation as Navigation exposing (TopButton(..))
-import Pages.SelectCipherType as SelectCipherType
 import Task
 import Time
 import Types exposing (CipherId)
@@ -62,8 +61,6 @@ type Msg
     | CreateCipher Bridge.FullCipher
     | FireGlobalEvent Event
     | GeneratePassword Bridge.PasswordGeneratorConfig
-    | CreateNewCipher
-    | SelectCipherTypeMsg SelectCipherType.Msg
     | OpenNewCipherEditPage Bridge.CipherType
 
 
@@ -88,7 +85,6 @@ type PageModel
     | MasterPasswordModel MasterPassword.Model
     | CipherModel Cipher.Model
     | CaptchaModel Captcha.Model
-    | SelectCipherTypeModel SelectCipherType.Model
 
 
 showPage :
@@ -173,16 +169,6 @@ showPage email page =
             { title = p.title model
             , body = p.view model
             , topButton = Just (BackButton { action = PopView, icon = Just "close" })
-            }
-
-        SelectCipherTypeModel model ->
-            let
-                p =
-                    SelectCipherType.page selectCipherTypeCallbacks SelectCipherTypeMsg
-            in
-            { title = p.title model
-            , body = p.view model
-            , topButton = Just simpleBackButton
             }
 
 
@@ -277,9 +263,6 @@ doNotStoreInHistory page =
             True
 
         LoadingPage ->
-            True
-
-        SelectCipherTypeModel _ ->
             True
 
         _ ->
@@ -543,9 +526,6 @@ update msg model =
 
                                     CaptchaModel m ->
                                         (Captcha.page captchaCallbacks CaptchaMsg).event m ev |> CaptchaModel
-
-                                    SelectCipherTypeModel m ->
-                                        (SelectCipherType.page selectCipherTypeCallbacks SelectCipherTypeMsg).event m ev |> SelectCipherTypeModel
                             )
               }
             , Cmd.none
@@ -553,18 +533,6 @@ update msg model =
 
         GeneratePassword cfg ->
             ( model, FFI.sendBridge (Bridge.GeneratePassword cfg) )
-
-        SelectCipherTypeMsg imsg ->
-            case currentPage of
-                SelectCipherTypeModel page ->
-                    (SelectCipherType.page selectCipherTypeCallbacks SelectCipherTypeMsg).update imsg page |> processPage SelectCipherTypeModel
-
-                _ ->
-                    ( model, Cmd.none )
-
-        CreateNewCipher ->
-            (SelectCipherType.page selectCipherTypeCallbacks SelectCipherTypeMsg).init ()
-                |> Tuple.mapFirst (\pageModel -> appendPageStack <| SelectCipherTypeModel pageModel)
 
         OpenNewCipherEditPage t ->
             (EditCipher.page EditCipherMsg).init
@@ -631,7 +599,7 @@ ciphersCallbacks : Ciphers.Callbacks Msg
 ciphersCallbacks =
     { selected = RequestCipher
     , logOut = NeedsReset
-    , createNewCipher = CreateNewCipher
+    , createNewCipher = OpenNewCipherEditPage
     }
 
 
@@ -660,8 +628,3 @@ masterPasswordCallbacks =
     { submit = SendMasterPassword
     , reset = NeedsReset
     }
-
-
-selectCipherTypeCallbacks : SelectCipherType.Callbacks Msg
-selectCipherTypeCallbacks =
-    { choose = OpenNewCipherEditPage }

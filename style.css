@@ -123,3 +123,15 @@ textarea {
   margin: 0px;
   margin-bottom: 1.5rem;
 }
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.p-tabs__list {
+  overflow: initial;
+}

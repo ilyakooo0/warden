@@ -21,6 +21,7 @@ type alias Model =
     , ciphersListFilter : CiphersFilter
     , scroll : InfiniteScroll.Model Msg
     , sublist : { end : Int }
+    , cipherSelectDropdownVisivble : Bool
     }
 
 
@@ -83,13 +84,14 @@ type Msg
     | LogOut
     | LoadMore InfiniteScroll.Direction
     | InfiniteScrollMsg InfiniteScroll.Msg
-    | CreateNewCipher
+    | CreateNewCipher Bridge.CipherType
+    | ToggleSelectCipherTypeVisible
 
 
 type alias Callbacks msg =
     { selected : String -> msg
     , logOut : msg
-    , createNewCipher : msg
+    , createNewCipher : Bridge.CipherType -> msg
     }
 
 
@@ -100,7 +102,7 @@ page callbacks liftMsg =
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
     , title =
-        \{ ciphersListFilter } ->
+        \{ ciphersListFilter, cipherSelectDropdownVisivble } ->
             [ text
                 (case ciphersListFilter of
                     AllCiphers ->
@@ -120,7 +122,49 @@ page callbacks liftMsg =
                             Bridge.NoteType ->
                                 "Notes"
                 )
-            , span [ Attr.class "u-float-right" ] [ iconButton "plus" (liftMsg CreateNewCipher) ]
+            , span [ Attr.class "u-float-right" ]
+                [ span [ Attr.class "p-contextual-menu" ]
+                    ([ span [] [ iconButton "plus" (liftMsg ToggleSelectCipherTypeVisible) ]
+                     ]
+                        ++ optionals cipherSelectDropdownVisivble
+                            [ div
+                                [ Attr.class "overlay"
+                                , Ev.onClick (liftMsg ToggleSelectCipherTypeVisible)
+                                ]
+                                []
+                            , span
+                                [ Attr.class "p-contextual-menu__dropdown"
+                                , Attr.attribute "aria-hidden" "false"
+                                ]
+                                (let
+                                    create t =
+                                        liftMsg (CreateNewCipher t)
+                                 in
+                                 [ button
+                                    [ Attr.class "p-contextual-menu__link"
+                                    , Ev.onClick (create Bridge.LoginType)
+                                    ]
+                                    [ text "Login" ]
+                                 , button
+                                    [ Attr.class "p-contextual-menu__link"
+                                    , Ev.onClick (create Bridge.CardType)
+                                    ]
+                                    [ text "Card" ]
+                                 , button
+                                    [ Attr.class "p-contextual-menu__link"
+                                    , Ev.onClick (create Bridge.NoteType)
+                                    ]
+                                    [ text "Note" ]
+                                 , button
+                                    [ Attr.class "p-contextual-menu__link"
+                                    , Ev.onClick (create Bridge.IdentityType)
+                                    ]
+                                    [ text "Contact" ]
+                                 ]
+                                )
+                            ]
+                    )
+                ]
             ]
     , event =
         \model ev ->
@@ -152,6 +196,7 @@ init ciphers =
       , ciphersListFilter = AllCiphers
       , scroll = InfiniteScroll.init (LoadMore >> pureCmd)
       , sublist = { end = 20 }
+      , cipherSelectDropdownVisivble = False
       }
     , Cmd.none
     )
@@ -194,8 +239,13 @@ update { logOut, createNewCipher } liftMsg msg model =
             in
             ( Ok { model | scroll = scroll }, Cmd.map liftMsg cmd )
 
-        CreateNewCipher ->
-            ( Ok model, pureCmd createNewCipher )
+        CreateNewCipher t ->
+            ( Ok { model | cipherSelectDropdownVisivble = False }, pureCmd (createNewCipher t) )
+
+        ToggleSelectCipherTypeVisible ->
+            ( Ok { model | cipherSelectDropdownVisivble = not model.cipherSelectDropdownVisivble }
+            , Cmd.none
+            )
 
 
 subscriptions : Model -> Sub Msg
