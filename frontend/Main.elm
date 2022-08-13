@@ -63,6 +63,7 @@ type Msg
     | GeneratePassword Bridge.PasswordGeneratorConfig
     | OpenNewCipherEditPage Bridge.CipherType
     | WrongPassword
+    | DeleteCipher Bridge.FullCipher
 
 
 type alias Model =
@@ -227,6 +228,9 @@ subscriptions model =
 
                     Bridge.WrongPassword ->
                         WrongPassword
+
+                    Bridge.CipherDeleted c ->
+                        ShowInfo "Entry deleted" ("The entry “" ++ c.name ++ "” has been successfully deleted.")
             )
          ]
             ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
@@ -601,6 +605,15 @@ update msg model =
                 ]
             )
 
+        DeleteCipher cipher ->
+            ( model
+            , Cmd.batch
+                [ pureCmd PopView
+                , pureCmd PopView
+                , FFI.sendBridge (Bridge.DeleteCipher cipher)
+                ]
+            )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -622,12 +635,12 @@ cipherCallbacks =
 
 editCipherCallbacks : EditCipher.Callbacks Msg
 editCipherCallbacks =
-    { save = UpdateCipher, generatePassword = GeneratePassword }
+    { save = UpdateCipher, generatePassword = GeneratePassword, delete = Just DeleteCipher }
 
 
 createCipherCallbacks : EditCipher.Callbacks Msg
 createCipherCallbacks =
-    { save = CreateCipher, generatePassword = GeneratePassword }
+    { save = CreateCipher, generatePassword = GeneratePassword, delete = Nothing }
 
 
 captchaCallbacks : Captcha.Callbacks

@@ -206,6 +206,13 @@ main = do
         send $ Bridge.CipherChanged newCipher
         performSync
         pure unit
+    Bridge.DeleteCipher c@(Bridge.FullCipher { id, name }) ->
+      runWithDecryptionKey do
+        api <- getAuthedApi
+        liftPromise $ api.deleteCipher id
+        send $ Bridge.CipherDeleted c
+        performSync
+        pure unit
 
 processCipher ::
   forall r.

@@ -79,6 +79,7 @@ export function getServices() {
         getSync: () => api.getSync().then(sanitize),
         postCipherCreate: (cipher) => api.postCipherCreate(makeCipherCreateRequest(cipher)),
         putCipher: (cipher) => api.putCipher(cipher.id, makeCipherRequest(cipher)),
+        deleteCipher: (id) => api.deleteCipher(id),
       }
     },
     crypto: bg.cryptoService,

@@ -24,11 +24,13 @@ type Msg
     | OpenGeneratePasword
     | CloseGeneratePassword
     | GeneratePassword Bridge.PasswordGeneratorConfig
+    | Delete
 
 
 type alias Callbacks msg =
     { save : Bridge.FullCipher -> msg
     , generatePassword : Bridge.PasswordGeneratorConfig -> msg
+    , delete : Maybe (Bridge.FullCipher -> msg)
     }
 
 
@@ -110,6 +112,12 @@ update _ msg model =
         GeneratePassword cfg ->
             ( Ok model, pureCmd (model.callbacks.generatePassword cfg) )
 
+        Delete ->
+            ( Ok model
+            , Maybe.withDefault Cmd.none
+                (Maybe.map (\f -> f model.fullCipher |> pureCmd) model.callbacks.delete)
+            )
+
 
 subscriptions : Model emsg -> Sub Msg
 subscriptions _ =
@@ -131,7 +139,7 @@ row { name, nameIcon, attrs } =
 
 
 view : Model emsg -> List (Html Msg)
-view { fullCipher, passwordGenerator } =
+view { fullCipher, passwordGenerator, callbacks } =
     maybeList passwordGenerator
         (\x ->
             modal
@@ -256,7 +264,8 @@ view { fullCipher, passwordGenerator } =
                             , Attr.type_ "text"
                             , Attr.value (Maybe.withDefault "" expMonth)
                             , Ev.onInput (\x -> edit { cipher | expMonth = Just x })
-                            , Attr.style "width" "20%"
+                            , Attr.style "width" "30%"
+                            , Attr.style "min-width" "initial"
                             , Attr.class "u-align--right"
                             ]
                             []
@@ -266,7 +275,8 @@ view { fullCipher, passwordGenerator } =
                             , Attr.type_ "text"
                             , Attr.value (Maybe.withDefault "" expYear)
                             , Ev.onInput (\x -> edit { cipher | expYear = Just x })
-                            , Attr.style "width" "20%"
+                            , Attr.style "width" "30%"
+                            , Attr.style "min-width" "initial"
                             ]
                             []
                         ]
@@ -432,6 +442,14 @@ view { fullCipher, passwordGenerator } =
                         }
                     ]
            )
+        ++ optional (callbacks.delete /= Nothing)
+            (button
+                [ Attr.style "width" "100%"
+                , Attr.class "p-button--negative"
+                , Ev.onClick Delete
+                ]
+                [ text "Delete" ]
+            )
 
 
 iconButton : String -> msg -> Html msg

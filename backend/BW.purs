@@ -34,6 +34,7 @@ type ApiService
     , getSync :: Unit -> Promise SyncResponse
     , postCipherCreate :: CipherResponse -> Promise CipherResponse
     , putCipher :: CipherResponse -> Promise CipherResponse
+    , deleteCipher :: String -> Promise Unit
     }
 
 type PasswordGeneration =

@@ -449,6 +449,7 @@ derive instance ordCmd_Login :: Ord Cmd_Login
 data Cmd =
     Copy String
   | CreateCipher FullCipher
+  | DeleteCipher FullCipher
   | GeneratePassword PasswordGeneratorConfig
   | Init
   | Login Cmd_Login
@@ -561,6 +562,7 @@ derive instance ordSub_NeedsMasterPassword :: Ord Sub_NeedsMasterPassword
 data Sub =
     CaptchaDone
   | CipherChanged FullCipher
+  | CipherDeleted FullCipher
   | Error String
   | GeneratedPassword String
   | LoadCipher FullCipher

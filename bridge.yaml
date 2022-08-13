@@ -19,6 +19,7 @@ Sub:
 - RecieveEmail: String
 - CipherChanged: FullCipher
 - GeneratedPassword: String
+- CipherDeleted: FullCipher
 
 Cmd:
 - Init
@@ -36,6 +37,7 @@ Cmd:
 - UpdateCipher: FullCipher
 - CreateCipher: FullCipher
 - GeneratePassword: PasswordGeneratorConfig
+- DeleteCipher: FullCipher
 
 FullCipher:
     reprompt: Int

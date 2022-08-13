@@ -503,6 +503,7 @@ jsonEncCmd_Login  val =
 type Cmd  =
     Copy String
     | CreateCipher FullCipher
+    | DeleteCipher FullCipher
     | GeneratePassword PasswordGeneratorConfig
     | Init 
     | Login Cmd_Login
@@ -519,6 +520,7 @@ jsonDecCmd =
     let jsonDecDictCmd = Dict.fromList
             [ ("Copy", Json.Decode.lazy (\_ -> Json.Decode.map Copy (Json.Decode.string)))
             , ("CreateCipher", Json.Decode.lazy (\_ -> Json.Decode.map CreateCipher (jsonDecFullCipher)))
+            , ("DeleteCipher", Json.Decode.lazy (\_ -> Json.Decode.map DeleteCipher (jsonDecFullCipher)))
             , ("GeneratePassword", Json.Decode.lazy (\_ -> Json.Decode.map GeneratePassword (jsonDecPasswordGeneratorConfig)))
             , ("Init", Json.Decode.lazy (\_ -> Json.Decode.succeed Init))
             , ("Login", Json.Decode.lazy (\_ -> Json.Decode.map Login (jsonDecCmd_Login)))
@@ -538,6 +540,7 @@ jsonEncCmd  val =
     let keyval v = case v of
                     Copy v1 -> ("Copy", encodeValue (Json.Encode.string v1))
                     CreateCipher v1 -> ("CreateCipher", encodeValue (jsonEncFullCipher v1))
+                    DeleteCipher v1 -> ("DeleteCipher", encodeValue (jsonEncFullCipher v1))
                     GeneratePassword v1 -> ("GeneratePassword", encodeValue (jsonEncPasswordGeneratorConfig v1))
                     Init  -> ("Init", encodeValue (Json.Encode.list identity []))
                     Login v1 -> ("Login", encodeValue (jsonEncCmd_Login v1))
@@ -700,6 +703,7 @@ jsonEncSub_NeedsMasterPassword  val =
 type Sub  =
     CaptchaDone 
     | CipherChanged FullCipher
+    | CipherDeleted FullCipher
     | Error String
     | GeneratedPassword String
     | LoadCipher FullCipher
@@ -717,6 +721,7 @@ jsonDecSub =
     let jsonDecDictSub = Dict.fromList
             [ ("CaptchaDone", Json.Decode.lazy (\_ -> Json.Decode.succeed CaptchaDone))
             , ("CipherChanged", Json.Decode.lazy (\_ -> Json.Decode.map CipherChanged (jsonDecFullCipher)))
+            , ("CipherDeleted", Json.Decode.lazy (\_ -> Json.Decode.map CipherDeleted (jsonDecFullCipher)))
             , ("Error", Json.Decode.lazy (\_ -> Json.Decode.map Error (Json.Decode.string)))
             , ("GeneratedPassword", Json.Decode.lazy (\_ -> Json.Decode.map GeneratedPassword (Json.Decode.string)))
             , ("LoadCipher", Json.Decode.lazy (\_ -> Json.Decode.map LoadCipher (jsonDecFullCipher)))
@@ -737,6 +742,7 @@ jsonEncSub  val =
     let keyval v = case v of
                     CaptchaDone  -> ("CaptchaDone", encodeValue (Json.Encode.list identity []))
                     CipherChanged v1 -> ("CipherChanged", encodeValue (jsonEncFullCipher v1))
+                    CipherDeleted v1 -> ("CipherDeleted", encodeValue (jsonEncFullCipher v1))
                     Error v1 -> ("Error", encodeValue (Json.Encode.string v1))
                     GeneratedPassword v1 -> ("GeneratedPassword", encodeValue (Json.Encode.string v1))
                     LoadCipher v1 -> ("LoadCipher", encodeValue (jsonEncFullCipher v1))
