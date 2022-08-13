@@ -222,7 +222,7 @@ view { fullCipher, passwordGenerator } =
                         , br [] []
                         , textarea
                             [ Attr.spellcheck True
-                            , Attr.style "height" "70vh"
+                            , Attr.style "height" "65vh"
                             , Attr.value contents
                             , Ev.onInput (\x -> EditCipher { fullCipher | cipher = Bridge.NoteCipher x })
                             ]
