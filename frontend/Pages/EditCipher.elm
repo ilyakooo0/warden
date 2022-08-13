@@ -11,9 +11,10 @@ import Pages.PasswordGenerator as PasswordGenerator
 import Utils exposing (..)
 
 
-type alias Model =
+type alias Model msg =
     { fullCipher : Bridge.FullCipher
     , passwordGenerator : Maybe PasswordGenerator.Model
+    , callbacks : Callbacks msg
     }
 
 
@@ -31,14 +32,14 @@ type alias Callbacks msg =
     }
 
 
-page : Callbacks emsg -> Page Bridge.FullCipher Model Msg emsg
-page callbacks liftMsg =
-    { init = \data -> Tuple.mapSecond (Cmd.map liftMsg) (init data)
+page : Page { fullCipher : Bridge.FullCipher, callbacks : Callbacks emsg } (Model emsg) Msg emsg
+page liftMsg =
+    { init = init
     , view = \model -> view model |> List.map (Html.map liftMsg)
-    , update = \msg model -> update callbacks liftMsg msg model
+    , update = \msg model -> update liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
     , title =
-        \{ fullCipher } ->
+        \{ fullCipher, callbacks } ->
             [ text fullCipher.name
             , span [ Attr.class "u-float-right" ] [ iconButton "task-outstanding" (callbacks.save fullCipher) ]
             ]
@@ -77,17 +78,18 @@ page callbacks liftMsg =
     }
 
 
-init : Bridge.FullCipher -> ( Model, Cmd Msg )
-init cipher =
-    ( { fullCipher = cipher
+init : { fullCipher : Bridge.FullCipher, callbacks : Callbacks emsg } -> ( Model emsg, Cmd emsg )
+init { fullCipher, callbacks } =
+    ( { fullCipher = fullCipher
       , passwordGenerator = Nothing
+      , callbacks = callbacks
       }
     , Cmd.none
     )
 
 
-update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update { generatePassword } _ msg model =
+update : (Msg -> emsg) -> Msg -> Model emsg -> ( Result String (Model emsg), Cmd emsg )
+update _ msg model =
     case msg of
         EditCipher fullCipher ->
             ( Ok { model | fullCipher = fullCipher }, Cmd.none )
@@ -106,10 +108,10 @@ update { generatePassword } _ msg model =
             ( Ok { model | passwordGenerator = Nothing }, Cmd.none )
 
         GeneratePassword cfg ->
-            ( Ok model, pureCmd (generatePassword cfg) )
+            ( Ok model, pureCmd (model.callbacks.generatePassword cfg) )
 
 
-subscriptions : Model -> Sub Msg
+subscriptions : Model emsg -> Sub Msg
 subscriptions _ =
     Sub.none
 
@@ -128,7 +130,7 @@ row { name, nameIcon, attrs } =
         ]
 
 
-view : Model -> List (Html Msg)
+view : Model emsg -> List (Html Msg)
 view { fullCipher, passwordGenerator } =
     maybeList passwordGenerator
         (\x ->

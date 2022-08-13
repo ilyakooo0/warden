@@ -448,6 +448,7 @@ derive instance ordCmd_Login :: Ord Cmd_Login
 
 data Cmd =
     Copy String
+  | CreateCipher FullCipher
   | GeneratePassword PasswordGeneratorConfig
   | Init
   | Login Cmd_Login

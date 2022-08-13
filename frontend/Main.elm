@@ -16,6 +16,7 @@ import Pages.Loader exposing (loader)
 import Pages.Login as Login
 import Pages.MasterPassword as MasterPassword
 import Pages.Navigation as Navigation exposing (TopButton(..))
+import Pages.SelectCipherType as SelectCipherType
 import Task
 import Time
 import Types exposing (CipherId)
@@ -58,8 +59,12 @@ type Msg
     | UpdateLastNotificatioTime Time.Posix
     | EditCipher Bridge.FullCipher
     | UpdateCipher Bridge.FullCipher
+    | CreateCipher Bridge.FullCipher
     | FireGlobalEvent Event
     | GeneratePassword Bridge.PasswordGeneratorConfig
+    | CreateNewCipher
+    | SelectCipherTypeMsg SelectCipherType.Msg
+    | OpenNewCipherEditPage Bridge.CipherType
 
 
 type alias Model =
@@ -79,10 +84,11 @@ type PageModel
     = LoginModel Login.Model
     | LoadingPage
     | CiphersModel Ciphers.Model
-    | EditCipherModel EditCipher.Model
+    | EditCipherModel (EditCipher.Model Msg)
     | MasterPasswordModel MasterPassword.Model
     | CipherModel Cipher.Model
     | CaptchaModel Captcha.Model
+    | SelectCipherTypeModel SelectCipherType.Model
 
 
 showPage :
@@ -162,11 +168,21 @@ showPage email page =
         EditCipherModel model ->
             let
                 p =
-                    EditCipher.page editCipherCallbacks EditCipherMsg
+                    EditCipher.page EditCipherMsg
             in
             { title = p.title model
             , body = p.view model
             , topButton = Just (BackButton { action = PopView, icon = Just "close" })
+            }
+
+        SelectCipherTypeModel model ->
+            let
+                p =
+                    SelectCipherType.page selectCipherTypeCallbacks SelectCipherTypeMsg
+            in
+            { title = p.title model
+            , body = p.view model
+            , topButton = Just simpleBackButton
             }
 
 
@@ -261,6 +277,9 @@ doNotStoreInHistory page =
             True
 
         LoadingPage ->
+            True
+
+        SelectCipherTypeModel _ ->
             True
 
         _ ->
@@ -388,8 +407,6 @@ update msg model =
             , cmd
             )
 
-        -- (Ciphers.page ciphersCallbacks CiphersMsg).init ciphers
-        --     |> Tuple.mapFirst (\pageModel -> appendPageStack <| CiphersModel pageModel)
         OpenCiphersScreen ->
             ( appendPageStack <| LoadingPage, Cmd.batch [ sendBridge Bridge.NeedCiphersList, sendBridge Bridge.NeedEmail ] )
 
@@ -425,7 +442,7 @@ update msg model =
         EditCipherMsg imsg ->
             case currentPage of
                 EditCipherModel page ->
-                    (EditCipher.page editCipherCallbacks EditCipherMsg).update imsg page |> processPage EditCipherModel
+                    (EditCipher.page EditCipherMsg).update imsg page |> processPage EditCipherModel
 
                 _ ->
                     ( model, Cmd.none )
@@ -479,7 +496,7 @@ update msg model =
             ( model, Cmd.none )
 
         EditCipher cipher ->
-            (EditCipher.page editCipherCallbacks EditCipherMsg).init cipher
+            (EditCipher.page EditCipherMsg).init { fullCipher = cipher, callbacks = editCipherCallbacks }
                 |> Tuple.mapFirst (\pageModel -> keepStackWith <| EditCipherModel pageModel)
 
         UpdateCipher cipher ->
@@ -487,6 +504,14 @@ update msg model =
             , Cmd.batch
                 [ Bridge.UpdateCipher cipher |> sendBridge
                 , cipher |> GlobalEvents.UpdateCipher |> FireGlobalEvent |> pureCmd
+                , PopView |> pureCmd
+                ]
+            )
+
+        CreateCipher cipher ->
+            ( model
+            , Cmd.batch
+                [ Bridge.CreateCipher cipher |> sendBridge
                 , PopView |> pureCmd
                 ]
             )
@@ -514,10 +539,13 @@ update msg model =
                                         (Cipher.page cipherCallbacks CipherMsg).event m ev |> CipherModel
 
                                     EditCipherModel m ->
-                                        (EditCipher.page editCipherCallbacks EditCipherMsg).event m ev |> EditCipherModel
+                                        (EditCipher.page EditCipherMsg).event m ev |> EditCipherModel
 
                                     CaptchaModel m ->
                                         (Captcha.page captchaCallbacks CaptchaMsg).event m ev |> CaptchaModel
+
+                                    SelectCipherTypeModel m ->
+                                        (SelectCipherType.page selectCipherTypeCallbacks SelectCipherTypeMsg).event m ev |> SelectCipherTypeModel
                             )
               }
             , Cmd.none
@@ -525,6 +553,73 @@ update msg model =
 
         GeneratePassword cfg ->
             ( model, FFI.sendBridge (Bridge.GeneratePassword cfg) )
+
+        SelectCipherTypeMsg imsg ->
+            case currentPage of
+                SelectCipherTypeModel page ->
+                    (SelectCipherType.page selectCipherTypeCallbacks SelectCipherTypeMsg).update imsg page |> processPage SelectCipherTypeModel
+
+                _ ->
+                    ( model, Cmd.none )
+
+        CreateNewCipher ->
+            (SelectCipherType.page selectCipherTypeCallbacks SelectCipherTypeMsg).init ()
+                |> Tuple.mapFirst (\pageModel -> appendPageStack <| SelectCipherTypeModel pageModel)
+
+        OpenNewCipherEditPage t ->
+            (EditCipher.page EditCipherMsg).init
+                { callbacks = createCipherCallbacks
+                , fullCipher =
+                    { reprompt = 0
+                    , favorite = False
+                    , id = ""
+                    , name = ""
+                    , cipher =
+                        case t of
+                            Bridge.LoginType ->
+                                Bridge.LoginCipher
+                                    { uris = []
+                                    , username = Nothing
+                                    , password = Nothing
+                                    }
+
+                            Bridge.NoteType ->
+                                Bridge.NoteCipher ""
+
+                            Bridge.CardType ->
+                                Bridge.CardCipher
+                                    { cardholderName = Nothing
+                                    , brand = Nothing
+                                    , number = Nothing
+                                    , expMonth = Nothing
+                                    , expYear = Nothing
+                                    , code = Nothing
+                                    }
+
+                            Bridge.IdentityType ->
+                                Bridge.IdentityCipher
+                                    { title = Nothing
+                                    , firstName = Nothing
+                                    , middleName = Nothing
+                                    , lastName = Nothing
+                                    , address1 = Nothing
+                                    , address2 = Nothing
+                                    , address3 = Nothing
+                                    , city = Nothing
+                                    , state = Nothing
+                                    , postalCode = Nothing
+                                    , country = Nothing
+                                    , company = Nothing
+                                    , email = Nothing
+                                    , phone = Nothing
+                                    , ssn = Nothing
+                                    , username = Nothing
+                                    , passportNumber = Nothing
+                                    , licenseNumber = Nothing
+                                    }
+                    }
+                }
+                |> Tuple.mapFirst (\pageModel -> keepStackWith <| EditCipherModel pageModel)
 
 
 loginCallbacks : Login.Callbacks Msg
@@ -534,7 +629,10 @@ loginCallbacks =
 
 ciphersCallbacks : Ciphers.Callbacks Msg
 ciphersCallbacks =
-    { selected = RequestCipher, logOut = NeedsReset }
+    { selected = RequestCipher
+    , logOut = NeedsReset
+    , createNewCipher = CreateNewCipher
+    }
 
 
 cipherCallbacks : Cipher.Callbacks Msg
@@ -547,6 +645,11 @@ editCipherCallbacks =
     { save = UpdateCipher, generatePassword = GeneratePassword }
 
 
+createCipherCallbacks : EditCipher.Callbacks Msg
+createCipherCallbacks =
+    { save = CreateCipher, generatePassword = GeneratePassword }
+
+
 captchaCallbacks : Captcha.Callbacks
 captchaCallbacks =
     {}
@@ -557,3 +660,8 @@ masterPasswordCallbacks =
     { submit = SendMasterPassword
     , reset = NeedsReset
     }
+
+
+selectCipherTypeCallbacks : SelectCipherType.Callbacks Msg
+selectCipherTypeCallbacks =
+    { choose = OpenNewCipherEditPage }

@@ -2,6 +2,7 @@ module Utils exposing (..)
 
 import Html exposing (..)
 import Html.Attributes as Attr
+import Html.Events as Ev
 import Task
 
 
@@ -144,3 +145,9 @@ spanList f aa =
 
             else
                 ( [], aa )
+
+
+iconButton : String -> msg -> Html msg
+iconButton name msg =
+    button [ Attr.class "p-button is-inline is-dense has-icon", Ev.onClick msg ]
+        [ i [ Attr.class ("p-icon--" ++ name) ] [] ]

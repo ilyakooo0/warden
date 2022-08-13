@@ -33,6 +33,7 @@ Cmd:
 - Copy: String
 - Open: String
 - UpdateCipher: FullCipher
+- CreateCipher: FullCipher
 - GeneratePassword: PasswordGeneratorConfig
 
 FullCipher:

@@ -111,3 +111,15 @@ textarea {
 .p-side-navigation__drawer {
   max-width: initial;
 }
+
+.select-cipher-type-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.select-cipher-type-container > * {
+  margin: 0px;
+  margin-bottom: 1.5rem;
+}

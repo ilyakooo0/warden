@@ -32,7 +32,7 @@ type ApiService
     -- TODO: There can really be more request and response types. Maybe handle this later.
     , postIdentityToken :: PasswordTokenRequest -> Promise (IdentityCaptchaResponse |+| IdentityTokenResponse)
     , getSync :: Unit -> Promise SyncResponse
-    , postCipher :: CipherResponse -> Promise CipherResponse
+    , postCipherCreate :: CipherResponse -> Promise CipherResponse
     , putCipher :: CipherResponse -> Promise CipherResponse
     }
 

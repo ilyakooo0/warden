@@ -17,6 +17,7 @@ import { StateService as BaseStateService } from "../../deps/bw/libs/shared/dist
 import { PasswordTokenRequest } from "../../deps/bw/libs/shared/dist/src/models/request/identityToken/passwordTokenRequest";
 import { TokenRequestTwoFactor } from "../../deps/bw/libs/common/src/models/request/identityToken/tokenRequestTwoFactor";
 import { CipherRequest } from "../../deps/bw/libs/common/src/models/request/cipherRequest";
+import { CipherCreateRequest } from "../../deps/bw/libs/common/src/models/request/cipherCreateRequest";
 import { Cipher } from "../../deps/bw/libs/common/src/models/domain/cipher";
 import { CipherData } from "../../deps/bw/libs/common/src/models/data/cipherData";
 import { PasswordGenerationService } from "../../deps/bw/libs/common/src/services/passwordGeneration.service";
@@ -76,7 +77,7 @@ export function getServices() {
           )
         ),
         getSync: () => api.getSync().then(sanitize),
-        postCipher: (cipher) => api.postCipher(makeCipherRequest(cipher)),
+        postCipherCreate: (cipher) => api.postCipherCreate(makeCipherCreateRequest(cipher)),
         putCipher: (cipher) => api.putCipher(cipher.id, makeCipherRequest(cipher)),
       }
     },
@@ -88,6 +89,10 @@ export function getServices() {
 
 function makeCipherRequest(cipher) {
   return new CipherRequest(new Cipher(new CipherData(cipher)))
+}
+
+function makeCipherCreateRequest(cipher) {
+  return new CipherCreateRequest(new Cipher(new CipherData(cipher)))
 }
 
 class MainBackground {

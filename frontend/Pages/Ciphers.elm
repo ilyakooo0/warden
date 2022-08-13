@@ -64,7 +64,7 @@ menuConfig email { ciphersListFilter, menuVisible } =
           , current = ciphersListFilter == SpecificCiphers Bridge.CardType
           }
         , { icon = "user"
-          , name = "Identities"
+          , name = "Contacts"
           , trigger = UpdateFilter (SpecificCiphers Bridge.IdentityType)
           , current = ciphersListFilter == SpecificCiphers Bridge.IdentityType
           }
@@ -83,11 +83,13 @@ type Msg
     | LogOut
     | LoadMore InfiniteScroll.Direction
     | InfiniteScrollMsg InfiniteScroll.Msg
+    | CreateNewCipher
 
 
 type alias Callbacks msg =
     { selected : String -> msg
     , logOut : msg
+    , createNewCipher : msg
     }
 
 
@@ -118,6 +120,7 @@ page callbacks liftMsg =
                             Bridge.NoteType ->
                                 "Notes"
                 )
+            , span [ Attr.class "u-float-right" ] [ iconButton "plus" (liftMsg CreateNewCipher) ]
             ]
     , event =
         \model ev ->
@@ -155,7 +158,7 @@ init ciphers =
 
 
 update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update { logOut } liftMsg msg model =
+update { logOut, createNewCipher } liftMsg msg model =
     case msg of
         Noop ->
             ( Ok model, Cmd.none )
@@ -190,6 +193,9 @@ update { logOut } liftMsg msg model =
                     InfiniteScroll.update InfiniteScrollMsg msg_ model.scroll
             in
             ( Ok { model | scroll = scroll }, Cmd.map liftMsg cmd )
+
+        CreateNewCipher ->
+            ( Ok model, pureCmd createNewCipher )
 
 
 subscriptions : Model -> Sub Msg

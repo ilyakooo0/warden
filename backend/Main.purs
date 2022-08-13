@@ -198,6 +198,14 @@ main = do
         password <- liftPromise $ services.passwordGeneration.generatePassword cfg
         send $ Bridge.GeneratedPassword password
         pure unit
+    Bridge.CreateCipher fullCipher ->
+      runWithDecryptionKey do
+        api <- getAuthedApi
+        cipher <- encodeCipher fullCipher
+        newCipher <- liftPromise (api.postCipherCreate cipher) >>= decodeCipher
+        send $ Bridge.CipherChanged newCipher
+        performSync
+        pure unit
 
 processCipher ::
   forall r.

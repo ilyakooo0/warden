@@ -502,6 +502,7 @@ jsonEncCmd_Login  val =
 
 type Cmd  =
     Copy String
+    | CreateCipher FullCipher
     | GeneratePassword PasswordGeneratorConfig
     | Init 
     | Login Cmd_Login
@@ -517,6 +518,7 @@ jsonDecCmd : Json.Decode.Decoder ( Cmd )
 jsonDecCmd =
     let jsonDecDictCmd = Dict.fromList
             [ ("Copy", Json.Decode.lazy (\_ -> Json.Decode.map Copy (Json.Decode.string)))
+            , ("CreateCipher", Json.Decode.lazy (\_ -> Json.Decode.map CreateCipher (jsonDecFullCipher)))
             , ("GeneratePassword", Json.Decode.lazy (\_ -> Json.Decode.map GeneratePassword (jsonDecPasswordGeneratorConfig)))
             , ("Init", Json.Decode.lazy (\_ -> Json.Decode.succeed Init))
             , ("Login", Json.Decode.lazy (\_ -> Json.Decode.map Login (jsonDecCmd_Login)))
@@ -535,6 +537,7 @@ jsonEncCmd : Cmd -> Value
 jsonEncCmd  val =
     let keyval v = case v of
                     Copy v1 -> ("Copy", encodeValue (Json.Encode.string v1))
+                    CreateCipher v1 -> ("CreateCipher", encodeValue (jsonEncFullCipher v1))
                     GeneratePassword v1 -> ("GeneratePassword", encodeValue (jsonEncPasswordGeneratorConfig v1))
                     Init  -> ("Init", encodeValue (Json.Encode.list identity []))
                     Login v1 -> ("Login", encodeValue (jsonEncCmd_Login v1))
