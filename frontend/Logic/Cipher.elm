@@ -49,7 +49,7 @@ normalizeIdentityCipher { address1, address2, address3, city, company, country, 
     , ssn = normalizeStringMaybe ssn
     , state = normalizeStringMaybe state
     , title = normalizeStringMaybe title
-    , username = username
+    , username = normalizeStringMaybe username
     }
 
 

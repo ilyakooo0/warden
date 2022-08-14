@@ -5,6 +5,7 @@ import GlobalEvents
 import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
+import Logic.Cipher exposing (normalizeCipher)
 import Modal exposing (modal)
 import Page exposing (..)
 import Pages.PasswordGenerator as PasswordGenerator
@@ -43,7 +44,10 @@ page liftMsg =
     , title =
         \{ fullCipher, callbacks } ->
             [ text fullCipher.name
-            , span [ Attr.class "u-float-right" ] [ iconButton "task-outstanding" (callbacks.save fullCipher) ]
+            , span [ Attr.class "u-float-right" ]
+                [ iconButton "task-outstanding"
+                    (callbacks.save { fullCipher | cipher = normalizeCipher fullCipher.cipher })
+                ]
             ]
     , event =
         \model ev ->
