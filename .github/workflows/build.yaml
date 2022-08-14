@@ -25,8 +25,8 @@ jobs:
         run: ./dev/build-bw.sh
 
       - name: Build Warden
-        run: clickable build --output $RUNNER_TEMP/warden
+        run: clickable build --output dist
 
       - uses: actions/upload-artifact@v3
         with:
-          path: $RUNNER_TEMP/*
+          path: dist/*
