@@ -53,42 +53,42 @@ type ProfileResponse
 
 type ProfileOrganizationResponse
   = { id :: String
-    , name :: String
-    , usePolicies :: Boolean
-    , useGroups :: Boolean
-    , useDirectory :: Boolean
-    , useEvents :: Boolean
-    , useTotp :: Boolean
-    , use2fa :: Boolean
-    , useApi :: Boolean
-    , useSso :: Boolean
-    , useKeyConnector :: Boolean
-    , useResetPassword :: Boolean
-    , selfHost :: Boolean
-    , usersGetPremium :: Boolean
-    , seats :: Int
-    , maxCollections :: Int
-    , maxStorageGb :: JNullable Int
-    , key :: String
-    , hasPublicAndPrivateKeys :: Boolean
-    , status :: OrganizationUserStatusType
-    , type :: OrganizationUserType
-    , enabled :: Boolean
-    , ssoBound :: Boolean
-    , identifier :: String
-    , permissions :: PermissionsApi
-    , resetPasswordEnrolled :: Boolean
-    , userId :: String
-    , providerId :: String
-    , providerName :: String
-    , familySponsorshipFriendlyName :: String
-    , familySponsorshipAvailable :: Boolean
-    , planProductType :: ProductType
-    , keyConnectorEnabled :: Boolean
-    , keyConnectorUrl :: String
-    , familySponsorshipLastSyncDate :: JNullable Timestamp
-    , familySponsorshipValidUntil :: JNullable Timestamp
-    , familySponsorshipToDelete :: JNullable Boolean
+    , name :: JNullable String
+    , usePolicies :: JNullable Boolean
+    , useGroups :: JNullable Boolean
+    , useDirectory :: JNullable Boolean
+    , useEvents :: JNullable Boolean
+    , useTotp :: JNullable Boolean
+    , use2fa :: JNullable Boolean
+    , useApi :: JNullable Boolean
+    , useSso :: JNullable Boolean
+    , useKeyConnector :: JNullable Boolean
+    , useResetPassword :: JNullable Boolean
+    , selfHost :: JNullable Boolean
+    , usersGetPremium :: JNullable Boolean
+    , seats :: JNullable Int
+    , maxCollections :: JNullable Int
+    , maxStorageGb :: JNullable JNullable Int
+    , key :: JNullable String
+    , hasPublicAndPrivateKeys :: JNullable Boolean
+    , status :: JNullable OrganizationUserStatusType
+    , type :: JNullable OrganizationUserType
+    , enabled :: JNullable Boolean
+    , ssoBound :: JNullable Boolean
+    , identifier :: JNullable String
+    , permissions :: JNullable PermissionsApi
+    , resetPasswordEnrolled :: JNullable Boolean
+    , userId :: JNullable String
+    , providerId :: JNullable String
+    , providerName :: JNullable String
+    , familySponsorshipFriendlyName :: JNullable String
+    , familySponsorshipAvailable :: JNullable Boolean
+    , planProductType :: JNullable ProductType
+    , keyConnectorEnabled :: JNullable Boolean
+    , keyConnectorUrl :: JNullable String
+    , familySponsorshipLastSyncDate :: JNullable JNullable Timestamp
+    , familySponsorshipValidUntil :: JNullable JNullable Timestamp
+    , familySponsorshipToDelete :: JNullable JNullable Boolean
     }
 
 organizationUserStatusTypeInvited = 0 :: OrganizationUserStatusType
@@ -145,10 +145,10 @@ type ProductType
 
 type ProfileProviderResponse
   = { id :: String
-    , name :: String
-    , key :: String
-    , status :: ProviderUserStatusType
-    , type :: ProviderUserType
+    , name :: JNullable String
+    , key :: JNullable String
+    , status :: JNullable ProviderUserStatusType
+    , type :: JNullable ProviderUserType
     , enabled :: Boolean
     , permissions :: PermissionsApi
     , userId :: String
@@ -569,11 +569,11 @@ type SecureNoteApi = {
 
 type AttachmentResponse
   = { id :: String
-    , url :: String
-    , fileName :: String
-    , key :: String
-    , size :: String
-    , sizeName :: String
+    , url :: JNullable String
+    , fileName :: JNullable String
+    , key :: JNullable String
+    , size :: JNullable String
+    , sizeName :: JNullable String
     }
 
 type PasswordHistoryResponse
@@ -640,13 +640,13 @@ type SendResponse
     , notes :: JNullable String
     , file :: JNullable SendFileApi
     , text :: JNullable SendTextApi
-    , key :: String
+    , key :: JNullable String
     , maxAccessCount :: JNullable Int
-    , accessCount :: Int
-    , revisionDate :: String
-    , expirationDate :: String
+    , accessCount :: JNullable Int
+    , revisionDate :: JNullable String
+    , expirationDate :: JNullable String
     , deletionDate :: JNullable String
-    , password :: String
+    , password :: JNullable String
     , disable :: Boolean
     , hideEmail :: Boolean
     }
@@ -660,12 +660,12 @@ type SendType
 
 type SendFileApi
   = { id :: String
-    , fileName :: String
-    , size :: String
-    , sizeName :: String
+    , fileName :: JNullable String
+    , size :: JNullable String
+    , sizeName :: JNullable String
     }
 
 type SendTextApi
-  = { text :: String
+  = { text :: JNullable String
     , hidden :: Boolean
     }
