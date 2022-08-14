@@ -5,6 +5,11 @@
 <h1 align="center">Warden</h1>
 
 <p align="center">
+  <a href="https://open-store.io/app/soy.iko.warden"><img src="https://open-store.io/badges/en_US.svg" alt="OpenStore" style="width: 100px;" /></a>
+</p>
+
+
+<p align="center">
   <img src="screenshots/1.png" style="width: 150px;" />
   <img src="screenshots/2.png" style="width: 150px;" />
   <img src="screenshots/3.png" style="width: 150px;" />
