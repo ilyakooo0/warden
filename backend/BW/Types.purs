@@ -86,9 +86,9 @@ type ProfileOrganizationResponse
     , planProductType :: JNullable ProductType
     , keyConnectorEnabled :: JNullable Boolean
     , keyConnectorUrl :: JNullable String
-    , familySponsorshipLastSyncDate :: JNullable JNullable Timestamp
-    , familySponsorshipValidUntil :: JNullable JNullable Timestamp
-    , familySponsorshipToDelete :: JNullable JNullable Boolean
+    , familySponsorshipLastSyncDate :: JNullable Timestamp
+    , familySponsorshipValidUntil :: JNullable Timestamp
+    , familySponsorshipToDelete :: JNullable Boolean
     }
 
 organizationUserStatusTypeInvited = 0 :: OrganizationUserStatusType
