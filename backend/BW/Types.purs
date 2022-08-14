@@ -68,7 +68,7 @@ type ProfileOrganizationResponse
     , usersGetPremium :: JNullable Boolean
     , seats :: JNullable Int
     , maxCollections :: JNullable Int
-    , maxStorageGb :: JNullable JNullable Int
+    , maxStorageGb :: JNullable Int
     , key :: JNullable String
     , hasPublicAndPrivateKeys :: JNullable Boolean
     , status :: JNullable OrganizationUserStatusType
