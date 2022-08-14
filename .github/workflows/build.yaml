@@ -29,4 +29,5 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
+          name: warden
           path: dist/*
