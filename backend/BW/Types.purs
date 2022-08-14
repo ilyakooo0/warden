@@ -39,11 +39,11 @@ type ProfileResponse
     , masterPasswordHint :: JNullable String
     , premiumPersonally :: Boolean
     -- , premiumFromOrganization :: Boolean
-    , culture :: String
+    , culture :: JNullable String
     , twoFactorEnabled :: Boolean
     , key :: EncryptedString
     , privateKey :: EncryptedString
-    , securityStamp :: String
+    , securityStamp :: JNullable String
     , forcePasswordReset :: Boolean
     , usesKeyConnector :: Boolean
     , organizations :: Array ProfileOrganizationResponse
@@ -151,7 +151,7 @@ type ProfileProviderResponse
     , type :: JNullable ProviderUserType
     , enabled :: Boolean
     , permissions :: PermissionsApi
-    , userId :: String
+    , userId :: JNullable String
     , useEvents :: Boolean
     }
 
@@ -173,7 +173,7 @@ type ProviderUserType
 
 type ProfileProviderOrganizationResponse
   = { id :: String
-    , name :: String
+    , name :: JNullable String
     , usePolicies :: Boolean
     , useGroups :: Boolean
     , useDirectory :: Boolean
@@ -198,14 +198,14 @@ type ProfileProviderOrganizationResponse
     , identifier :: String
     , permissions :: PermissionsApi
     , resetPasswordEnrolled :: Boolean
-    , userId :: String
-    , providerId :: String
-    , providerName :: String
-    , familySponsorshipFriendlyName :: String
+    , userId :: JNullable String
+    , providerId :: JNullable String
+    , providerName :: JNullable String
+    , familySponsorshipFriendlyName :: JNullable String
     , familySponsorshipAvailable :: Boolean
     , planProductType :: ProductType
     , keyConnectorEnabled :: Boolean
-    , keyConnectorUrl :: String
+    , keyConnectorUrl :: JNullable String
     , familySponsorshipLastSyncDate :: JNullable Timestamp
     , familySponsorshipValidUntil :: JNullable Timestamp
     , familySponsorshipToDelete :: JNullable Boolean
@@ -578,7 +578,7 @@ type AttachmentResponse
 
 type PasswordHistoryResponse
   = { password :: String
-    , lastUsedDate :: String
+    , lastUsedDate :: JNullable String
     }
 
 cipherRepromptTypeNone = 0 :: CipherRepromptType
@@ -634,9 +634,9 @@ type PolicyType
 
 type SendResponse
   = { id :: String
-    , accessId :: String
+    , accessId :: JNullable String
     , type :: SendType
-    , name :: String
+    , name :: JNullable String
     , notes :: JNullable String
     , file :: JNullable SendFileApi
     , text :: JNullable SendTextApi
