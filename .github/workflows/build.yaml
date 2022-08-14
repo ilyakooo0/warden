@@ -23,3 +23,10 @@ jobs:
 
       - name: Build bw libraries
         run: ./dev/build-bw.sh
+
+      - name: Build Warden
+        run: clickable build --output $RUNNER_TEMP/warden
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ${{ env.RUNNER_TEMP }}/*
