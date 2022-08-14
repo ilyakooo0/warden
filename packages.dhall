@@ -142,8 +142,8 @@ in  upstream
       , "tuples"
       , "unsafe-coerce"
       ]
-    , repo = "https://github.com/ilyakooo0/purescript-untagged-union.git"
-    , version = "iko/ps-15"
+    , repo = "https://github.com/rowtype-yoga/purescript-untagged-union.git"
+    , version = "6c5bccef38696a16e86ba9a65cf778b4462c4a66"
     }
   with literals =
     { repo = "https://github.com/ilyakooo0/purescript-literals.git"
