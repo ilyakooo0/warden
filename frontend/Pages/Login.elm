@@ -40,7 +40,7 @@ page callbacks liftMsg =
 init : ( Model, Cmd Msg )
 init =
     ( { server = "https://vault.bitwarden.com"
-      , email = "ilyakooo0@gmail.com"
+      , email = ""
       , password = ""
       }
     , Cmd.none
