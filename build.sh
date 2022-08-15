@@ -14,4 +14,4 @@ terser "$TEMP/elm.js" --ecma 2018 --compress 'pure_funcs=[F2,F3,F4,F5,F6,F7,F8,F
 
 (cd "$SRC_DIR" && spago bundle-app --to "$TEMP/backend.js")
 
-terser "$TEMP/backend.js" --ecma 2018 --mangle --compress --comments=false --toplevel --output "$INSTALL_DIR/backend.js"
+terser "$TEMP/backend.js" --ecma 2018 --mangle --compress 'drop_console=true' --comments=false --toplevel --output "$INSTALL_DIR/backend.js"
