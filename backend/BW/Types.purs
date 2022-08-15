@@ -232,7 +232,7 @@ type PasswordTokenRequest
 
 type DeviceRequest
   = { type :: DeviceType
-    , name :: JNullable String
+    , name :: String
     , identifier :: String
     , pushToken :: JNullable String
     }
