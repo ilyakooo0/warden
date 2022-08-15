@@ -131,7 +131,6 @@ main = do
               api <- liftPromise $ services.getApi urls (nullify token)
               sync <- liftPromise $ api.getSync unit
               hash <- hashPassword (Password password)
-              log $ show sync
               liftEffect do
                 Ref.write (Just masterKey) masterKeyRef
                 Storage.store storage UrlsKey server
