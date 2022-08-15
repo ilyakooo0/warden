@@ -33,7 +33,7 @@ type PreloginRequest
 
 type ProfileResponse
   = { id :: String
-    , name :: String
+    , name :: JNullable String
     , email :: String
     , emailVerified :: Boolean
     , masterPasswordHint :: JNullable String
@@ -189,13 +189,13 @@ type ProfileProviderOrganizationResponse
     , seats :: Int
     , maxCollections :: Int
     , maxStorageGb :: JNullable Int
-    , key :: String
+    , key :: JNullable String
     , hasPublicAndPrivateKeys :: Boolean
     , status :: OrganizationUserStatusType
     , type :: OrganizationUserType
     , enabled :: Boolean
     , ssoBound :: Boolean
-    , identifier :: String
+    , identifier :: JNullable String
     , permissions :: PermissionsApi
     , resetPasswordEnrolled :: Boolean
     , userId :: JNullable String
@@ -232,7 +232,7 @@ type PasswordTokenRequest
 
 type DeviceRequest
   = { type :: DeviceType
-    , name :: String
+    , name :: JNullable String
     , identifier :: String
     , pushToken :: JNullable String
     }
@@ -373,14 +373,14 @@ type SyncResponse
 
 type FolderResponse
   = { id :: String
-    , name :: String
-    , revisionDate :: String
+    , name :: JNullable String
+    , revisionDate :: JNullable String
     }
 
 type CollectionDetailsResponse
   = { id :: String
     , organizationId :: JNullable String
-    , name :: String
+    , name :: JNullable String
     , externalId :: JNullable String
     , readOnly :: Boolean
     }
@@ -424,8 +424,8 @@ type CipherType
   = Int
 
 type FieldApi
-  = { name :: String
-    , value :: String
+  = { name :: JNullable String
+    , value :: JNullable String
     , type :: FieldType
     , linkedId :: JNullable LinkedIdType
     }
