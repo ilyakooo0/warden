@@ -213,6 +213,17 @@ main = do
         send $ Bridge.CipherDeleted c
         performSync
         pure unit
+    Bridge.RequestTotp totp ->
+      runWithDecryptionKey do
+        { totpService } <- askAt (Proxy :: _ "services")
+        code <- liftPromise $ totpService.getCode totp
+        let
+          interval = totpService.getTimeInterval totp
+        send $ Bridge.Totp
+          $ Bridge.Sub_Totp
+              { interval, code
+              }
+        pure unit
 
 processCipher ::
   forall r.

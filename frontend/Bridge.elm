@@ -383,6 +383,17 @@ jsonEncCipher_LoginCipher_password_Maybe  val = (maybeEncode (Json.Encode.string
 
 
 
+type alias Cipher_LoginCipher_totp_Maybe  = (Maybe String)
+
+jsonDecCipher_LoginCipher_totp_Maybe : Json.Decode.Decoder ( Cipher_LoginCipher_totp_Maybe )
+jsonDecCipher_LoginCipher_totp_Maybe =
+    Json.Decode.maybe (Json.Decode.string)
+
+jsonEncCipher_LoginCipher_totp_Maybe : Cipher_LoginCipher_totp_Maybe -> Value
+jsonEncCipher_LoginCipher_totp_Maybe  val = (maybeEncode (Json.Encode.string)) val
+
+
+
 type alias Cipher_LoginCipher_uris_List  = (List String)
 
 jsonDecCipher_LoginCipher_uris_List : Json.Decode.Decoder ( Cipher_LoginCipher_uris_List )
@@ -407,14 +418,16 @@ jsonEncCipher_LoginCipher_username_Maybe  val = (maybeEncode (Json.Encode.string
 
 type alias Cipher_LoginCipher  =
    { password: Cipher_LoginCipher_password_Maybe
+   , totp: Cipher_LoginCipher_totp_Maybe
    , uris: Cipher_LoginCipher_uris_List
    , username: Cipher_LoginCipher_username_Maybe
    }
 
 jsonDecCipher_LoginCipher : Json.Decode.Decoder ( Cipher_LoginCipher )
 jsonDecCipher_LoginCipher =
-   Json.Decode.succeed (\ppassword puris pusername -> {password = ppassword, uris = puris, username = pusername})
+   Json.Decode.succeed (\ppassword ptotp puris pusername -> {password = ppassword, totp = ptotp, uris = puris, username = pusername})
    |> required "password" (jsonDecCipher_LoginCipher_password_Maybe)
+   |> required "totp" (jsonDecCipher_LoginCipher_totp_Maybe)
    |> required "uris" (jsonDecCipher_LoginCipher_uris_List)
    |> required "username" (jsonDecCipher_LoginCipher_username_Maybe)
 
@@ -422,6 +435,7 @@ jsonEncCipher_LoginCipher : Cipher_LoginCipher -> Value
 jsonEncCipher_LoginCipher  val =
    Json.Encode.object
    [ ("password", jsonEncCipher_LoginCipher_password_Maybe val.password)
+   , ("totp", jsonEncCipher_LoginCipher_totp_Maybe val.totp)
    , ("uris", jsonEncCipher_LoginCipher_uris_List val.uris)
    , ("username", jsonEncCipher_LoginCipher_username_Maybe val.username)
    ]
@@ -512,6 +526,7 @@ type Cmd  =
     | NeedsReset 
     | Open String
     | RequestCipher String
+    | RequestTotp String
     | SendMasterPassword String
     | UpdateCipher FullCipher
 
@@ -529,6 +544,7 @@ jsonDecCmd =
             , ("NeedsReset", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedsReset))
             , ("Open", Json.Decode.lazy (\_ -> Json.Decode.map Open (Json.Decode.string)))
             , ("RequestCipher", Json.Decode.lazy (\_ -> Json.Decode.map RequestCipher (Json.Decode.string)))
+            , ("RequestTotp", Json.Decode.lazy (\_ -> Json.Decode.map RequestTotp (Json.Decode.string)))
             , ("SendMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map SendMasterPassword (Json.Decode.string)))
             , ("UpdateCipher", Json.Decode.lazy (\_ -> Json.Decode.map UpdateCipher (jsonDecFullCipher)))
             ]
@@ -549,6 +565,7 @@ jsonEncCmd  val =
                     NeedsReset  -> ("NeedsReset", encodeValue (Json.Encode.list identity []))
                     Open v1 -> ("Open", encodeValue (Json.Encode.string v1))
                     RequestCipher v1 -> ("RequestCipher", encodeValue (Json.Encode.string v1))
+                    RequestTotp v1 -> ("RequestTotp", encodeValue (Json.Encode.string v1))
                     SendMasterPassword v1 -> ("SendMasterPassword", encodeValue (Json.Encode.string v1))
                     UpdateCipher v1 -> ("UpdateCipher", encodeValue (jsonEncFullCipher v1))
     in encodeSumTaggedObject "tag" "contents" keyval val
@@ -700,6 +717,26 @@ jsonEncSub_NeedsMasterPassword  val =
 
 
 
+type alias Sub_Totp  =
+   { code: String
+   , interval: Int
+   }
+
+jsonDecSub_Totp : Json.Decode.Decoder ( Sub_Totp )
+jsonDecSub_Totp =
+   Json.Decode.succeed (\pcode pinterval -> {code = pcode, interval = pinterval})
+   |> required "code" (Json.Decode.string)
+   |> required "interval" (Json.Decode.int)
+
+jsonEncSub_Totp : Sub_Totp -> Value
+jsonEncSub_Totp  val =
+   Json.Encode.object
+   [ ("code", Json.Encode.string val.code)
+   , ("interval", Json.Encode.int val.interval)
+   ]
+
+
+
 type Sub  =
     CaptchaDone 
     | CipherChanged FullCipher
@@ -714,6 +751,7 @@ type Sub  =
     | NeedsMasterPassword Sub_NeedsMasterPassword
     | RecieveEmail String
     | Reset 
+    | Totp Sub_Totp
     | WrongPassword 
 
 jsonDecSub : Json.Decode.Decoder ( Sub )
@@ -732,6 +770,7 @@ jsonDecSub =
             , ("NeedsMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map NeedsMasterPassword (jsonDecSub_NeedsMasterPassword)))
             , ("RecieveEmail", Json.Decode.lazy (\_ -> Json.Decode.map RecieveEmail (Json.Decode.string)))
             , ("Reset", Json.Decode.lazy (\_ -> Json.Decode.succeed Reset))
+            , ("Totp", Json.Decode.lazy (\_ -> Json.Decode.map Totp (jsonDecSub_Totp)))
             , ("WrongPassword", Json.Decode.lazy (\_ -> Json.Decode.succeed WrongPassword))
             ]
         jsonDecObjectSetSub = Set.fromList []
@@ -753,6 +792,7 @@ jsonEncSub  val =
                     NeedsMasterPassword v1 -> ("NeedsMasterPassword", encodeValue (jsonEncSub_NeedsMasterPassword v1))
                     RecieveEmail v1 -> ("RecieveEmail", encodeValue (Json.Encode.string v1))
                     Reset  -> ("Reset", encodeValue (Json.Encode.list identity []))
+                    Totp v1 -> ("Totp", encodeValue (jsonEncSub_Totp v1))
                     WrongPassword  -> ("WrongPassword", encodeValue (Json.Encode.list identity []))
     in encodeSumTaggedObject "tag" "contents" keyval val
 

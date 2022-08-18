@@ -326,12 +326,14 @@ decodeCipher cipher = do
           Just login -> do
             username <- decryptNullable login.username
             password <- decryptNullable login.password
+            totp <- decryptNullable login.totp
             uris <- fromJOpt [] <$> ((traverse >>> traverse) (_.uri >>> decrypt) login.uris)
             pure $ Bridge.LoginCipher
               $ Bridge.Cipher_LoginCipher
                   { username
                   , password
                   , uris: wrap uris
+                  , totp
                   }
     n
       | cipherTypeCard == n -> do

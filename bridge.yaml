@@ -20,6 +20,9 @@ Sub:
 - CipherChanged: FullCipher
 - GeneratedPassword: String
 - CipherDeleted: FullCipher
+- Totp:
+    code: String
+    interval: Int
 
 Cmd:
 - Init
@@ -38,6 +41,7 @@ Cmd:
 - CreateCipher: FullCipher
 - GeneratePassword: PasswordGeneratorConfig
 - DeleteCipher: FullCipher
+- RequestTotp: String
 
 FullCipher:
     reprompt: Int
@@ -52,6 +56,8 @@ Cipher:
     username:
         Maybe: String
     password:
+        Maybe: String
+    totp:
         Maybe: String
 - NoteCipher: String
 - CardCipher:

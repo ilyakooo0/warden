@@ -17,6 +17,11 @@ import Effect (Effect)
 import Effect.Unsafe (unsafePerformEffect)
 import Untagged.Union (type (|+|))
 
+type TotpService
+  = { getCode :: String -> Promise String
+    , getTimeInterval :: String -> Int
+    }
+
 type CryptoService
   = { makeKey :: Fn4 Password String KDF Int (Promise SymmetricCryptoKey)
     , hashPassword :: Fn3 Password SymmetricCryptoKey (JNullable HashPurpose) (Promise StringHash)
@@ -85,6 +90,7 @@ type Services
     , getApi :: Urls -> JNullable IdentityTokenResponse -> Promise ApiService
     , cryptoFunctions :: CryptoFunctions
     , passwordGeneration :: PasswordGeneration
+    , totpService :: TotpService
     }
 
 foreign import getServices :: Effect Services

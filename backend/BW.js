@@ -84,7 +84,8 @@ export function getServices() {
     },
     crypto: bg.cryptoService,
     cryptoFunctions: bg.cryptoFunctionService,
-    passwordGeneration: bg.passwordGenerationService
+    passwordGeneration: bg.passwordGenerationService,
+    totpService: bg.totpService,
   }
 }
 
@@ -173,6 +174,11 @@ class MainBackground {
     this.passwordGenerationService = new PasswordGenerationService(
       this.cryptoService,
       this.policyService,
+      this.stateService
+    );
+    this.totpService = new TotpService(
+      this.cryptoFunctionService,
+      this.logService,
       this.stateService
     );
   }
