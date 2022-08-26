@@ -362,6 +362,18 @@ derive instance genericCipher_LoginCipher_password_Maybe :: Generic Cipher_Login
 derive instance eqCipher_LoginCipher_password_Maybe :: Eq Cipher_LoginCipher_password_Maybe
 derive instance ordCipher_LoginCipher_password_Maybe :: Ord Cipher_LoginCipher_password_Maybe
 
+newtype Cipher_LoginCipher_totp_Maybe =
+    Cipher_LoginCipher_totp_Maybe (Maybe String)
+
+derive instance newtypeCipher_LoginCipher_totp_Maybe :: Newtype Cipher_LoginCipher_totp_Maybe _
+instance encodeJsonCipher_LoginCipher_totp_Maybe :: EncodeJson Cipher_LoginCipher_totp_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCipher_LoginCipher_totp_Maybe :: DecodeJson Cipher_LoginCipher_totp_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCipher_LoginCipher_totp_Maybe :: Generic Cipher_LoginCipher_totp_Maybe _
+derive instance eqCipher_LoginCipher_totp_Maybe :: Eq Cipher_LoginCipher_totp_Maybe
+derive instance ordCipher_LoginCipher_totp_Maybe :: Ord Cipher_LoginCipher_totp_Maybe
+
 newtype Cipher_LoginCipher_uris_List =
     Cipher_LoginCipher_uris_List (Array String)
 
@@ -389,6 +401,7 @@ derive instance ordCipher_LoginCipher_username_Maybe :: Ord Cipher_LoginCipher_u
 newtype Cipher_LoginCipher =
     Cipher_LoginCipher {
       password :: Cipher_LoginCipher_password_Maybe
+    , totp :: Cipher_LoginCipher_totp_Maybe
     , uris :: Cipher_LoginCipher_uris_List
     , username :: Cipher_LoginCipher_username_Maybe
     }
@@ -458,6 +471,7 @@ data Cmd =
   | NeedsReset
   | Open String
   | RequestCipher String
+  | RequestTotp String
   | SendMasterPassword String
   | UpdateCipher FullCipher
 
@@ -559,6 +573,22 @@ derive instance genericSub_NeedsMasterPassword :: Generic Sub_NeedsMasterPasswor
 derive instance eqSub_NeedsMasterPassword :: Eq Sub_NeedsMasterPassword
 derive instance ordSub_NeedsMasterPassword :: Ord Sub_NeedsMasterPassword
 
+newtype Sub_Totp =
+    Sub_Totp {
+      code :: String
+    , interval :: Int
+    , source :: String
+    }
+
+derive instance newtypeSub_Totp :: Newtype Sub_Totp _
+instance encodeJsonSub_Totp :: EncodeJson Sub_Totp where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_Totp :: DecodeJson Sub_Totp where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_Totp :: Generic Sub_Totp _
+derive instance eqSub_Totp :: Eq Sub_Totp
+derive instance ordSub_Totp :: Ord Sub_Totp
+
 data Sub =
     CaptchaDone
   | CipherChanged FullCipher
@@ -573,6 +603,7 @@ data Sub =
   | NeedsMasterPassword Sub_NeedsMasterPassword
   | RecieveEmail String
   | Reset
+  | Totp Sub_Totp
   | WrongPassword
 
 instance encodeJsonSub :: EncodeJson Sub where

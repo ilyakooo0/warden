@@ -206,12 +206,23 @@ main = do
         send $ Bridge.CipherChanged newCipher
         performSync
         pure unit
-    Bridge.DeleteCipher c@(Bridge.FullCipher { id, name }) ->
+    Bridge.DeleteCipher c@(Bridge.FullCipher { id }) ->
       runWithDecryptionKey do
         api <- getAuthedApi
         liftPromise $ api.deleteCipher id
         send $ Bridge.CipherDeleted c
         performSync
+        pure unit
+    Bridge.RequestTotp totp ->
+      runWithDecryptionKey do
+        { totpService } <- askAt (Proxy :: _ "services")
+        code <- liftPromise $ totpService.getCode totp
+        let
+          interval = totpService.getTimeInterval totp
+        send $ Bridge.Totp
+          $ Bridge.Sub_Totp
+              { interval, code, source: totp
+              }
         pure unit
 
 processCipher ::

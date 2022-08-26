@@ -54,9 +54,10 @@ normalizeIdentityCipher { address1, address2, address3, city, company, country, 
 
 
 normalizeLoginCipher : Bridge.Cipher_LoginCipher -> Bridge.Cipher_LoginCipher
-normalizeLoginCipher { password, uris, username } =
+normalizeLoginCipher { password, totp, uris, username } =
     { password = password
     , uris = uris |> List.map String.trim |> List.filter String.isEmpty
+    , totp = normalizeStringMaybe totp
     , username = username
     }
 

@@ -81,6 +81,9 @@ page liftMsg =
                                             c
                             }
                     }
+
+                _ ->
+                    model
     }
 
 
@@ -174,7 +177,7 @@ view { fullCipher, passwordGenerator, callbacks } =
         ++ (case fullCipher.cipher of
                 Bridge.LoginCipher cipher ->
                     let
-                        { username, password, uris } =
+                        { username, password, uris, totp } =
                             cipher
 
                         edit c =
@@ -203,6 +206,16 @@ view { fullCipher, passwordGenerator, callbacks } =
                             []
                         , iconButton "restart" OpenGeneratePasword
                         ]
+                    , row
+                        { name = "One-time password"
+                        , nameIcon = "revisions"
+                        , attrs =
+                            [ Attr.type_ "text"
+                            , Attr.value (Maybe.withDefault "" totp)
+                            , Ev.onInput (\x -> edit { cipher | totp = Just x })
+                            , Attr.attribute "autocomplete" "off"
+                            ]
+                        }
                     ]
                         ++ (uris
                                 |> List.indexedMap

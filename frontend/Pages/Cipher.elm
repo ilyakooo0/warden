@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Attributes as Attr
 import Html.Events as Ev
 import Page exposing (..)
+import Time
 import Utils exposing (..)
 
 
@@ -13,6 +14,7 @@ type alias Model =
     { cipher : Bridge.FullCipher
     , passwordHidden : Bool
     , cvvHidden : Bool
+    , decodedTotp : Maybe { code : String, interval : Int }
     }
 
 
@@ -27,15 +29,16 @@ type alias Callbacks msg =
     { copy : String -> msg
     , open : String -> msg
     , edit : Bridge.FullCipher -> msg
+    , needTotp : String -> msg
     }
 
 
 page : Callbacks emsg -> Page Bridge.FullCipher Model Msg emsg
 page callbacks liftMsg =
-    { init = \data -> Tuple.mapSecond (Cmd.map liftMsg) (init data)
+    { init = \data -> init callbacks data
     , view = \model -> view model |> List.map (Html.map liftMsg)
     , update = \msg model -> update callbacks liftMsg msg model
-    , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
+    , subscriptions = \model -> subscriptions model callbacks
     , title =
         \{ cipher } ->
             [ text cipher.name
@@ -54,18 +57,41 @@ page callbacks liftMsg =
                                 model.cipher
                     }
 
+                GlobalEvents.DecodedTotp { source, code, interval } ->
+                    case model.cipher.cipher of
+                        Bridge.LoginCipher { totp } ->
+                            if totp == Just source then
+                                { model | decodedTotp = Just { code = code, interval = interval } }
+
+                            else
+                                model
+
+                        _ ->
+                            model
+
                 _ ->
                     model
     }
 
 
-init : Bridge.FullCipher -> ( Model, Cmd Msg )
-init cipher =
+init : Callbacks emsg -> Bridge.FullCipher -> ( Model, Cmd emsg )
+init { needTotp } cipher =
     ( { cipher = cipher
       , passwordHidden = True
       , cvvHidden = True
+      , decodedTotp = Nothing
       }
-    , Cmd.none
+    , case cipher.cipher of
+        Bridge.LoginCipher { totp } ->
+            case totp of
+                Just x ->
+                    needTotp x |> pureCmd
+
+                Nothing ->
+                    Cmd.none
+
+        _ ->
+            Cmd.none
     )
 
 
@@ -85,9 +111,19 @@ update { copy, open } _ msg model =
             ( Ok model, open uri |> pureCmd )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+subscriptions : Model -> Callbacks msg -> Sub msg
+subscriptions { cipher } { needTotp } =
+    case cipher.cipher of
+        Bridge.LoginCipher { totp } ->
+            case totp of
+                Just x ->
+                    Time.every 1000 (always (needTotp x))
+
+                Nothing ->
+                    Sub.none
+
+        _ ->
+            Sub.none
 
 
 row : { name : String, value : String, nameIcon : String, icons : List ( String, msg ) } -> Html msg
@@ -101,9 +137,9 @@ row { name, value, nameIcon, icons } =
 
 
 view : Model -> List (Html Msg)
-view { passwordHidden, cipher, cvvHidden } =
+view { passwordHidden, cipher, cvvHidden, decodedTotp } =
     (case cipher.cipher of
-        Bridge.LoginCipher { username, password, uris } ->
+        Bridge.LoginCipher { username, password, uris, totp } ->
             maybeList username
                 (\x ->
                     row
@@ -123,11 +159,36 @@ view { passwordHidden, cipher, cvvHidden } =
                             , icons = [ ( hiddenButtonIcon passwordHidden, TogglePasswordVisiblity ), ( "copy", Copy x ) ]
                             }
                     )
+                ++ maybeList totp
+                    (\_ ->
+                        row
+                            { name = "One-time password"
+                            , value =
+                                case decodedTotp of
+                                    Nothing ->
+                                        "Loading..."
+
+                                    Just { code } ->
+                                        code
+                            , nameIcon = "revisions"
+                            , icons =
+                                case decodedTotp of
+                                    Nothing ->
+                                        []
+
+                                    Just { code } ->
+                                        [ ( "copy", Copy code ) ]
+                            }
+                    )
                 ++ (uris
                         |> List.map
                             (\uri ->
                                 row
-                                    { name = "URL", value = uri, nameIcon = "get-link", icons = [ ( "external-link", Open uri ), ( "copy", Copy uri ) ] }
+                                    { name = "URL"
+                                    , value = uri
+                                    , nameIcon = "get-link"
+                                    , icons = [ ( "external-link", Open uri ), ( "copy", Copy uri ) ]
+                                    }
                             )
                    )
 

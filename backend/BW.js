@@ -21,6 +21,7 @@ import { CipherCreateRequest } from "../../deps/bw/libs/common/src/models/reques
 import { Cipher } from "../../deps/bw/libs/common/src/models/domain/cipher";
 import { CipherData } from "../../deps/bw/libs/common/src/models/data/cipherData";
 import { PasswordGenerationService } from "../../deps/bw/libs/common/src/services/passwordGeneration.service";
+import { TotpService } from "../../deps/bw/libs/shared/dist/src/services/totp.service"
 
 function sanitize(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -84,7 +85,8 @@ export function getServices() {
     },
     crypto: bg.cryptoService,
     cryptoFunctions: bg.cryptoFunctionService,
-    passwordGeneration: bg.passwordGenerationService
+    passwordGeneration: bg.passwordGenerationService,
+    totpService: bg.totpService,
   }
 }
 
@@ -173,6 +175,11 @@ class MainBackground {
     this.passwordGenerationService = new PasswordGenerationService(
       this.cryptoService,
       this.policyService,
+      this.stateService
+    );
+    this.totpService = new TotpService(
+      this.cryptoFunctionService,
+      this.logService,
       this.stateService
     );
   }
