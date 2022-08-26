@@ -577,6 +577,7 @@ newtype Sub_Totp =
     Sub_Totp {
       code :: String
     , interval :: Int
+    , source :: String
     }
 
 derive instance newtypeSub_Totp :: Newtype Sub_Totp _

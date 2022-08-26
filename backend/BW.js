@@ -21,6 +21,7 @@ import { CipherCreateRequest } from "../../deps/bw/libs/common/src/models/reques
 import { Cipher } from "../../deps/bw/libs/common/src/models/domain/cipher";
 import { CipherData } from "../../deps/bw/libs/common/src/models/data/cipherData";
 import { PasswordGenerationService } from "../../deps/bw/libs/common/src/services/passwordGeneration.service";
+import { TotpService } from "../../deps/bw/libs/shared/dist/src/services/totp.service"
 
 function sanitize(obj) {
   return JSON.parse(JSON.stringify(obj));

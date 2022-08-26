@@ -21,6 +21,7 @@ Sub:
 - GeneratedPassword: String
 - CipherDeleted: FullCipher
 - Totp:
+    source: String
     code: String
     interval: Int
 

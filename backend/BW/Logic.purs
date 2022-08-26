@@ -256,6 +256,7 @@ encodeCipher (Bridge.FullCipher { name, cipher, id, favorite, reprompt }) = do
             )
             (unwrap login.uris)
         username <- encryptNullable login.username
+        totp <- encryptNullable login.totp
         pure
           x
             { login =
@@ -264,7 +265,7 @@ encodeCipher (Bridge.FullCipher { name, cipher, id, favorite, reprompt }) = do
                 , uris: JOpt $ opt uris
                 , username
                 , passwordRevisionDate: jnull
-                , totp: jnull
+                , totp: totp
                 , autofillOnPageLoad: JOpt undefined
                 }
             , type = cipherTypeLogin

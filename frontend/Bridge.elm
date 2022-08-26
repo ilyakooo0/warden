@@ -720,19 +720,22 @@ jsonEncSub_NeedsMasterPassword  val =
 type alias Sub_Totp  =
    { code: String
    , interval: Int
+   , source: String
    }
 
 jsonDecSub_Totp : Json.Decode.Decoder ( Sub_Totp )
 jsonDecSub_Totp =
-   Json.Decode.succeed (\pcode pinterval -> {code = pcode, interval = pinterval})
+   Json.Decode.succeed (\pcode pinterval psource -> {code = pcode, interval = pinterval, source = psource})
    |> required "code" (Json.Decode.string)
    |> required "interval" (Json.Decode.int)
+   |> required "source" (Json.Decode.string)
 
 jsonEncSub_Totp : Sub_Totp -> Value
 jsonEncSub_Totp  val =
    Json.Encode.object
    [ ("code", Json.Encode.string val.code)
    , ("interval", Json.Encode.int val.interval)
+   , ("source", Json.Encode.string val.source)
    ]
 
 

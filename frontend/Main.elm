@@ -64,6 +64,7 @@ type Msg
     | OpenNewCipherEditPage Bridge.CipherType
     | WrongPassword
     | DeleteCipher Bridge.FullCipher
+    | RequestTotp String
 
 
 type alias Model =
@@ -231,9 +232,39 @@ subscriptions model =
 
                     Bridge.CipherDeleted c ->
                         ShowInfo "Entry deleted" ("The entry “" ++ c.name ++ "” has been successfully deleted.")
+
+                    Bridge.Totp totp ->
+                        GlobalEvents.DecodedTotp totp |> FireGlobalEvent
             )
          ]
             ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
+            ++ (model.pageStack
+                    |> Nonempty.toList
+                    |> List.map
+                        (\x ->
+                            case x of
+                                LoginModel m ->
+                                    (Login.page loginCallbacks LoginMsg).subscriptions m
+
+                                LoadingPage ->
+                                    Sub.none
+
+                                CiphersModel m ->
+                                    (Ciphers.page ciphersCallbacks CiphersMsg).subscriptions m
+
+                                EditCipherModel m ->
+                                    (EditCipher.page EditCipherMsg).subscriptions m
+
+                                MasterPasswordModel m ->
+                                    (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).subscriptions m
+
+                                CipherModel m ->
+                                    (Cipher.page cipherCallbacks CipherMsg).subscriptions m
+
+                                CaptchaModel m ->
+                                    (Captcha.page captchaCallbacks CaptchaMsg).subscriptions m
+                        )
+               )
         )
 
 
@@ -557,6 +588,7 @@ update msg model =
                                     { uris = []
                                     , username = Nothing
                                     , password = Nothing
+                                    , totp = Nothing
                                     }
 
                             Bridge.NoteType ->
@@ -614,6 +646,9 @@ update msg model =
                 ]
             )
 
+        RequestTotp totp ->
+            ( model, FFI.sendBridge (Bridge.RequestTotp totp) )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -630,7 +665,7 @@ ciphersCallbacks =
 
 cipherCallbacks : Cipher.Callbacks Msg
 cipherCallbacks =
-    { copy = Copy, open = Open, edit = EditCipher }
+    { copy = Copy, open = Open, edit = EditCipher, needTotp = RequestTotp }
 
 
 editCipherCallbacks : EditCipher.Callbacks Msg

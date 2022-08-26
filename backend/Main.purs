@@ -206,7 +206,7 @@ main = do
         send $ Bridge.CipherChanged newCipher
         performSync
         pure unit
-    Bridge.DeleteCipher c@(Bridge.FullCipher { id, name }) ->
+    Bridge.DeleteCipher c@(Bridge.FullCipher { id }) ->
       runWithDecryptionKey do
         api <- getAuthedApi
         liftPromise $ api.deleteCipher id
@@ -221,7 +221,7 @@ main = do
           interval = totpService.getTimeInterval totp
         send $ Bridge.Totp
           $ Bridge.Sub_Totp
-              { interval, code
+              { interval, code, source: totp
               }
         pure unit
 
