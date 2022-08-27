@@ -35,7 +35,7 @@ type ApiService
   = { postPrelogin :: PreloginRequest -> Promise PreloginResponse
     , getProfile :: Unit -> Promise ProfileResponse
     -- TODO: There can really be more request and response types. Maybe handle this later.
-    , postIdentityToken :: PasswordTokenRequest -> Promise (IdentityCaptchaResponse |+| IdentityTokenResponse)
+    , postIdentityToken :: PasswordTokenRequest -> Promise (IdentityCaptchaResponse |+| IdentityTwoFactorResponse |+| IdentityTokenResponse)
     , getSync :: Unit -> Promise SyncResponse
     , postCipherCreate :: CipherResponse -> Promise CipherResponse
     , putCipher :: CipherResponse -> Promise CipherResponse

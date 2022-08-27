@@ -3,10 +3,18 @@ module BW.Types where
 import Prelude
 
 import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Int as Int
 import Data.JNullable (JNullable)
 import Data.JOpt (JOpt)
+import Data.Maybe (Maybe)
 import Data.ShowableJson (ShowableJson)
 import Data.Timestamp (Timestamp)
+import Data.Traversable (traverse)
+import Foreign (Foreign)
+import Foreign as Foreign
+import Foreign.Object (Object)
+import Type.Prelude (Proxy(..))
+import Untagged.TypeCheck (class HasRuntimeType, hasRuntimeType)
 
 newtype EncryptedString
   = EncryptedString String
@@ -357,6 +365,21 @@ type IdentityTokenResponse
     , apiUseKeyConnector :: JNullable Boolean
     , keyConnectorUrl :: JNullable String
     }
+
+newtype TwoFactorProviderTypes = TwoFactorProviderTypes (Array String)
+
+instance HasRuntimeType TwoFactorProviderTypes where
+  hasRuntimeType Proxy = Foreign.isArray
+
+
+decodeTwoFactorProviderTypes :: TwoFactorProviderTypes -> Maybe (Array TwoFactorProviderType)
+decodeTwoFactorProviderTypes (TwoFactorProviderTypes types) = traverse Int.fromString types
+
+type IdentityTwoFactorResponse =
+  { twoFactorProviders :: TwoFactorProviderTypes
+  , twoFactorProviders2 :: Object (Object String)
+  , captchaToken :: String
+  }
 
 newtype Email
   = Email String

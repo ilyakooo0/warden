@@ -123,10 +123,10 @@ main = do
                       pure $ Right resp
                   )
                   (const $ pure $ Left unit)
-          case map toEither1 loginResponse of
+          case map (toEither1 >>> map toEither1) $ loginResponse of
             Left _ -> send Bridge.WrongPassword
             Right (Left { siteKey }) -> send $ Bridge.NeedsCaptcha siteKey
-            Right (Right token) -> do
+            Right (Right (Right token)) -> do
               masterKey <- Logic.makePreloginKey prelogin (Email email) (Password password)
               api <- liftPromise $ services.getApi urls (nullify token)
               sync <- liftPromise $ api.getSync unit
@@ -140,6 +140,8 @@ main = do
                 Storage.store storage SyncKey sync
                 Storage.store storage TokenKey token
               send Bridge.LoginSuccessful
+            Right (Right (Left _)) -> do
+              pure unit
     Bridge.NeedCiphersList ->
       runWithDecryptionKey do
         sendCiphers

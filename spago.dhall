@@ -28,6 +28,8 @@ to generate this file without the comments in this block.
   , "either"
   , "exceptions"
   , "foldable-traversable"
+  , "foreign"
+  , "foreign-object"
   , "functions"
   , "maybe"
   , "newtype"

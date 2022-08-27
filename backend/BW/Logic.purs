@@ -91,7 +91,7 @@ getLogInRequestToken ::
     , aff :: Aff
     | r
     )
-    (IdentityCaptchaResponse |+| IdentityTokenResponse)
+    (IdentityCaptchaResponse |+| IdentityTwoFactorResponse |+| IdentityTokenResponse)
 getLogInRequestToken prelogin email password captchaResponse = do
   key <- makePreloginKey prelogin email password
   crypto <- askAt (Proxy :: _ "crypto")

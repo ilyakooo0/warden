@@ -459,6 +459,21 @@ derive instance genericCmd_Login :: Generic Cmd_Login _
 derive instance eqCmd_Login :: Eq Cmd_Login
 derive instance ordCmd_Login :: Ord Cmd_Login
 
+newtype Cmd_SubmitSecondFactor =
+    Cmd_SubmitSecondFactor {
+      type :: TwoFactorProviderType
+    , value :: String
+    }
+
+derive instance newtypeCmd_SubmitSecondFactor :: Newtype Cmd_SubmitSecondFactor _
+instance encodeJsonCmd_SubmitSecondFactor :: EncodeJson Cmd_SubmitSecondFactor where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCmd_SubmitSecondFactor :: DecodeJson Cmd_SubmitSecondFactor where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCmd_SubmitSecondFactor :: Generic Cmd_SubmitSecondFactor _
+derive instance eqCmd_SubmitSecondFactor :: Eq Cmd_SubmitSecondFactor
+derive instance ordCmd_SubmitSecondFactor :: Ord Cmd_SubmitSecondFactor
+
 data Cmd =
     Copy String
   | CreateCipher FullCipher
@@ -473,6 +488,7 @@ data Cmd =
   | RequestCipher String
   | RequestTotp String
   | SendMasterPassword String
+  | SubmitSecondFactor Cmd_SubmitSecondFactor
   | UpdateCipher FullCipher
 
 instance encodeJsonCmd :: EncodeJson Cmd where
@@ -573,6 +589,18 @@ derive instance genericSub_NeedsMasterPassword :: Generic Sub_NeedsMasterPasswor
 derive instance eqSub_NeedsMasterPassword :: Eq Sub_NeedsMasterPassword
 derive instance ordSub_NeedsMasterPassword :: Ord Sub_NeedsMasterPassword
 
+newtype Sub_NeedsSecondFactor_List =
+    Sub_NeedsSecondFactor_List (Array TwoFactorProviderType)
+
+derive instance newtypeSub_NeedsSecondFactor_List :: Newtype Sub_NeedsSecondFactor_List _
+instance encodeJsonSub_NeedsSecondFactor_List :: EncodeJson Sub_NeedsSecondFactor_List where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_NeedsSecondFactor_List :: DecodeJson Sub_NeedsSecondFactor_List where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_NeedsSecondFactor_List :: Generic Sub_NeedsSecondFactor_List _
+derive instance eqSub_NeedsSecondFactor_List :: Eq Sub_NeedsSecondFactor_List
+derive instance ordSub_NeedsSecondFactor_List :: Ord Sub_NeedsSecondFactor_List
+
 newtype Sub_Totp =
     Sub_Totp {
       code :: String
@@ -601,6 +629,7 @@ data Sub =
   | NeedsCaptcha String
   | NeedsLogin
   | NeedsMasterPassword Sub_NeedsMasterPassword
+  | NeedsSecondFactor Sub_NeedsSecondFactor_List
   | RecieveEmail String
   | Reset
   | Totp Sub_Totp
@@ -613,4 +642,22 @@ instance decodeJsonSub :: DecodeJson Sub where
 derive instance genericSub :: Generic Sub _
 derive instance eqSub :: Eq Sub
 derive instance ordSub :: Ord Sub
+
+data TwoFactorProviderType =
+    Authenticator
+  | Duo
+  | Email
+  | OrganizationDuo
+  | Remember
+  | U2f
+  | WebAuthn
+  | Yubikey
+
+instance encodeJsonTwoFactorProviderType :: EncodeJson TwoFactorProviderType where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonTwoFactorProviderType :: DecodeJson TwoFactorProviderType where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericTwoFactorProviderType :: Generic TwoFactorProviderType _
+derive instance eqTwoFactorProviderType :: Eq TwoFactorProviderType
+derive instance ordTwoFactorProviderType :: Ord TwoFactorProviderType
 

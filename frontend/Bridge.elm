@@ -514,6 +514,26 @@ jsonEncCmd_Login  val =
 
 
 
+type alias Cmd_SubmitSecondFactor  =
+   { type_: TwoFactorProviderType
+   , value: String
+   }
+
+jsonDecCmd_SubmitSecondFactor : Json.Decode.Decoder ( Cmd_SubmitSecondFactor )
+jsonDecCmd_SubmitSecondFactor =
+   Json.Decode.succeed (\ptype pvalue -> {type_ = ptype, value = pvalue})
+   |> required "type" (jsonDecTwoFactorProviderType)
+   |> required "value" (Json.Decode.string)
+
+jsonEncCmd_SubmitSecondFactor : Cmd_SubmitSecondFactor -> Value
+jsonEncCmd_SubmitSecondFactor  val =
+   Json.Encode.object
+   [ ("type", jsonEncTwoFactorProviderType val.type_)
+   , ("value", Json.Encode.string val.value)
+   ]
+
+
+
 type Cmd  =
     Copy String
     | CreateCipher FullCipher
@@ -528,6 +548,7 @@ type Cmd  =
     | RequestCipher String
     | RequestTotp String
     | SendMasterPassword String
+    | SubmitSecondFactor Cmd_SubmitSecondFactor
     | UpdateCipher FullCipher
 
 jsonDecCmd : Json.Decode.Decoder ( Cmd )
@@ -546,6 +567,7 @@ jsonDecCmd =
             , ("RequestCipher", Json.Decode.lazy (\_ -> Json.Decode.map RequestCipher (Json.Decode.string)))
             , ("RequestTotp", Json.Decode.lazy (\_ -> Json.Decode.map RequestTotp (Json.Decode.string)))
             , ("SendMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map SendMasterPassword (Json.Decode.string)))
+            , ("SubmitSecondFactor", Json.Decode.lazy (\_ -> Json.Decode.map SubmitSecondFactor (jsonDecCmd_SubmitSecondFactor)))
             , ("UpdateCipher", Json.Decode.lazy (\_ -> Json.Decode.map UpdateCipher (jsonDecFullCipher)))
             ]
         jsonDecObjectSetCmd = Set.fromList []
@@ -567,6 +589,7 @@ jsonEncCmd  val =
                     RequestCipher v1 -> ("RequestCipher", encodeValue (Json.Encode.string v1))
                     RequestTotp v1 -> ("RequestTotp", encodeValue (Json.Encode.string v1))
                     SendMasterPassword v1 -> ("SendMasterPassword", encodeValue (Json.Encode.string v1))
+                    SubmitSecondFactor v1 -> ("SubmitSecondFactor", encodeValue (jsonEncCmd_SubmitSecondFactor v1))
                     UpdateCipher v1 -> ("UpdateCipher", encodeValue (jsonEncFullCipher v1))
     in encodeSumTaggedObject "tag" "contents" keyval val
 
@@ -717,6 +740,17 @@ jsonEncSub_NeedsMasterPassword  val =
 
 
 
+type alias Sub_NeedsSecondFactor_List  = (List TwoFactorProviderType)
+
+jsonDecSub_NeedsSecondFactor_List : Json.Decode.Decoder ( Sub_NeedsSecondFactor_List )
+jsonDecSub_NeedsSecondFactor_List =
+    Json.Decode.list (jsonDecTwoFactorProviderType)
+
+jsonEncSub_NeedsSecondFactor_List : Sub_NeedsSecondFactor_List -> Value
+jsonEncSub_NeedsSecondFactor_List  val = (Json.Encode.list jsonEncTwoFactorProviderType) val
+
+
+
 type alias Sub_Totp  =
    { code: String
    , interval: Int
@@ -752,6 +786,7 @@ type Sub  =
     | NeedsCaptcha String
     | NeedsLogin 
     | NeedsMasterPassword Sub_NeedsMasterPassword
+    | NeedsSecondFactor Sub_NeedsSecondFactor_List
     | RecieveEmail String
     | Reset 
     | Totp Sub_Totp
@@ -771,6 +806,7 @@ jsonDecSub =
             , ("NeedsCaptcha", Json.Decode.lazy (\_ -> Json.Decode.map NeedsCaptcha (Json.Decode.string)))
             , ("NeedsLogin", Json.Decode.lazy (\_ -> Json.Decode.succeed NeedsLogin))
             , ("NeedsMasterPassword", Json.Decode.lazy (\_ -> Json.Decode.map NeedsMasterPassword (jsonDecSub_NeedsMasterPassword)))
+            , ("NeedsSecondFactor", Json.Decode.lazy (\_ -> Json.Decode.map NeedsSecondFactor (jsonDecSub_NeedsSecondFactor_List)))
             , ("RecieveEmail", Json.Decode.lazy (\_ -> Json.Decode.map RecieveEmail (Json.Decode.string)))
             , ("Reset", Json.Decode.lazy (\_ -> Json.Decode.succeed Reset))
             , ("Totp", Json.Decode.lazy (\_ -> Json.Decode.map Totp (jsonDecSub_Totp)))
@@ -793,9 +829,39 @@ jsonEncSub  val =
                     NeedsCaptcha v1 -> ("NeedsCaptcha", encodeValue (Json.Encode.string v1))
                     NeedsLogin  -> ("NeedsLogin", encodeValue (Json.Encode.list identity []))
                     NeedsMasterPassword v1 -> ("NeedsMasterPassword", encodeValue (jsonEncSub_NeedsMasterPassword v1))
+                    NeedsSecondFactor v1 -> ("NeedsSecondFactor", encodeValue (jsonEncSub_NeedsSecondFactor_List v1))
                     RecieveEmail v1 -> ("RecieveEmail", encodeValue (Json.Encode.string v1))
                     Reset  -> ("Reset", encodeValue (Json.Encode.list identity []))
                     Totp v1 -> ("Totp", encodeValue (jsonEncSub_Totp v1))
                     WrongPassword  -> ("WrongPassword", encodeValue (Json.Encode.list identity []))
     in encodeSumTaggedObject "tag" "contents" keyval val
+
+
+
+type TwoFactorProviderType  =
+    Authenticator 
+    | Duo 
+    | Email 
+    | OrganizationDuo 
+    | Remember 
+    | U2f 
+    | WebAuthn 
+    | Yubikey 
+
+jsonDecTwoFactorProviderType : Json.Decode.Decoder ( TwoFactorProviderType )
+jsonDecTwoFactorProviderType = 
+    let jsonDecDictTwoFactorProviderType = Dict.fromList [("Authenticator", Authenticator), ("Duo", Duo), ("Email", Email), ("OrganizationDuo", OrganizationDuo), ("Remember", Remember), ("U2f", U2f), ("WebAuthn", WebAuthn), ("Yubikey", Yubikey)]
+    in  decodeSumUnaries "TwoFactorProviderType" jsonDecDictTwoFactorProviderType
+
+jsonEncTwoFactorProviderType : TwoFactorProviderType -> Value
+jsonEncTwoFactorProviderType  val =
+    case val of
+        Authenticator -> Json.Encode.string "Authenticator"
+        Duo -> Json.Encode.string "Duo"
+        Email -> Json.Encode.string "Email"
+        OrganizationDuo -> Json.Encode.string "OrganizationDuo"
+        Remember -> Json.Encode.string "Remember"
+        U2f -> Json.Encode.string "U2f"
+        WebAuthn -> Json.Encode.string "WebAuthn"
+        Yubikey -> Json.Encode.string "Yubikey"
 
