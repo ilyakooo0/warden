@@ -226,6 +226,8 @@ main = do
               { interval, code, source: totp
               }
         pure unit
+    Bridge.SubmitSecondFactor (Bridge.Cmd_SubmitSecondFactor { "type": t, value }) -> do
+      pure unit
 
 processCipher ::
   forall r.

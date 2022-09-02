@@ -1,4 +1,4 @@
-module Pages.SecondFactor exposing (..)
+module Pages.SecondFactorSelect exposing (..)
 
 import Bridge
 import Html exposing (..)
@@ -22,7 +22,7 @@ type alias Callbacks =
 
 page : Callbacks -> Page (List Bridge.TwoFactorProviderType) Model Msg emsg
 page callbacks liftMsg =
-    { init = \siteKey -> Tuple.mapSecond (Cmd.map liftMsg) (init siteKey)
+    { init = \providers -> Tuple.mapSecond (Cmd.map liftMsg) (init providers)
     , view = \model -> view model |> List.map (Html.map liftMsg)
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
@@ -31,9 +31,9 @@ page callbacks liftMsg =
     }
 
 
-init : HCaptchSiteKey -> ( Model, Cmd Msg )
-init siteKey =
-    ( { siteKey = siteKey }, Cmd.none )
+init : List Bridge.TwoFactorProviderType -> ( Model, Cmd Msg )
+init providers =
+    ( { availableFactors = providers }, Cmd.none )
 
 
 update : Callbacks -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
@@ -49,7 +49,6 @@ subscriptions model =
 
 
 view : Model -> List (Html Msg)
-view { siteKey } =
-    [ div [ Attr.class "u-embedded-media" ]
-        [ iframe [ Attr.src ("https://iko.soy/warden/hcaptcha.html?" ++ siteKey) ] [] ]
+view { availableFactors } =
+    [ h1 [] [ text "factors" ]
     ]

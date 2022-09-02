@@ -40,6 +40,7 @@ type ApiService
     , postCipherCreate :: CipherResponse -> Promise CipherResponse
     , putCipher :: CipherResponse -> Promise CipherResponse
     , deleteCipher :: String -> Promise Unit
+    , postTwoFactorEmail :: TwoFactorEmailRequest -> Promise Unit
     }
 
 type PasswordGeneration =

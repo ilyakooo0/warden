@@ -16,6 +16,7 @@ import Pages.Loader exposing (loader)
 import Pages.Login as Login
 import Pages.MasterPassword as MasterPassword
 import Pages.Navigation as Navigation exposing (TopButton(..))
+import Pages.SecondFactorSelect as SecondFactorSelect
 import Task
 import Time
 import Types exposing (CipherId)
@@ -65,6 +66,8 @@ type Msg
     | WrongPassword
     | DeleteCipher Bridge.FullCipher
     | RequestTotp String
+    | SecondFactorSelectMsg SecondFactorSelect.Msg
+    | ShowSecondFactorSelect (List Bridge.TwoFactorProviderType)
 
 
 type alias Model =
@@ -88,6 +91,7 @@ type PageModel
     | MasterPasswordModel MasterPassword.Model
     | CipherModel Cipher.Model
     | CaptchaModel Captcha.Model
+    | SecondFactorSelectModel SecondFactorSelect.Model
 
 
 showPage :
@@ -174,6 +178,16 @@ showPage email page =
             , topButton = Just (BackButton { action = PopView, icon = Just "close" })
             }
 
+        SecondFactorSelectModel model ->
+            let
+                p =
+                    SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg
+            in
+            { title = p.title model
+            , body = p.view model
+            , topButton = Just simpleBackButton
+            }
+
 
 main : Program () Model Msg
 main =
@@ -235,6 +249,9 @@ subscriptions model =
 
                     Bridge.Totp totp ->
                         GlobalEvents.DecodedTotp totp |> FireGlobalEvent
+
+                    Bridge.NeedsSecondFactor _ ->
+                        Debug.todo "branch 'NeedsSecondFactor _' not implemented"
             )
          ]
             ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
@@ -263,6 +280,9 @@ subscriptions model =
 
                                 CaptchaModel m ->
                                     (Captcha.page captchaCallbacks CaptchaMsg).subscriptions m
+
+                                SecondFactorSelectModel m ->
+                                    (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).subscriptions m
                         )
                )
         )
@@ -565,6 +585,9 @@ update msg model =
 
                                     CaptchaModel m ->
                                         (Captcha.page captchaCallbacks CaptchaMsg).event m ev |> CaptchaModel
+
+                                    SecondFactorSelectModel _ ->
+                                        Debug.todo "branch 'SecondFactorSelectModel _' not implemented"
                             )
               }
             , Cmd.none
@@ -649,6 +672,19 @@ update msg model =
         RequestTotp totp ->
             ( model, FFI.sendBridge (Bridge.RequestTotp totp) )
 
+        SecondFactorSelectMsg imsg ->
+            case currentPage of
+                SecondFactorSelectModel m ->
+                    (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).update imsg m
+                        |> processPage SecondFactorSelectModel
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ShowSecondFactorSelect secondFactors ->
+            (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).init secondFactors
+                |> Tuple.mapFirst (\pageModel -> appendPageStack <| SecondFactorSelectModel pageModel)
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -688,3 +724,8 @@ masterPasswordCallbacks =
     { submit = SendMasterPassword
     , reset = NeedsReset
     }
+
+
+secondFactorSelectCallbacks : SecondFactorSelect.Callbacks
+secondFactorSelectCallbacks =
+    {}

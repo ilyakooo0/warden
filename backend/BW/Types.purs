@@ -692,3 +692,8 @@ type SendTextApi
   = { text :: JNullable String
     , hidden :: Boolean
     }
+
+type TwoFactorEmailRequest =
+  { email :: String
+  , masterPasswordHash :: StringHash
+  }
