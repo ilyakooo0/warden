@@ -1,6 +1,6 @@
 {
     "name": "soy.iko.warden",
-    "description": "A simple bitwarden client",
+    "description": "A simple Bitwarden client",
     "architecture": "@CLICK_ARCH@",
     "title": "Warden",
     "hooks": {
@@ -9,7 +9,7 @@
             "desktop": "appname.desktop"
         }
     },
-    "version": "1.0.0",
+    "version": "1.1.0",
     "maintainer": "Ilia Kostiuchenko <email@iko.soy>",
     "framework": "@CLICK_FRAMEWORK@"
 }
