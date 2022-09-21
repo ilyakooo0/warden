@@ -1,8 +1,11 @@
-module Pages.SecondFactorSelect exposing (..)
+module Pages.SecondFactorSelect exposing (Callbacks, Model, Msg, page)
 
 import Bridge
+import Element
+import Element.Input as Input
 import Html exposing (..)
 import Html.Attributes as Attr
+import Logic.SecondFactor exposing (secondFactorName)
 import Page exposing (..)
 import Utils exposing (..)
 
@@ -13,20 +16,21 @@ type alias Model =
 
 
 type Msg
-    = Noop
+    = SelectFactor Bridge.TwoFactorProviderType
 
 
-type alias Callbacks =
-    {}
+type alias Callbacks emsg =
+    { selectFactor : Bridge.TwoFactorProviderType -> emsg
+    }
 
 
-page : Callbacks -> Page (List Bridge.TwoFactorProviderType) Model Msg emsg
+page : Callbacks emsg -> Page (List Bridge.TwoFactorProviderType) Model Msg emsg
 page callbacks liftMsg =
     { init = \providers -> Tuple.mapSecond (Cmd.map liftMsg) (init providers)
     , view = \model -> view model |> List.map (Html.map liftMsg)
     , update = \msg model -> update callbacks liftMsg msg model
     , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title = always [ text "Captcha" ]
+    , title = always [ text "Second factor" ]
     , event = \model _ -> model
     }
 
@@ -36,11 +40,11 @@ init providers =
     ( { availableFactors = providers }, Cmd.none )
 
 
-update : Callbacks -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update _ _ msg model =
+update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
+update { selectFactor } _ msg model =
     case msg of
-        Noop ->
-            ( Ok model, Cmd.none )
+        SelectFactor factor ->
+            ( Ok model, selectFactor factor |> pureCmd )
 
 
 subscriptions : Model -> Sub Msg
@@ -50,5 +54,18 @@ subscriptions model =
 
 view : Model -> List (Html Msg)
 view { availableFactors } =
-    [ h1 [] [ text "factors" ]
+    [ Element.layout []
+        (Element.column [ Element.centerX ]
+            (availableFactors
+                |> List.map
+                    (\factor ->
+                        Input.button []
+                            { label =
+                                button [ Attr.class "p-button" ] [ secondFactorName factor |> text ]
+                                    |> Element.html
+                            , onPress = SelectFactor factor |> Just
+                            }
+                    )
+            )
+        )
     ]

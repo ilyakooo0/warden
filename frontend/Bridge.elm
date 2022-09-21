@@ -535,7 +535,8 @@ jsonEncCmd_SubmitSecondFactor  val =
 
 
 type Cmd  =
-    Copy String
+    ChooseSecondFactor TwoFactorProviderType
+    | Copy String
     | CreateCipher FullCipher
     | DeleteCipher FullCipher
     | GeneratePassword PasswordGeneratorConfig
@@ -554,7 +555,8 @@ type Cmd  =
 jsonDecCmd : Json.Decode.Decoder ( Cmd )
 jsonDecCmd =
     let jsonDecDictCmd = Dict.fromList
-            [ ("Copy", Json.Decode.lazy (\_ -> Json.Decode.map Copy (Json.Decode.string)))
+            [ ("ChooseSecondFactor", Json.Decode.lazy (\_ -> Json.Decode.map ChooseSecondFactor (jsonDecTwoFactorProviderType)))
+            , ("Copy", Json.Decode.lazy (\_ -> Json.Decode.map Copy (Json.Decode.string)))
             , ("CreateCipher", Json.Decode.lazy (\_ -> Json.Decode.map CreateCipher (jsonDecFullCipher)))
             , ("DeleteCipher", Json.Decode.lazy (\_ -> Json.Decode.map DeleteCipher (jsonDecFullCipher)))
             , ("GeneratePassword", Json.Decode.lazy (\_ -> Json.Decode.map GeneratePassword (jsonDecPasswordGeneratorConfig)))
@@ -576,6 +578,7 @@ jsonDecCmd =
 jsonEncCmd : Cmd -> Value
 jsonEncCmd  val =
     let keyval v = case v of
+                    ChooseSecondFactor v1 -> ("ChooseSecondFactor", encodeValue (jsonEncTwoFactorProviderType v1))
                     Copy v1 -> ("Copy", encodeValue (Json.Encode.string v1))
                     CreateCipher v1 -> ("CreateCipher", encodeValue (jsonEncFullCipher v1))
                     DeleteCipher v1 -> ("DeleteCipher", encodeValue (jsonEncFullCipher v1))

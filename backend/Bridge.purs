@@ -475,7 +475,8 @@ derive instance eqCmd_SubmitSecondFactor :: Eq Cmd_SubmitSecondFactor
 derive instance ordCmd_SubmitSecondFactor :: Ord Cmd_SubmitSecondFactor
 
 data Cmd =
-    Copy String
+    ChooseSecondFactor TwoFactorProviderType
+  | Copy String
   | CreateCipher FullCipher
   | DeleteCipher FullCipher
   | GeneratePassword PasswordGeneratorConfig

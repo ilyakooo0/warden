@@ -7,7 +7,7 @@ import BW (ApiService, CryptoFunctions, Services, CryptoService)
 import BW as WB
 import BW.Logic (decodeCipher, decrypt, encodeCipher, hashPassword, liftPromise)
 import BW.Logic as Logic
-import BW.Types (CipherResponse, Email(..), Password(..), Urls, SyncResponse, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
+import BW.Types (CipherResponse, Email(..), Password(..), SyncResponse, TwoFactorProviderType, TwoFactorProviderTypes(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote, twoFactorProviderTypeAuthenticator, twoFactorProviderTypeDuo, twoFactorProviderTypeEmail, twoFactorProviderTypeOrganizationDuo, twoFactorProviderTypeRemember, twoFactorProviderTypeU2f, twoFactorProviderTypeWebAuthn, twoFactorProviderTypeYubikey)
 import Bridge as Bridge
 import Control.Monad.Error.Class (catchError, throwError)
 import Data.Argonaut (class DecodeJson)
@@ -110,7 +110,7 @@ main = do
       let
         urls = baseUrl server
       runAff do
-        unauthedApi <- liftPromise $ services.getApi urls jnull
+        unauthedApi <- liftPromise postTwoFactorEmail $ services.getApi urls jnull
         prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
         runReaderAt (Proxy :: _ "api") unauthedApi do
           loginResponse <-
@@ -140,8 +140,9 @@ main = do
                 Storage.store storage SyncKey sync
                 Storage.store storage TokenKey token
               send Bridge.LoginSuccessful
-            Right (Right (Left _)) -> do
-              pure unit
+            Right (Right (Left { twoFactorProviders: TwoFactorProviderTypes rawProviders })) -> do
+              providers <- traverse processSecondFactorType rawProviders
+              send $ Bridge.NeedsSecondFactor $ Bridge.Sub_NeedsSecondFactor_List providers
     Bridge.NeedCiphersList ->
       runWithDecryptionKey do
         sendCiphers
@@ -227,7 +228,14 @@ main = do
               }
         pure unit
     Bridge.SubmitSecondFactor (Bridge.Cmd_SubmitSecondFactor { "type": t, value }) -> do
-      pure unit
+      pure unit -- TODO
+    Bridge.ChooseSecondFactor t -> case t of
+      Bridge.Email ->
+        runWithDecryptionKey do
+          api <- getAuthedApi
+          liftPromise $ api.postTwoFactorEmail {}
+          pure unit
+      _ -> pure unit
 
 processCipher ::
   forall r.
@@ -400,3 +408,26 @@ sendCiphers = do
     sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
   send $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
   pure unit
+
+processSecondFactorType ::
+  forall r.
+  TwoFactorProviderType ->
+  Run ( effect :: Effect | r ) Bridge.TwoFactorProviderType
+processSecondFactorType x = case x of
+  n
+    | n == twoFactorProviderTypeAuthenticator -> pure Bridge.Authenticator
+  n
+    | n == twoFactorProviderTypeEmail -> pure Bridge.Email
+  n
+    | n == twoFactorProviderTypeDuo -> pure Bridge.Duo
+  n
+    | n == twoFactorProviderTypeYubikey -> pure Bridge.Yubikey
+  n
+    | n == twoFactorProviderTypeU2f -> pure Bridge.U2f
+  n
+    | n == twoFactorProviderTypeRemember -> pure Bridge.Remember
+  n
+    | n == twoFactorProviderTypeOrganizationDuo -> pure Bridge.OrganizationDuo
+  n
+    | n == twoFactorProviderTypeWebAuthn -> pure Bridge.WebAuthn
+  n -> liftEffect $ throwError $ error $ "Unsupported second factor type: " <> show n

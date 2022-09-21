@@ -13,8 +13,10 @@ import Data.Traversable (traverse)
 import Foreign (Foreign)
 import Foreign as Foreign
 import Foreign.Object (Object)
+import Literals.Undefined (Undefined)
 import Type.Prelude (Proxy(..))
 import Untagged.TypeCheck (class HasRuntimeType, hasRuntimeType)
+import Untagged.Union (type (|+|))
 
 newtype EncryptedString
   = EncryptedString String
@@ -366,19 +368,16 @@ type IdentityTokenResponse
     , keyConnectorUrl :: JNullable String
     }
 
-newtype TwoFactorProviderTypes = TwoFactorProviderTypes (Array String)
+newtype TwoFactorProviderTypes = TwoFactorProviderTypes (Array TwoFactorProviderType)
 
 instance HasRuntimeType TwoFactorProviderTypes where
   hasRuntimeType Proxy = Foreign.isArray
 
-
-decodeTwoFactorProviderTypes :: TwoFactorProviderTypes -> Maybe (Array TwoFactorProviderType)
-decodeTwoFactorProviderTypes (TwoFactorProviderTypes types) = traverse Int.fromString types
-
 type IdentityTwoFactorResponse =
   { twoFactorProviders :: TwoFactorProviderTypes
-  , twoFactorProviders2 :: Object (Object String)
-  , captchaToken :: String
+  -- it is a Map type and untaged unions gets confused
+  -- , twoFactorProviders2 :: Object (Object String)
+  , captchaToken :: String |+| Undefined
   }
 
 newtype Email

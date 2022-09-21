@@ -16,6 +16,7 @@ import Pages.Loader exposing (loader)
 import Pages.Login as Login
 import Pages.MasterPassword as MasterPassword
 import Pages.Navigation as Navigation exposing (TopButton(..))
+import Pages.SecondFactor as SecondFactor
 import Pages.SecondFactorSelect as SecondFactorSelect
 import Task
 import Time
@@ -68,6 +69,9 @@ type Msg
     | RequestTotp String
     | SecondFactorSelectMsg SecondFactorSelect.Msg
     | ShowSecondFactorSelect (List Bridge.TwoFactorProviderType)
+    | SelectSecondFactor Bridge.TwoFactorProviderType
+    | SecondFactorMsg SecondFactor.Msg
+    | SubmitSecondFactor { factorType : Bridge.TwoFactorProviderType, value : String }
 
 
 type alias Model =
@@ -92,6 +96,7 @@ type PageModel
     | CipherModel Cipher.Model
     | CaptchaModel Captcha.Model
     | SecondFactorSelectModel SecondFactorSelect.Model
+    | SecondFactorModel SecondFactor.Model
 
 
 showPage :
@@ -188,6 +193,12 @@ showPage email page =
             , topButton = Just simpleBackButton
             }
 
+        SecondFactorModel model ->
+            { title = [ SecondFactor.title model |> text ]
+            , body = [ SecondFactor.view model |> Html.map SecondFactorMsg ]
+            , topButton = Just simpleBackButton
+            }
+
 
 main : Program () Model Msg
 main =
@@ -250,8 +261,8 @@ subscriptions model =
                     Bridge.Totp totp ->
                         GlobalEvents.DecodedTotp totp |> FireGlobalEvent
 
-                    Bridge.NeedsSecondFactor _ ->
-                        Debug.todo "branch 'NeedsSecondFactor _' not implemented"
+                    Bridge.NeedsSecondFactor secondFactors ->
+                        ShowSecondFactorSelect secondFactors
             )
          ]
             ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
@@ -283,6 +294,9 @@ subscriptions model =
 
                                 SecondFactorSelectModel m ->
                                     (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).subscriptions m
+
+                                SecondFactorModel _ ->
+                                    Sub.none
                         )
                )
         )
@@ -586,8 +600,11 @@ update msg model =
                                     CaptchaModel m ->
                                         (Captcha.page captchaCallbacks CaptchaMsg).event m ev |> CaptchaModel
 
-                                    SecondFactorSelectModel _ ->
-                                        Debug.todo "branch 'SecondFactorSelectModel _' not implemented"
+                                    SecondFactorSelectModel m ->
+                                        (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).event m ev |> SecondFactorSelectModel
+
+                                    SecondFactorModel m ->
+                                        SecondFactorModel m
                             )
               }
             , Cmd.none
@@ -685,6 +702,28 @@ update msg model =
             (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).init secondFactors
                 |> Tuple.mapFirst (\pageModel -> appendPageStack <| SecondFactorSelectModel pageModel)
 
+        SelectSecondFactor secondFactor ->
+            ( SecondFactor.init secondFactor |> SecondFactorModel |> appendPageStack
+            , Bridge.ChooseSecondFactor secondFactor |> FFI.sendBridge
+            )
+
+        SecondFactorMsg imsg ->
+            case currentPage of
+                SecondFactorModel m ->
+                    SecondFactor.update secondFactorCallbacks m imsg
+                        |> Tuple.mapBoth
+                            (SecondFactorModel >> appendPageStack)
+                            (Maybe.map pureCmd >> Maybe.withDefault Cmd.none)
+
+                _ ->
+                    ( model, Cmd.none )
+
+        SubmitSecondFactor { factorType, value } ->
+            ( model
+            , Bridge.SubmitSecondFactor { type_ = factorType, value = value }
+                |> FFI.sendBridge
+            )
+
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
@@ -726,6 +765,13 @@ masterPasswordCallbacks =
     }
 
 
-secondFactorSelectCallbacks : SecondFactorSelect.Callbacks
+secondFactorSelectCallbacks : SecondFactorSelect.Callbacks Msg
 secondFactorSelectCallbacks =
-    {}
+    { selectFactor = SelectSecondFactor
+    }
+
+
+secondFactorCallbacks : SecondFactor.Callbacks Msg
+secondFactorCallbacks =
+    { submit = SubmitSecondFactor
+    }

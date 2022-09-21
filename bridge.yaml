@@ -32,6 +32,7 @@ Cmd:
       email: String
       server: String
       password: String
+  - ChooseSecondFactor: TwoFactorProviderType
   - SubmitSecondFactor:
       type: TwoFactorProviderType
       value: String

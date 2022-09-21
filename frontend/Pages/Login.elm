@@ -71,8 +71,8 @@ subscriptions model =
 view : Model -> List (Html Msg)
 view model =
     [ form [ Ev.onSubmit Submit ]
-        ([ label [] [ text "Server" ]
-         , input
+        [ label [] [ text "Server" ]
+        , input
             [ Attr.type_ "url"
             , Attr.value model.server
             , Ev.onInput UpdateServer
@@ -80,8 +80,8 @@ view model =
             , Attr.required True
             ]
             []
-         , label [] [ text "Email" ]
-         , input
+        , label [] [ text "Email" ]
+        , input
             [ Attr.type_ "email"
             , Attr.value model.email
             , Ev.onInput UpdateEmail
@@ -89,8 +89,8 @@ view model =
             , Attr.required True
             ]
             []
-         , label [] [ text "Password" ]
-         , input
+        , label [] [ text "Password" ]
+        , input
             [ Attr.type_ "password"
             , Attr.value model.password
             , Ev.onInput UpdatePassword
@@ -98,7 +98,6 @@ view model =
             , Attr.required True
             ]
             []
-         ]
-            ++ [ alignRight [ button [ Attr.type_ "submit" ] [ text "Log in" ] ] ]
-        )
+        , alignRight [ button [ Attr.type_ "submit" ] [ text "Log in" ] ]
+        ]
     ]
