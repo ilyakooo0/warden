@@ -495,15 +495,17 @@ type alias Cmd_ChooseSecondFactor  =
    { email: String
    , factor: TwoFactorProviderType
    , password: String
+   , requestFromServer: Bool
    , server: String
    }
 
 jsonDecCmd_ChooseSecondFactor : Json.Decode.Decoder ( Cmd_ChooseSecondFactor )
 jsonDecCmd_ChooseSecondFactor =
-   Json.Decode.succeed (\pemail pfactor ppassword pserver -> {email = pemail, factor = pfactor, password = ppassword, server = pserver})
+   Json.Decode.succeed (\pemail pfactor ppassword prequestFromServer pserver -> {email = pemail, factor = pfactor, password = ppassword, requestFromServer = prequestFromServer, server = pserver})
    |> required "email" (Json.Decode.string)
    |> required "factor" (jsonDecTwoFactorProviderType)
    |> required "password" (Json.Decode.string)
+   |> required "requestFromServer" (Json.Decode.bool)
    |> required "server" (Json.Decode.string)
 
 jsonEncCmd_ChooseSecondFactor : Cmd_ChooseSecondFactor -> Value
@@ -512,6 +514,7 @@ jsonEncCmd_ChooseSecondFactor  val =
    [ ("email", Json.Encode.string val.email)
    , ("factor", jsonEncTwoFactorProviderType val.factor)
    , ("password", Json.Encode.string val.password)
+   , ("requestFromServer", Json.Encode.bool val.requestFromServer)
    , ("server", Json.Encode.string val.server)
    ]
 

@@ -42,6 +42,7 @@ Cmd:
       email: String
       server: String
       password: String
+      requestFromServer: Bool
   - NeedCiphersList
   - SendMasterPassword: String
   - NeedsReset

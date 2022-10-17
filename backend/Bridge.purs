@@ -448,6 +448,7 @@ newtype Cmd_ChooseSecondFactor =
       email :: String
     , factor :: TwoFactorProviderType
     , password :: String
+    , requestFromServer :: Boolean
     , server :: String
     }
 

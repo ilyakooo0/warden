@@ -69,7 +69,10 @@ type Msg
     | RequestTotp String
     | SecondFactorSelectMsg SecondFactorSelect.Msg
     | ShowSecondFactorSelect (List Bridge.TwoFactorProviderType)
-    | SelectSecondFactor Bridge.TwoFactorProviderType
+    | SelectSecondFactor
+        { provider : Bridge.TwoFactorProviderType
+        , requestFromServer : Bool
+        }
     | SecondFactorMsg SecondFactor.Msg
 
 
@@ -281,7 +284,15 @@ subscriptions model =
                         GlobalEvents.DecodedTotp totp |> FireGlobalEvent
 
                     Bridge.NeedsSecondFactor secondFactors ->
-                        ShowSecondFactorSelect secondFactors
+                        case secondFactors of
+                            [ provider ] ->
+                                SelectSecondFactor
+                                    { provider = provider
+                                    , requestFromServer = False
+                                    }
+
+                            _ ->
+                                ShowSecondFactorSelect secondFactors
             )
          ]
             ++ optional (List.isEmpty model.notifications |> not) (Time.every 1000 (\t -> ClearNotification { currentTime = t }))
@@ -721,7 +732,7 @@ update msg model =
             (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).init secondFactors
                 |> Tuple.mapFirst (\pageModel -> appendPageStack <| SecondFactorSelectModel pageModel)
 
-        SelectSecondFactor provider ->
+        SelectSecondFactor { provider, requestFromServer } ->
             case Nonempty.toList model.pageStack |> findLoginDetails of
                 Just { email, password, server } ->
                     ( SecondFactor.init
@@ -749,6 +760,7 @@ update msg model =
                         , email = email
                         , password = password
                         , server = server
+                        , requestFromServer = requestFromServer
                         }
                         |> FFI.sendBridge
                     )
@@ -818,5 +830,7 @@ masterPasswordCallbacks =
 
 secondFactorSelectCallbacks : SecondFactorSelect.Callbacks Msg
 secondFactorSelectCallbacks =
-    { selectFactor = SelectSecondFactor
+    { selectFactor =
+        \provider ->
+            SelectSecondFactor { provider = provider, requestFromServer = True }
     }

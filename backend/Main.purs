@@ -249,21 +249,25 @@ main = do
               }
         pure unit
     Bridge.ChooseSecondFactor
-      (Bridge.Cmd_ChooseSecondFactor { email: email', factor, server, password }) ->
-      let
-        email = Email email'
-      in
-        case factor of
-          Bridge.Email ->
-            runAff do
-              let
-                urls = baseUrl server
-              unauthedApi <- liftPromise $ services.getApi urls jnull
-              prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
-              masterPasswordHash <- bwPasswordStringHash prelogin email (Password password)
-              liftPromise $ unauthedApi.postTwoFactorEmail { email, masterPasswordHash }
-              pure unit
-          _ -> pure unit
+      ( Bridge.Cmd_ChooseSecondFactor
+        { email: email', factor, server, password, requestFromServer
+      }
+    ) ->
+      when requestFromServer
+        let
+          email = Email email'
+        in
+          case factor of
+            Bridge.Email ->
+              runAff do
+                let
+                  urls = baseUrl server
+                unauthedApi <- liftPromise $ services.getApi urls jnull
+                prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
+                masterPasswordHash <- bwPasswordStringHash prelogin email (Password password)
+                liftPromise $ unauthedApi.postTwoFactorEmail { email, masterPasswordHash }
+                pure unit
+            _ -> pure unit
 
 processCipher ::
   forall r.
