@@ -73,7 +73,11 @@ export function getServices() {
             req.email,
             req.masterPasswordHash,
             req.captchaResponse,
-            new TokenRequestTwoFactor(req.twoFactor),
+            new TokenRequestTwoFactor(
+              req.twoFactor.provider,
+              req.twoFactor.token,
+              req.twoFactor.remember
+            ),
             req.device
           )
         ),

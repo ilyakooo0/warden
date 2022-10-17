@@ -17,54 +17,75 @@ import Utils exposing (..)
 
 
 type alias Callbacks msg =
-    { submit : { factorType : Bridge.TwoFactorProviderType, value : String } -> msg
+    { submit : { token : String, remember : Bool } -> msg
     }
 
 
 type Msg
-    = Submit String
+    = Submit
     | UpdateValue String
+    | UpdateRemember Bool
 
 
-type alias Model =
-    { value : String
+type alias Model msg =
+    { token : String
+    , remember : Bool
     , factorType : Bridge.TwoFactorProviderType
+    , callbacks : Callbacks msg
     }
 
 
-init : Bridge.TwoFactorProviderType -> Model
-init factorType =
-    { value = ""
-    , factorType = factorType
+init :
+    { provider : Bridge.TwoFactorProviderType
+    , callbacks : Callbacks msg
+    }
+    -> Model msg
+init { provider, callbacks } =
+    { token = ""
+    , remember = True
+    , factorType = provider
+    , callbacks = callbacks
     }
 
 
-title : Model -> String
+title : Model msg -> String
 title { factorType } =
     secondFactorName factorType
 
 
-update : Callbacks emsg -> Model -> Msg -> ( Model, Maybe emsg )
-update { submit } model msg =
+update : Model emsg -> Msg -> ( Model emsg, Maybe emsg )
+update model msg =
     case msg of
-        Submit value ->
-            ( model, submit { value = value, factorType = model.factorType } |> Just )
+        Submit ->
+            ( model, model.callbacks.submit { token = model.token, remember = model.remember } |> Just )
 
-        UpdateValue value ->
-            ( { model | value = value }, Nothing )
+        UpdateValue token ->
+            ( { model | token = token }, Nothing )
+
+        UpdateRemember remember ->
+            ( { model | remember = remember }, Nothing )
 
 
-view : Model -> Html Msg
-view { factorType, value } =
-    form []
+view : Model emsg -> Html Msg
+view { factorType, token, remember } =
+    form [ Ev.onSubmit Submit ]
         [ label [] [ secondFactorName factorType ++ " code" |> text ]
         , input
             [ Attr.type_ "number"
-            , Attr.value value
+            , Attr.value token
             , Attr.required True
             , Ev.onInput UpdateValue
             , Attr.attribute "autocomplete" "one-time-code"
             ]
             []
+        , label []
+            [ input
+                [ Attr.type_ "checkbox"
+                , Attr.checked remember
+                , Ev.onCheck UpdateRemember
+                ]
+                []
+            , text "Remember this device"
+            ]
         , alignRight [ button [ Attr.type_ "submit" ] [ text "Submit" ] ]
         ]

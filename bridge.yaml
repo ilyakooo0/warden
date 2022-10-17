@@ -32,10 +32,16 @@ Cmd:
       email: String
       server: String
       password: String
-  - ChooseSecondFactor: TwoFactorProviderType
-  - SubmitSecondFactor:
-      type: TwoFactorProviderType
-      value: String
+      secondFactor:
+        Maybe:
+          provider: TwoFactorProviderType
+          token: String
+          remember: Bool
+  - ChooseSecondFactor:
+      factor: TwoFactorProviderType
+      email: String
+      server: String
+      password: String
   - NeedCiphersList
   - SendMasterPassword: String
   - NeedsReset

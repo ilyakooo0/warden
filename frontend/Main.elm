@@ -36,11 +36,11 @@ type Msg
     | ShowError String String
     | ShowInfo String String
     | CloseNotification
-    | SubmitLogin { email : String, password : String, server : String }
+    | SubmitLogin Bridge.Cmd_Login
     | LoginMsg Login.Msg
     | CiphersMsg Ciphers.Msg
     | LoadCiphers Bridge.Sub_LoadCiphers_List
-    | OpenCiphersScreen
+    | LoginSuccessful
     | Reset
     | NeedsReset
     | MasterPasswordMsg MasterPassword.Msg
@@ -71,7 +71,6 @@ type Msg
     | ShowSecondFactorSelect (List Bridge.TwoFactorProviderType)
     | SelectSecondFactor Bridge.TwoFactorProviderType
     | SecondFactorMsg SecondFactor.Msg
-    | SubmitSecondFactor { factorType : Bridge.TwoFactorProviderType, value : String }
 
 
 type alias Model =
@@ -80,6 +79,26 @@ type alias Model =
     , userEmail : Maybe String
     , lastNotificationTime : Time.Posix
     }
+
+
+findLoginDetails :
+    List PageModel
+    ->
+        Maybe
+            { server : String
+            , email : String
+            , password : String
+            }
+findLoginDetails xs =
+    case xs of
+        (LoginModel model) :: _ ->
+            Just model
+
+        _ :: rest ->
+            findLoginDetails rest
+
+        [] ->
+            Nothing
 
 
 appendNotification : Notification.Config -> Model -> ( Model, Cmd Msg )
@@ -96,7 +115,7 @@ type PageModel
     | CipherModel Cipher.Model
     | CaptchaModel Captcha.Model
     | SecondFactorSelectModel SecondFactorSelect.Model
-    | SecondFactorModel SecondFactor.Model
+    | SecondFactorModel (SecondFactor.Model Msg)
 
 
 showPage :
@@ -226,7 +245,7 @@ subscriptions model =
                         LoadCiphers ciphers
 
                     Bridge.LoginSuccessful ->
-                        OpenCiphersScreen
+                        LoginSuccessful
 
                     Bridge.Reset ->
                         Reset
@@ -329,12 +348,6 @@ mapHead f (Nonempty x xx) =
 doNotStoreInHistory : PageModel -> Bool
 doNotStoreInHistory page =
     case page of
-        LoginModel _ ->
-            True
-
-        MasterPasswordModel _ ->
-            True
-
         LoadingPage ->
             True
 
@@ -349,7 +362,7 @@ update msg model =
         processPage liftModel ( resultModel, cmd ) =
             case resultModel of
                 Ok mdl ->
-                    ( { model | pageStack = mapHead (always (liftModel mdl)) model.pageStack }, cmd )
+                    ( updatePageStackHead (liftModel mdl), cmd )
 
                 Err err ->
                     appendNotification
@@ -358,6 +371,10 @@ update msg model =
                         , severity = Notification.Error
                         }
                         model
+
+        updatePageStackHead : PageModel -> Model
+        updatePageStackHead mdl =
+            { model | pageStack = mapHead (always mdl) model.pageStack }
 
         appendPageStack : PageModel -> Model
         appendPageStack mdl =
@@ -463,8 +480,10 @@ update msg model =
             , cmd
             )
 
-        OpenCiphersScreen ->
-            ( appendPageStack <| LoadingPage, Cmd.batch [ sendBridge Bridge.NeedCiphersList, sendBridge Bridge.NeedEmail ] )
+        LoginSuccessful ->
+            ( { model | pageStack = Nonempty.singleton LoadingPage }
+            , Cmd.batch [ sendBridge Bridge.NeedCiphersList, sendBridge Bridge.NeedEmail ]
+            )
 
         Reset ->
             init
@@ -702,32 +721,64 @@ update msg model =
             (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).init secondFactors
                 |> Tuple.mapFirst (\pageModel -> appendPageStack <| SecondFactorSelectModel pageModel)
 
-        SelectSecondFactor secondFactor ->
-            ( SecondFactor.init secondFactor |> SecondFactorModel |> appendPageStack
-            , Bridge.ChooseSecondFactor secondFactor |> FFI.sendBridge
-            )
+        SelectSecondFactor provider ->
+            case Nonempty.toList model.pageStack |> findLoginDetails of
+                Just { email, password, server } ->
+                    ( SecondFactor.init
+                        { provider = provider
+                        , callbacks =
+                            { submit =
+                                \{ token, remember } ->
+                                    SubmitLogin
+                                        { email = email
+                                        , password = password
+                                        , server = server
+                                        , secondFactor =
+                                            Just
+                                                { provider = provider
+                                                , token = token
+                                                , remember = remember
+                                                }
+                                        }
+                            }
+                        }
+                        |> SecondFactorModel
+                        |> appendPageStack
+                    , Bridge.ChooseSecondFactor
+                        { factor = provider
+                        , email = email
+                        , password = password
+                        , server = server
+                        }
+                        |> FFI.sendBridge
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
         SecondFactorMsg imsg ->
             case currentPage of
                 SecondFactorModel m ->
-                    SecondFactor.update secondFactorCallbacks m imsg
+                    SecondFactor.update m imsg
                         |> Tuple.mapBoth
-                            (SecondFactorModel >> appendPageStack)
+                            (SecondFactorModel >> updatePageStackHead)
                             (Maybe.map pureCmd >> Maybe.withDefault Cmd.none)
 
                 _ ->
                     ( model, Cmd.none )
 
-        SubmitSecondFactor { factorType, value } ->
-            ( model
-            , Bridge.SubmitSecondFactor { type_ = factorType, value = value }
-                |> FFI.sendBridge
-            )
-
 
 loginCallbacks : Login.Callbacks Msg
 loginCallbacks =
-    { submit = SubmitLogin }
+    { submit =
+        \{ email, server, password } ->
+            SubmitLogin
+                { email = email
+                , password = password
+                , server = server
+                , secondFactor = Nothing
+                }
+    }
 
 
 ciphersCallbacks : Ciphers.Callbacks Msg
@@ -768,10 +819,4 @@ masterPasswordCallbacks =
 secondFactorSelectCallbacks : SecondFactorSelect.Callbacks Msg
 secondFactorSelectCallbacks =
     { selectFactor = SelectSecondFactor
-    }
-
-
-secondFactorCallbacks : SecondFactor.Callbacks Msg
-secondFactorCallbacks =
-    { submit = SubmitSecondFactor
     }
