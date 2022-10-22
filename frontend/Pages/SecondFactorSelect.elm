@@ -22,7 +22,12 @@ import Utils exposing (..)
 main : Program () (Model (Maybe Msg)) (Maybe Msg)
 main =
     Page.page
-        { init = init { selectFactor = always Nothing } [ Bridge.Authenticator ]
+        { init =
+            init { selectFactor = always Nothing }
+                [ Bridge.Authenticator
+                , Bridge.Duo
+                , Bridge.Email
+                ]
         , view = view
         , update = update
         }
@@ -71,7 +76,7 @@ view { availableFactors } =
             (availableFactors
                 |> List.map
                     (\factor ->
-                        Input.button []
+                        Input.button [ Element.centerX ]
                             { label =
                                 button [ Attr.class "p-button" ] [ secondFactorName factor |> text ]
                                     |> Element.html
