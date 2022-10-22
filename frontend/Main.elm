@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Main exposing (main)
 
 import Bridge
 import Browser
@@ -117,7 +117,7 @@ type PageModel
     | MasterPasswordModel MasterPassword.Model
     | CipherModel Cipher.Model
     | CaptchaModel Captcha.Model
-    | SecondFactorSelectModel SecondFactorSelect.Model
+    | SecondFactorSelectModel (SecondFactorSelect.Model Msg)
     | SecondFactorModel (SecondFactor.Model Msg)
 
 
@@ -206,12 +206,8 @@ showPage email page =
             }
 
         SecondFactorSelectModel model ->
-            let
-                p =
-                    SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg
-            in
-            { title = p.title model
-            , body = p.view model
+            { title = [ text SecondFactorSelect.title ]
+            , body = SecondFactorSelect.view model |> List.map (Html.map SecondFactorSelectMsg)
             , topButton = Just simpleBackButton
             }
 
@@ -323,7 +319,7 @@ subscriptions model =
                                     (Captcha.page captchaCallbacks CaptchaMsg).subscriptions m
 
                                 SecondFactorSelectModel m ->
-                                    (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).subscriptions m
+                                    Sub.none
 
                                 SecondFactorModel _ ->
                                     Sub.none
@@ -631,7 +627,7 @@ update msg model =
                                         (Captcha.page captchaCallbacks CaptchaMsg).event m ev |> CaptchaModel
 
                                     SecondFactorSelectModel m ->
-                                        (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).event m ev |> SecondFactorSelectModel
+                                        SecondFactorSelectModel m
 
                                     SecondFactorModel m ->
                                         SecondFactorModel m
@@ -722,15 +718,18 @@ update msg model =
         SecondFactorSelectMsg imsg ->
             case currentPage of
                 SecondFactorSelectModel m ->
-                    (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).update imsg m
+                    SecondFactorSelect.update imsg m
+                        |> Tuple.mapFirst Ok
                         |> processPage SecondFactorSelectModel
 
                 _ ->
                     ( model, Cmd.none )
 
         ShowSecondFactorSelect secondFactors ->
-            (SecondFactorSelect.page secondFactorSelectCallbacks SecondFactorSelectMsg).init secondFactors
-                |> Tuple.mapFirst (\pageModel -> appendPageStack <| SecondFactorSelectModel pageModel)
+            SecondFactorSelect.init secondFactorSelectCallbacks secondFactors
+                |> Tuple.mapBoth
+                    (\pageModel -> appendPageStack <| SecondFactorSelectModel pageModel)
+                    (Cmd.map SecondFactorSelectMsg)
 
         SelectSecondFactor { provider, requestFromServer } ->
             case Nonempty.toList model.pageStack |> findLoginDetails of

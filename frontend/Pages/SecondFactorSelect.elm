@@ -1,4 +1,13 @@
-module Pages.SecondFactorSelect exposing (Callbacks, Model, Msg, page)
+module Pages.SecondFactorSelect exposing
+    ( Callbacks
+    , Model
+    , Msg
+    , init
+    , main
+    , title
+    , update
+    , view
+    )
 
 import Bridge
 import Element
@@ -10,8 +19,18 @@ import Page exposing (..)
 import Utils exposing (..)
 
 
-type alias Model =
+main : Program () (Model (Maybe Msg)) (Maybe Msg)
+main =
+    Page.page
+        { init = init { selectFactor = always Nothing } [ Bridge.Authenticator ]
+        , view = view
+        , update = update
+        }
+
+
+type alias Model emsg =
     { availableFactors : List Bridge.TwoFactorProviderType
+    , callbacks : Callbacks emsg
     }
 
 
@@ -24,35 +43,28 @@ type alias Callbacks emsg =
     }
 
 
-page : Callbacks emsg -> Page (List Bridge.TwoFactorProviderType) Model Msg emsg
-page callbacks liftMsg =
-    { init = \providers -> Tuple.mapSecond (Cmd.map liftMsg) (init providers)
-    , view = \model -> view model |> List.map (Html.map liftMsg)
-    , update = \msg model -> update callbacks liftMsg msg model
-    , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title = always [ text "Second factor" ]
-    , event = \model _ -> model
-    }
+title : String
+title =
+    "Second factor"
 
 
-init : List Bridge.TwoFactorProviderType -> ( Model, Cmd Msg )
-init providers =
-    ( { availableFactors = providers }, Cmd.none )
+init : Callbacks emsg -> List Bridge.TwoFactorProviderType -> ( Model emsg, Cmd Msg )
+init callbacks providers =
+    ( { availableFactors = providers
+      , callbacks = callbacks
+      }
+    , Cmd.none
+    )
 
 
-update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update { selectFactor } _ msg model =
+update : Msg -> Model emsg -> ( Model emsg, Cmd emsg )
+update msg model =
     case msg of
         SelectFactor factor ->
-            ( Ok model, selectFactor factor |> pureCmd )
+            ( model, model.callbacks.selectFactor factor |> pureCmd )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
-
-view : Model -> List (Html Msg)
+view : Model emsg -> List (Html Msg)
 view { availableFactors } =
     [ Element.layout []
         (Element.column [ Element.centerX ]
