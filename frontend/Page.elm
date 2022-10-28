@@ -1,28 +1,8 @@
 module Page exposing (..)
 
 import Browser
-import GlobalEvents exposing (Event)
 import Html exposing (..)
 import Html.Events exposing (..)
-
-
-type alias Env =
-    {}
-
-
-type alias Page init model imsg emsg =
-    (imsg -> emsg)
-    -> InitializedPage init model imsg emsg
-
-
-type alias InitializedPage init model imsg emsg =
-    { init : init -> ( model, Cmd emsg )
-    , view : model -> List (Html emsg)
-    , update : imsg -> model -> ( Result String model, Cmd emsg )
-    , subscriptions : model -> Sub emsg
-    , title : model -> List (Html emsg)
-    , event : model -> Event -> model
-    }
 
 
 page :

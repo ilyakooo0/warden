@@ -1,4 +1,4 @@
-module Pages.MasterPassword exposing (..)
+module Pages.MasterPassword exposing (Callbacks, Model, Msg, init, title, update, view)
 
 import Html exposing (..)
 import Html.Attributes as Attr
@@ -7,10 +7,11 @@ import Page exposing (..)
 import Utils exposing (..)
 
 
-type alias Model =
+type alias Model emsg =
     { server : String
     , email : String
     , password : String
+    , callbacks : Callbacks emsg
     }
 
 
@@ -26,46 +27,34 @@ type alias Callbacks emsg =
     }
 
 
-page : Callbacks emsg -> Page { server : String, login : String } Model Msg emsg
-page callbacks liftMsg =
-    { init = \cfg -> Tuple.mapSecond (Cmd.map liftMsg) (init cfg)
-    , view = \model -> view model |> List.map (Html.map liftMsg)
-    , update = \msg model -> update callbacks liftMsg msg model
-    , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title = always [ text "Enter master password" ]
-    , event = \model _ -> model
+title : String
+title =
+    "Enter master password"
+
+
+init : Callbacks emsg -> { server : String, login : String } -> Model emsg
+init callbacks { server, login } =
+    { server = server
+    , email = login
+    , password = ""
+    , callbacks = callbacks
     }
 
 
-init : { server : String, login : String } -> ( Model, Cmd Msg )
-init { server, login } =
-    ( { server = server
-      , email = login
-      , password = ""
-      }
-    , Cmd.none
-    )
-
-
-update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update { submit, reset } _ msg model =
+update : Msg -> Model emsg -> ( Model emsg, Cmd emsg )
+update msg model =
     case msg of
         UpdatePassword password ->
-            ( Ok { model | password = password }, Cmd.none )
+            ( { model | password = password }, Cmd.none )
 
         Submit ->
-            ( Ok model, pureCmd (submit { password = model.password }) )
+            ( model, pureCmd (model.callbacks.submit { password = model.password }) )
 
         Reset ->
-            ( Ok model, pureCmd reset )
+            ( model, pureCmd model.callbacks.reset )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
-
-
-view : Model -> List (Html Msg)
+view : Model emsg -> List (Html Msg)
 view model =
     [ alignRight [ button [ Attr.class "p-button--negative", Ev.onClick Reset ] [ text "Log out" ] ]
     , table [ Attr.class "p-table--mobile-card u-no-margin" ]

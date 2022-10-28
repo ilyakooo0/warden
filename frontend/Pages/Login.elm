@@ -1,4 +1,4 @@
-module Pages.Login exposing (Callbacks, Model, Msg, page)
+module Pages.Login exposing (Callbacks, Model, Msg, init, title, update, view)
 
 import Html exposing (..)
 import Html.Attributes as Attr
@@ -7,10 +7,11 @@ import Page exposing (..)
 import Utils exposing (..)
 
 
-type alias Model =
+type alias Model emsg =
     { server : String
     , email : String
     , password : String
+    , callbacks : Callbacks emsg
     }
 
 
@@ -26,49 +27,45 @@ type alias Callbacks emsg =
     }
 
 
-page : Callbacks emsg -> Page () Model Msg emsg
-page callbacks liftMsg =
-    { init = \() -> Tuple.mapSecond (Cmd.map liftMsg) init
-    , view = \model -> view model |> List.map (Html.map liftMsg)
-    , update = \msg model -> update callbacks liftMsg msg model
-    , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title = always [ text "Log into bitwarden" ]
-    , event = \model _ -> model
+title : String
+title =
+    "Log into bitwarden"
+
+
+init : Callbacks emsg -> Model emsg
+init callbacks =
+    { server = "https://vault.bitwarden.com"
+    , email = ""
+    , password = ""
+    , callbacks = callbacks
     }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { server = "https://vault.bitwarden.com"
-      , email = ""
-      , password = ""
-      }
-    , Cmd.none
-    )
-
-
-update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update { submit } liftMsg msg model =
+update : Msg -> Model emsg -> ( Model emsg, Cmd emsg )
+update msg model =
     case msg of
         UpdateEmail email ->
-            ( Ok { model | email = email }, Cmd.none )
+            ( { model | email = email }, Cmd.none )
 
         UpdateServer server ->
-            ( Ok { model | server = server }, Cmd.none )
+            ( { model | server = server }, Cmd.none )
 
         UpdatePassword password ->
-            ( Ok { model | password = password }, Cmd.none )
+            ( { model | password = password }, Cmd.none )
 
         Submit ->
-            ( Ok model, pureCmd (submit model) )
+            ( model
+            , pureCmd
+                (model.callbacks.submit
+                    { email = model.email
+                    , password = model.password
+                    , server = model.password
+                    }
+                )
+            )
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
-
-view : Model -> List (Html Msg)
+view : Model emsg -> List (Html Msg)
 view model =
     [ form [ Ev.onSubmit Submit ]
         [ label [] [ text "Server" ]

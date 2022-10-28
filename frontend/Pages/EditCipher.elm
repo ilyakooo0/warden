@@ -1,4 +1,4 @@
-module Pages.EditCipher exposing (..)
+module Pages.EditCipher exposing (Callbacks, Model, Msg, event, init, title, update, view)
 
 import Bridge
 import GlobalEvents
@@ -8,6 +8,7 @@ import Html.Events as Ev
 import Logic.Cipher exposing (normalizeCipher)
 import Modal exposing (modal)
 import Page exposing (..)
+import Pages.MasterPassword exposing (Msg)
 import Pages.PasswordGenerator as PasswordGenerator
 import Utils exposing (..)
 
@@ -35,56 +36,51 @@ type alias Callbacks msg =
     }
 
 
-page : Page { fullCipher : Bridge.FullCipher, callbacks : Callbacks emsg } (Model emsg) Msg emsg
-page liftMsg =
-    { init = init
-    , view = \model -> view model |> List.map (Html.map liftMsg)
-    , update = \msg model -> update liftMsg msg model
-    , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title =
-        \{ fullCipher, callbacks } ->
-            [ text fullCipher.name
-            , span [ Attr.class "u-float-right" ]
-                [ iconButton "task-outstanding"
-                    (callbacks.save { fullCipher | cipher = normalizeCipher fullCipher.cipher })
-                ]
-            ]
-    , event =
-        \model ev ->
-            case ev of
-                GlobalEvents.UpdateCipher c ->
-                    { model
-                        | fullCipher =
-                            if c.id == model.fullCipher.id then
-                                c
+title : Model msg -> List (Html msg)
+title { fullCipher, callbacks } =
+    [ text fullCipher.name
+    , span [ Attr.class "u-float-right" ]
+        [ iconButton "task-outstanding"
+            (callbacks.save { fullCipher | cipher = normalizeCipher fullCipher.cipher })
+        ]
+    ]
 
-                            else
-                                model.fullCipher
+
+event : Model msg -> GlobalEvents.Event -> Model msg
+event model ev =
+    case ev of
+        GlobalEvents.UpdateCipher c ->
+            { model
+                | fullCipher =
+                    if c.id == model.fullCipher.id then
+                        c
+
+                    else
+                        model.fullCipher
+            }
+
+        GlobalEvents.GeneratedPassword password ->
+            let
+                fullCipher =
+                    model.fullCipher
+            in
+            { model
+                | passwordGenerator = Nothing
+                , fullCipher =
+                    { fullCipher
+                        | cipher =
+                            case fullCipher.cipher of
+                                Bridge.LoginCipher c ->
+                                    Bridge.LoginCipher
+                                        { c | password = Just password }
+
+                                c ->
+                                    c
                     }
+            }
 
-                GlobalEvents.GeneratedPassword password ->
-                    let
-                        fullCipher =
-                            model.fullCipher
-                    in
-                    { model
-                        | passwordGenerator = Nothing
-                        , fullCipher =
-                            { fullCipher
-                                | cipher =
-                                    case fullCipher.cipher of
-                                        Bridge.LoginCipher c ->
-                                            Bridge.LoginCipher
-                                                { c | password = Just password }
-
-                                        c ->
-                                            c
-                            }
-                    }
-
-                _ ->
-                    model
-    }
+        _ ->
+            model
 
 
 init : { fullCipher : Bridge.FullCipher, callbacks : Callbacks emsg } -> ( Model emsg, Cmd emsg )
@@ -97,8 +93,8 @@ init { fullCipher, callbacks } =
     )
 
 
-update : (Msg -> emsg) -> Msg -> Model emsg -> ( Result String (Model emsg), Cmd emsg )
-update _ msg model =
+update : Msg -> Model emsg -> ( Result String (Model emsg), Cmd emsg )
+update msg model =
     case msg of
         EditCipher fullCipher ->
             ( Ok { model | fullCipher = fullCipher }, Cmd.none )
@@ -124,11 +120,6 @@ update _ msg model =
             , Maybe.withDefault Cmd.none
                 (Maybe.map (\f -> f model.fullCipher |> pureCmd) model.callbacks.delete)
             )
-
-
-subscriptions : Model emsg -> Sub Msg
-subscriptions _ =
-    Sub.none
 
 
 heading : String -> String -> Html msg

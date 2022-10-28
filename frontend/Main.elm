@@ -53,7 +53,6 @@ type Msg
     | RecieveEmail String
     | Copy String
     | Open String
-    | CaptchaMsg Captcha.Msg
     | EditCipherMsg EditCipher.Msg
     | ShowCaptcha Captcha.HCaptchSiteKey
     | ClearNotification { currentTime : Time.Posix }
@@ -94,8 +93,12 @@ findLoginDetails :
             }
 findLoginDetails xs =
     case xs of
-        (LoginModel model) :: _ ->
-            Just model
+        (LoginModel { server, email, password }) :: _ ->
+            Just
+                { server = server
+                , email = email
+                , password = password
+                }
 
         _ :: rest ->
             findLoginDetails rest
@@ -110,12 +113,12 @@ appendNotification cfg model =
 
 
 type PageModel
-    = LoginModel Login.Model
+    = LoginModel (Login.Model Msg)
     | LoadingPage
-    | CiphersModel Ciphers.Model
+    | CiphersModel (Ciphers.Model Msg)
     | EditCipherModel (EditCipher.Model Msg)
-    | MasterPasswordModel MasterPassword.Model
-    | CipherModel Cipher.Model
+    | MasterPasswordModel (MasterPassword.Model Msg)
+    | CipherModel (Cipher.Model Msg)
     | CaptchaModel Captcha.Model
     | SecondFactorSelectModel (SecondFactorSelect.Model Msg)
     | SecondFactorModel (SecondFactor.Model Msg)
@@ -136,22 +139,14 @@ showPage email page =
     in
     case page of
         LoginModel model ->
-            let
-                p =
-                    Login.page loginCallbacks LoginMsg
-            in
-            { title = p.title model
-            , body = p.view model
+            { title = [ text Login.title ]
+            , body = Login.view model |> List.map (Html.map LoginMsg)
             , topButton = Nothing
             }
 
         CiphersModel model ->
-            let
-                p =
-                    Ciphers.page ciphersCallbacks CiphersMsg
-            in
-            { title = p.title model
-            , body = p.view model
+            { title = Ciphers.title model |> List.map (Html.map CiphersMsg)
+            , body = Ciphers.view model
             , topButton =
                 Ciphers.menuConfig email model
                     |> Navigation.mapMenuConfig CiphersMsg
@@ -166,42 +161,26 @@ showPage email page =
             }
 
         MasterPasswordModel model ->
-            let
-                p =
-                    MasterPassword.page masterPasswordCallbacks MasterPasswordMsg
-            in
-            { title = p.title model
-            , body = p.view model
+            { title = [ text MasterPassword.title ]
+            , body = MasterPassword.view model |> List.map (Html.map MasterPasswordMsg)
             , topButton = Nothing
             }
 
         CipherModel model ->
-            let
-                p =
-                    Cipher.page cipherCallbacks CipherMsg
-            in
-            { title = p.title model
-            , body = p.view model
+            { title = Cipher.title model
+            , body = Cipher.view model |> List.map (Html.map CipherMsg)
             , topButton = Just simpleBackButton
             }
 
         CaptchaModel model ->
-            let
-                p =
-                    Captcha.page captchaCallbacks CaptchaMsg
-            in
-            { title = p.title model
-            , body = p.view model
+            { title = [ text Captcha.title ]
+            , body = Captcha.view model
             , topButton = Just simpleBackButton
             }
 
         EditCipherModel model ->
-            let
-                p =
-                    EditCipher.page EditCipherMsg
-            in
-            { title = p.title model
-            , body = p.view model
+            { title = EditCipher.title model
+            , body = EditCipher.view model |> List.map (Html.map EditCipherMsg)
             , topButton = Just (BackButton { action = PopView, icon = Just "close" })
             }
 
@@ -298,25 +277,25 @@ subscriptions model =
                         (\x ->
                             case x of
                                 LoginModel m ->
-                                    (Login.page loginCallbacks LoginMsg).subscriptions m
+                                    Sub.none
 
                                 LoadingPage ->
                                     Sub.none
 
-                                CiphersModel m ->
-                                    (Ciphers.page ciphersCallbacks CiphersMsg).subscriptions m
+                                CiphersModel _ ->
+                                    Sub.none
 
-                                EditCipherModel m ->
-                                    (EditCipher.page EditCipherMsg).subscriptions m
+                                EditCipherModel _ ->
+                                    Sub.none
 
                                 MasterPasswordModel m ->
-                                    (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).subscriptions m
+                                    Sub.none
 
                                 CipherModel m ->
-                                    (Cipher.page cipherCallbacks CipherMsg).subscriptions m
+                                    Cipher.subscriptions m
 
-                                CaptchaModel m ->
-                                    (Captcha.page captchaCallbacks CaptchaMsg).subscriptions m
+                                CaptchaModel _ ->
+                                    Sub.none
 
                                 SecondFactorSelectModel m ->
                                     Sub.none
@@ -432,7 +411,7 @@ update msg model =
         LoginMsg imsg ->
             case currentPage of
                 LoginModel page ->
-                    (Login.page loginCallbacks LoginMsg).update imsg page |> processPage LoginModel
+                    Login.update imsg page |> Tuple.mapFirst Ok |> processPage LoginModel
 
                 _ ->
                     ( model, Cmd.none )
@@ -440,14 +419,15 @@ update msg model =
         CiphersMsg imsg ->
             case currentPage of
                 CiphersModel page ->
-                    (Ciphers.page ciphersCallbacks CiphersMsg).update imsg page |> processPage CiphersModel
+                    Ciphers.update imsg page |> Tuple.mapFirst Ok |> processPage CiphersModel
 
                 _ ->
                     ( model, Cmd.none )
 
         ShowLoginPage ->
-            (Login.page loginCallbacks LoginMsg).init ()
-                |> Tuple.mapFirst (\pageModel -> appendPageStack <| LoginModel pageModel)
+            ( Login.init loginCallbacks |> LoginModel |> appendPageStack
+            , Cmd.none
+            )
 
         LoadCiphers ciphers ->
             let
@@ -464,8 +444,8 @@ update msg model =
                                         False
                             )
 
-                ( pageModel, cmd ) =
-                    (Ciphers.page ciphersCallbacks CiphersMsg).init ciphers
+                pageModel =
+                    Ciphers.init ciphersCallbacks ciphers
             in
             ( if ciphersShown then
                 { model
@@ -484,7 +464,7 @@ update msg model =
 
               else
                 appendPageStack <| CiphersModel pageModel
-            , cmd
+            , Cmd.none
             )
 
         LoginSuccessful ->
@@ -496,8 +476,11 @@ update msg model =
             init
 
         ShowMasterPasswordPage { server, login } ->
-            (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).init { server = server, login = login }
-                |> Tuple.mapFirst (\pageModel -> appendPageStack <| MasterPasswordModel pageModel)
+            ( MasterPassword.init masterPasswordCallbacks { server = server, login = login }
+                |> MasterPasswordModel
+                |> appendPageStack
+            , Cmd.none
+            )
 
         NeedsReset ->
             ( appendPageStack <| LoadingPage, sendBridge Bridge.NeedsReset )
@@ -508,7 +491,7 @@ update msg model =
         MasterPasswordMsg imsg ->
             case currentPage of
                 MasterPasswordModel page ->
-                    (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).update imsg page |> processPage MasterPasswordModel
+                    MasterPassword.update imsg page |> Tuple.mapFirst Ok |> processPage MasterPasswordModel
 
                 _ ->
                     ( model, Cmd.none )
@@ -516,7 +499,7 @@ update msg model =
         CipherMsg imsg ->
             case currentPage of
                 CipherModel page ->
-                    (Cipher.page cipherCallbacks CipherMsg).update imsg page |> processPage CipherModel
+                    Cipher.update imsg page |> processPage CipherModel
 
                 _ ->
                     ( model, Cmd.none )
@@ -524,13 +507,13 @@ update msg model =
         EditCipherMsg imsg ->
             case currentPage of
                 EditCipherModel page ->
-                    (EditCipher.page EditCipherMsg).update imsg page |> processPage EditCipherModel
+                    EditCipher.update imsg page |> processPage EditCipherModel
 
                 _ ->
                     ( model, Cmd.none )
 
         ShowCipherPage cipher ->
-            (Cipher.page cipherCallbacks CipherMsg).init cipher
+            Cipher.init cipherCallbacks cipher
                 |> Tuple.mapFirst (\pageModel -> appendPageStack <| CipherModel pageModel)
 
         RequestCipher id ->
@@ -551,16 +534,7 @@ update msg model =
             ( model, FFI.sendBridge (Bridge.Open uri) )
 
         ShowCaptcha uri ->
-            (Captcha.page captchaCallbacks CaptchaMsg).init uri
-                |> Tuple.mapFirst (\pageModel -> keepStackWith <| CaptchaModel pageModel)
-
-        CaptchaMsg imsg ->
-            case currentPage of
-                CaptchaModel page ->
-                    (Captcha.page captchaCallbacks CaptchaMsg).update imsg page |> processPage CaptchaModel
-
-                _ ->
-                    ( model, Cmd.none )
+            ( Captcha.init uri |> CaptchaModel |> keepStackWith, Cmd.none )
 
         ClearNotification { currentTime } ->
             if Time.posixToMillis model.lastNotificationTime + notificationLingerSeconds * 1000 > Time.posixToMillis currentTime then
@@ -578,7 +552,7 @@ update msg model =
             ( model, Cmd.none )
 
         EditCipher cipher ->
-            (EditCipher.page EditCipherMsg).init { fullCipher = cipher, callbacks = editCipherCallbacks }
+            EditCipher.init { fullCipher = cipher, callbacks = editCipherCallbacks }
                 |> Tuple.mapFirst (\pageModel -> keepStackWith <| EditCipherModel pageModel)
 
         UpdateCipher cipher ->
@@ -609,22 +583,22 @@ update msg model =
                                         LoadingPage
 
                                     LoginModel m ->
-                                        (Login.page loginCallbacks LoginMsg).event m ev |> LoginModel
+                                        LoginModel m
 
                                     CiphersModel m ->
-                                        (Ciphers.page ciphersCallbacks CiphersMsg).event m ev |> CiphersModel
+                                        Ciphers.event m ev |> CiphersModel
 
                                     MasterPasswordModel m ->
-                                        (MasterPassword.page masterPasswordCallbacks MasterPasswordMsg).event m ev |> MasterPasswordModel
+                                        MasterPasswordModel m
 
                                     CipherModel m ->
-                                        (Cipher.page cipherCallbacks CipherMsg).event m ev |> CipherModel
+                                        Cipher.event m ev |> CipherModel
 
                                     EditCipherModel m ->
-                                        (EditCipher.page EditCipherMsg).event m ev |> EditCipherModel
+                                        EditCipher.event m ev |> EditCipherModel
 
                                     CaptchaModel m ->
-                                        (Captcha.page captchaCallbacks CaptchaMsg).event m ev |> CaptchaModel
+                                        CaptchaModel m
 
                                     SecondFactorSelectModel m ->
                                         SecondFactorSelectModel m
@@ -640,7 +614,7 @@ update msg model =
             ( model, FFI.sendBridge (Bridge.GeneratePassword cfg) )
 
         OpenNewCipherEditPage t ->
-            (EditCipher.page EditCipherMsg).init
+            EditCipher.init
                 { callbacks = createCipherCallbacks
                 , fullCipher =
                     { reprompt = 0
@@ -797,6 +771,7 @@ ciphersCallbacks =
     { selected = RequestCipher
     , logOut = NeedsReset
     , createNewCipher = OpenNewCipherEditPage
+    , lift = CiphersMsg
     }
 
 
@@ -813,11 +788,6 @@ editCipherCallbacks =
 createCipherCallbacks : EditCipher.Callbacks Msg
 createCipherCallbacks =
     { save = CreateCipher, generatePassword = GeneratePassword, delete = Nothing }
-
-
-captchaCallbacks : Captcha.Callbacks
-captchaCallbacks =
-    {}
 
 
 masterPasswordCallbacks : MasterPassword.Callbacks Msg
