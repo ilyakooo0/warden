@@ -276,7 +276,7 @@ subscriptions model =
                     |> List.map
                         (\x ->
                             case x of
-                                LoginModel m ->
+                                LoginModel _ ->
                                     Sub.none
 
                                 LoadingPage ->
@@ -288,7 +288,7 @@ subscriptions model =
                                 EditCipherModel _ ->
                                     Sub.none
 
-                                MasterPasswordModel m ->
+                                MasterPasswordModel _ ->
                                     Sub.none
 
                                 CipherModel m ->
@@ -297,7 +297,7 @@ subscriptions model =
                                 CaptchaModel _ ->
                                     Sub.none
 
-                                SecondFactorSelectModel m ->
+                                SecondFactorSelectModel _ ->
                                     Sub.none
 
                                 SecondFactorModel _ ->
@@ -344,20 +344,6 @@ doNotStoreInHistory page =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        processPage : (pageModel -> PageModel) -> ( Result String pageModel, Cmd Msg ) -> ( Model, Cmd Msg )
-        processPage liftModel ( resultModel, cmd ) =
-            case resultModel of
-                Ok mdl ->
-                    ( updatePageStackHead (liftModel mdl), cmd )
-
-                Err err ->
-                    appendNotification
-                        { title = "An error had occured"
-                        , message = err
-                        , severity = Notification.Error
-                        }
-                        model
-
         updatePageStackHead : PageModel -> Model
         updatePageStackHead mdl =
             { model | pageStack = mapHead (always mdl) model.pageStack }
@@ -411,7 +397,8 @@ update msg model =
         LoginMsg imsg ->
             case currentPage of
                 LoginModel page ->
-                    Login.update imsg page |> Tuple.mapFirst Ok |> processPage LoginModel
+                    Login.update imsg page
+                        |> Tuple.mapFirst (LoginModel >> updatePageStackHead)
 
                 _ ->
                     ( model, Cmd.none )
@@ -419,7 +406,8 @@ update msg model =
         CiphersMsg imsg ->
             case currentPage of
                 CiphersModel page ->
-                    Ciphers.update imsg page |> Tuple.mapFirst Ok |> processPage CiphersModel
+                    Ciphers.update imsg page
+                        |> Tuple.mapFirst (CiphersModel >> updatePageStackHead)
 
                 _ ->
                     ( model, Cmd.none )
@@ -491,7 +479,8 @@ update msg model =
         MasterPasswordMsg imsg ->
             case currentPage of
                 MasterPasswordModel page ->
-                    MasterPassword.update imsg page |> Tuple.mapFirst Ok |> processPage MasterPasswordModel
+                    MasterPassword.update imsg page
+                        |> Tuple.mapFirst (MasterPasswordModel >> updatePageStackHead)
 
                 _ ->
                     ( model, Cmd.none )
@@ -499,7 +488,8 @@ update msg model =
         CipherMsg imsg ->
             case currentPage of
                 CipherModel page ->
-                    Cipher.update imsg page |> processPage CipherModel
+                    Cipher.update imsg page
+                        |> Tuple.mapFirst (CipherModel >> updatePageStackHead)
 
                 _ ->
                     ( model, Cmd.none )
@@ -507,7 +497,8 @@ update msg model =
         EditCipherMsg imsg ->
             case currentPage of
                 EditCipherModel page ->
-                    EditCipher.update imsg page |> processPage EditCipherModel
+                    EditCipher.update imsg page
+                        |> Tuple.mapFirst (EditCipherModel >> updatePageStackHead)
 
                 _ ->
                     ( model, Cmd.none )
@@ -693,8 +684,7 @@ update msg model =
             case currentPage of
                 SecondFactorSelectModel m ->
                     SecondFactorSelect.update imsg m
-                        |> Tuple.mapFirst Ok
-                        |> processPage SecondFactorSelectModel
+                        |> Tuple.mapFirst (SecondFactorSelectModel >> updatePageStackHead)
 
                 _ ->
                     ( model, Cmd.none )

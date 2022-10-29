@@ -93,30 +93,30 @@ init { fullCipher, callbacks } =
     )
 
 
-update : Msg -> Model emsg -> ( Result String (Model emsg), Cmd emsg )
+update : Msg -> Model emsg -> ( Model emsg, Cmd emsg )
 update msg model =
     case msg of
         EditCipher fullCipher ->
-            ( Ok { model | fullCipher = fullCipher }, Cmd.none )
+            ( { model | fullCipher = fullCipher }, Cmd.none )
 
         PasswordGeneratorMsg m ->
-            ( Ok { model | passwordGenerator = Maybe.map (PasswordGenerator.update m) model.passwordGenerator }
+            ( { model | passwordGenerator = Maybe.map (PasswordGenerator.update m) model.passwordGenerator }
             , Cmd.none
             )
 
         OpenGeneratePasword ->
-            ( Ok { model | passwordGenerator = Just PasswordGenerator.init }
+            ( { model | passwordGenerator = Just PasswordGenerator.init }
             , Cmd.none
             )
 
         CloseGeneratePassword ->
-            ( Ok { model | passwordGenerator = Nothing }, Cmd.none )
+            ( { model | passwordGenerator = Nothing }, Cmd.none )
 
         GeneratePassword cfg ->
-            ( Ok model, pureCmd (model.callbacks.generatePassword cfg) )
+            ( model, pureCmd (model.callbacks.generatePassword cfg) )
 
         Delete ->
-            ( Ok model
+            ( model
             , Maybe.withDefault Cmd.none
                 (Maybe.map (\f -> f model.fullCipher |> pureCmd) model.callbacks.delete)
             )

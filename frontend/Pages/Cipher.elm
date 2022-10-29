@@ -102,20 +102,20 @@ init callbacks cipher =
     )
 
 
-update : Msg -> Model emsg -> ( Result String (Model emsg), Cmd emsg )
+update : Msg -> Model emsg -> ( Model emsg, Cmd emsg )
 update msg model =
     case msg of
         TogglePasswordVisiblity ->
-            ( Ok { model | passwordHidden = not model.passwordHidden }, Cmd.none )
+            ( { model | passwordHidden = not model.passwordHidden }, Cmd.none )
 
         ToggleCVVVisiblity ->
-            ( Ok { model | cvvHidden = not model.cvvHidden }, Cmd.none )
+            ( { model | cvvHidden = not model.cvvHidden }, Cmd.none )
 
         Copy text ->
-            ( Ok model, model.callbacks.copy text |> pureCmd )
+            ( model, model.callbacks.copy text |> pureCmd )
 
         Open uri ->
-            ( Ok model, model.callbacks.open uri |> pureCmd )
+            ( model, model.callbacks.open uri |> pureCmd )
 
 
 subscriptions : Model msg -> Sub msg
