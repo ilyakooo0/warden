@@ -6,7 +6,7 @@ import Html.Events exposing (..)
 
 
 page :
-    { init : ( model, Cmd msg )
+    { init : model
     , view : model -> List (Html msg)
     , update : msg -> model -> ( model, Cmd (Maybe msg) )
     }
@@ -14,7 +14,7 @@ page :
 page { init, view, update } =
     Browser.element
         { subscriptions = always Sub.none
-        , init = \_ -> init |> Tuple.mapSecond (Cmd.map Just)
+        , init = \_ -> ( init, Cmd.none )
         , view = view >> Html.div [] >> Html.map Just
         , update =
             \mmsg model ->

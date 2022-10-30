@@ -27,6 +27,7 @@ type Msg
     | CloseGeneratePassword
     | GeneratePassword Bridge.PasswordGeneratorConfig
     | Delete
+    | Save
 
 
 type alias Callbacks msg =
@@ -36,12 +37,11 @@ type alias Callbacks msg =
     }
 
 
-title : Model msg -> List (Html msg)
-title { fullCipher, callbacks } =
+title : Model msg -> List (Html Msg)
+title { fullCipher } =
     [ text fullCipher.name
     , span [ Attr.class "u-float-right" ]
-        [ iconButton "task-outstanding"
-            (callbacks.save { fullCipher | cipher = normalizeCipher fullCipher.cipher })
+        [ iconButton "task-outstanding" Save
         ]
     ]
 
@@ -119,6 +119,15 @@ update msg model =
             ( model
             , Maybe.withDefault Cmd.none
                 (Maybe.map (\f -> f model.fullCipher |> pureCmd) model.callbacks.delete)
+            )
+
+        Save ->
+            let
+                { fullCipher } =
+                    model
+            in
+            ( model
+            , model.callbacks.save { fullCipher | cipher = normalizeCipher fullCipher.cipher } |> pureCmd
             )
 
 

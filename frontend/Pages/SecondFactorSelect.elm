@@ -53,13 +53,11 @@ title =
     "Second factor"
 
 
-init : Callbacks emsg -> List Bridge.TwoFactorProviderType -> ( Model emsg, Cmd Msg )
+init : Callbacks emsg -> List Bridge.TwoFactorProviderType -> Model emsg
 init callbacks providers =
-    ( { availableFactors = providers
-      , callbacks = callbacks
-      }
-    , Cmd.none
-    )
+    { availableFactors = providers
+    , callbacks = callbacks
+    }
 
 
 update : Msg -> Model emsg -> ( Model emsg, Cmd emsg )

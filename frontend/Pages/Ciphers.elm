@@ -87,6 +87,7 @@ type Msg
     | InfiniteScrollMsg InfiniteScroll.Msg
     | CreateNewCipher Bridge.CipherType
     | ToggleSelectCipherTypeVisible
+    | SelectCipher String
 
 
 type alias Callbacks msg =
@@ -243,31 +244,34 @@ update msg model =
             , Cmd.none
             )
 
+        SelectCipher id ->
+            ( model, model.callbacks.selected id |> pureCmd )
 
-view : Model emsg -> List (Html emsg)
-view { ciphers, search, ciphersListFilter, sublist, callbacks } =
+
+view : Model emsg -> List (Html Msg)
+view { ciphers, search, ciphersListFilter, sublist } =
     [ input
         [ Attr.type_ "search"
         , Attr.value search
-        , Ev.onInput (callbacks.lift << UpdateSearch)
+        , Ev.onInput UpdateSearch
         , Attr.placeholder "Search"
         , Attr.attribute "autocomplete" "off"
         ]
         []
     , ciphers
         |> applyCipherFilter ciphersListFilter
-        |> Search.searchList search .name (List.take sublist.end >> Lazy.lazy3 showCiphers callbacks.lift callbacks.selected)
+        |> Search.searchList search .name (List.take sublist.end >> Lazy.lazy showCiphers)
     ]
 
 
-showCiphers : (Msg -> msg) -> (String -> msg) -> Bridge.Sub_LoadCiphers_List -> Html msg
-showCiphers liftMsg selected ciphers =
-    Keyed.ul [ Attr.class "p-list--divided", InfiniteScroll.infiniteScroll (InfiniteScrollMsg >> liftMsg), Attr.class "ciphers-list no-scroll-bar" ]
+showCiphers : Bridge.Sub_LoadCiphers_List -> Html Msg
+showCiphers ciphers =
+    Keyed.ul [ Attr.class "p-list--divided", InfiniteScroll.infiniteScroll InfiniteScrollMsg, Attr.class "ciphers-list no-scroll-bar" ]
         (ciphers
             |> List.map
                 (\{ name, date, id } ->
                     ( id
-                    , li [ Attr.class "p-list__item cipher-row", Ev.onClick (selected id) ]
+                    , li [ Attr.class "p-list__item cipher-row", Ev.onClick (SelectCipher id) ]
                         [ div [ Attr.class "cipher-row-container" ]
                             [ p [] [ text name ]
                             , p [ Attr.class "p-text--small u-align-text--right u-text--muted" ] [ text date ]

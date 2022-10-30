@@ -59,7 +59,7 @@ update msg model =
                 (model.callbacks.submit
                     { email = model.email
                     , password = model.password
-                    , server = model.password
+                    , server = model.server
                     }
                 )
             )

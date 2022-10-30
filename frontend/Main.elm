@@ -37,23 +37,18 @@ type Msg
     | ShowInfo String String
     | CloseNotification
     | SubmitLogin Bridge.Cmd_Login
-    | LoginMsg Login.Msg
-    | CiphersMsg Ciphers.Msg
     | LoadCiphers Bridge.Sub_LoadCiphers_List
     | LoginSuccessful
     | Reset
     | NeedsReset
-    | MasterPasswordMsg MasterPassword.Msg
     | SendMasterPassword { password : String }
     | ShowMasterPasswordPage { server : String, login : String }
-    | CipherMsg Cipher.Msg
     | ShowCipherPage Bridge.FullCipher
     | RequestCipher CipherId
     | PopView
     | RecieveEmail String
     | Copy String
     | Open String
-    | EditCipherMsg EditCipher.Msg
     | ShowCaptcha Captcha.HCaptchSiteKey
     | ClearNotification { currentTime : Time.Posix }
     | UpdateLastNotificatioTime Time.Posix
@@ -66,12 +61,21 @@ type Msg
     | WrongPassword
     | DeleteCipher Bridge.FullCipher
     | RequestTotp String
-    | SecondFactorSelectMsg SecondFactorSelect.Msg
     | ShowSecondFactorSelect (List Bridge.TwoFactorProviderType)
     | SelectSecondFactor
         { provider : Bridge.TwoFactorProviderType
         , requestFromServer : Bool
         }
+    | PageMsg PageMsg
+
+
+type PageMsg
+    = LoginMsg Login.Msg
+    | CiphersMsg Ciphers.Msg
+    | MasterPasswordMsg MasterPassword.Msg
+    | CipherMsg Cipher.Msg
+    | EditCipherMsg EditCipher.Msg
+    | SecondFactorSelectMsg SecondFactorSelect.Msg
     | SecondFactorMsg SecondFactor.Msg
 
 
@@ -136,23 +140,43 @@ showPage email page =
     let
         simpleBackButton =
             BackButton { action = PopView, icon = Nothing }
+
+        liftPageWith :
+            (pageMsg -> PageMsg)
+            ->
+                { title : List (Html pageMsg)
+                , body : List (Html pageMsg)
+                , topButton : Maybe (Navigation.TopButton Msg)
+                }
+            ->
+                { title : List (Html Msg)
+                , body : List (Html Msg)
+                , topButton : Maybe (Navigation.TopButton Msg)
+                }
+        liftPageWith lift { title, body, topButton } =
+            { title = title |> List.map (Html.map (lift >> PageMsg))
+            , body = body |> List.map (Html.map (lift >> PageMsg))
+            , topButton = topButton
+            }
     in
     case page of
         LoginModel model ->
-            { title = [ text Login.title ]
-            , body = Login.view model |> List.map (Html.map LoginMsg)
-            , topButton = Nothing
-            }
+            liftPageWith LoginMsg
+                { title = [ text Login.title ]
+                , body = Login.view model
+                , topButton = Nothing
+                }
 
         CiphersModel model ->
-            { title = Ciphers.title model |> List.map (Html.map CiphersMsg)
-            , body = Ciphers.view model
-            , topButton =
-                Ciphers.menuConfig email model
-                    |> Navigation.mapMenuConfig CiphersMsg
-                    |> Navigation.MenuButton
-                    |> Just
-            }
+            liftPageWith CiphersMsg
+                { title = Ciphers.title model
+                , body = Ciphers.view model
+                , topButton =
+                    Ciphers.menuConfig email model
+                        |> Navigation.mapMenuConfig (CiphersMsg >> PageMsg)
+                        |> Navigation.MenuButton
+                        |> Just
+                }
 
         LoadingPage ->
             { title = []
@@ -161,16 +185,18 @@ showPage email page =
             }
 
         MasterPasswordModel model ->
-            { title = [ text MasterPassword.title ]
-            , body = MasterPassword.view model |> List.map (Html.map MasterPasswordMsg)
-            , topButton = Nothing
-            }
+            liftPageWith MasterPasswordMsg
+                { title = [ text MasterPassword.title ]
+                , body = MasterPassword.view model
+                , topButton = Nothing
+                }
 
         CipherModel model ->
-            { title = Cipher.title model
-            , body = Cipher.view model |> List.map (Html.map CipherMsg)
-            , topButton = Just simpleBackButton
-            }
+            liftPageWith CipherMsg
+                { title = Cipher.title model
+                , body = Cipher.view model
+                , topButton = Just simpleBackButton
+                }
 
         CaptchaModel model ->
             { title = [ text Captcha.title ]
@@ -179,22 +205,25 @@ showPage email page =
             }
 
         EditCipherModel model ->
-            { title = EditCipher.title model
-            , body = EditCipher.view model |> List.map (Html.map EditCipherMsg)
-            , topButton = Just (BackButton { action = PopView, icon = Just "close" })
-            }
+            liftPageWith EditCipherMsg
+                { title = EditCipher.title model
+                , body = EditCipher.view model
+                , topButton = Just (BackButton { action = PopView, icon = Just "close" })
+                }
 
         SecondFactorSelectModel model ->
-            { title = [ text SecondFactorSelect.title ]
-            , body = SecondFactorSelect.view model |> List.map (Html.map SecondFactorSelectMsg)
-            , topButton = Just simpleBackButton
-            }
+            liftPageWith SecondFactorSelectMsg
+                { title = [ text SecondFactorSelect.title ]
+                , body = SecondFactorSelect.view model
+                , topButton = Just simpleBackButton
+                }
 
         SecondFactorModel model ->
-            { title = [ SecondFactor.title model |> text ]
-            , body = [ SecondFactor.view model |> Html.map SecondFactorMsg ]
-            , topButton = Just simpleBackButton
-            }
+            liftPageWith SecondFactorMsg
+                { title = [ SecondFactor.title model |> text ]
+                , body = [ SecondFactor.view model ]
+                , topButton = Just simpleBackButton
+                }
 
 
 main : Program () Model Msg
@@ -322,7 +351,10 @@ view : Model -> Html Msg
 view model =
     div []
         (maybeList (List.head model.notifications) (Lazy.lazy2 Notification.notification CloseNotification)
-            ++ [ Lazy.lazy2 Navigation.showNavigationView model.pageStack (showPage (Maybe.withDefault "" model.userEmail)) ]
+            ++ [ Lazy.lazy2 Navigation.showNavigationView
+                    model.pageStack
+                    (showPage (Maybe.withDefault "" model.userEmail))
+               ]
         )
 
 
@@ -355,9 +387,6 @@ update msg model =
         keepStackWith : PageModel -> Model
         keepStackWith mdl =
             { model | pageStack = Nonempty.cons mdl model.pageStack }
-
-        currentPage =
-            model.pageStack |> Nonempty.head
     in
     case msg of
         RecieveMessage x ->
@@ -393,24 +422,6 @@ update msg model =
             ( keepStackWith <| LoadingPage
             , FFI.sendBridge (Bridge.Login data)
             )
-
-        LoginMsg imsg ->
-            case currentPage of
-                LoginModel page ->
-                    Login.update imsg page
-                        |> Tuple.mapFirst (LoginModel >> updatePageStackHead)
-
-                _ ->
-                    ( model, Cmd.none )
-
-        CiphersMsg imsg ->
-            case currentPage of
-                CiphersModel page ->
-                    Ciphers.update imsg page
-                        |> Tuple.mapFirst (CiphersModel >> updatePageStackHead)
-
-                _ ->
-                    ( model, Cmd.none )
 
         ShowLoginPage ->
             ( Login.init loginCallbacks |> LoginModel |> appendPageStack
@@ -475,33 +486,6 @@ update msg model =
 
         SendMasterPassword { password } ->
             ( appendPageStack <| LoadingPage, sendBridge (Bridge.SendMasterPassword password) )
-
-        MasterPasswordMsg imsg ->
-            case currentPage of
-                MasterPasswordModel page ->
-                    MasterPassword.update imsg page
-                        |> Tuple.mapFirst (MasterPasswordModel >> updatePageStackHead)
-
-                _ ->
-                    ( model, Cmd.none )
-
-        CipherMsg imsg ->
-            case currentPage of
-                CipherModel page ->
-                    Cipher.update imsg page
-                        |> Tuple.mapFirst (CipherModel >> updatePageStackHead)
-
-                _ ->
-                    ( model, Cmd.none )
-
-        EditCipherMsg imsg ->
-            case currentPage of
-                EditCipherModel page ->
-                    EditCipher.update imsg page
-                        |> Tuple.mapFirst (EditCipherModel >> updatePageStackHead)
-
-                _ ->
-                    ( model, Cmd.none )
 
         ShowCipherPage cipher ->
             Cipher.init cipherCallbacks cipher
@@ -680,20 +664,12 @@ update msg model =
         RequestTotp totp ->
             ( model, FFI.sendBridge (Bridge.RequestTotp totp) )
 
-        SecondFactorSelectMsg imsg ->
-            case currentPage of
-                SecondFactorSelectModel m ->
-                    SecondFactorSelect.update imsg m
-                        |> Tuple.mapFirst (SecondFactorSelectModel >> updatePageStackHead)
-
-                _ ->
-                    ( model, Cmd.none )
-
         ShowSecondFactorSelect secondFactors ->
-            SecondFactorSelect.init secondFactorSelectCallbacks secondFactors
-                |> Tuple.mapBoth
-                    (\pageModel -> appendPageStack <| SecondFactorSelectModel pageModel)
-                    (Cmd.map SecondFactorSelectMsg)
+            ( SecondFactorSelect.init secondFactorSelectCallbacks secondFactors
+                |> SecondFactorSelectModel
+                |> appendPageStack
+            , Cmd.none
+            )
 
         SelectSecondFactor { provider, requestFromServer } ->
             case Nonempty.toList model.pageStack |> findLoginDetails of
@@ -731,13 +707,37 @@ update msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
-        SecondFactorMsg imsg ->
-            case currentPage of
-                SecondFactorModel m ->
+        PageMsg pageMsg ->
+            case ( pageMsg, model.pageStack |> Nonempty.head ) of
+                ( SecondFactorMsg imsg, SecondFactorModel m ) ->
                     SecondFactor.update m imsg
                         |> Tuple.mapBoth
                             (SecondFactorModel >> updatePageStackHead)
                             (Maybe.map pureCmd >> Maybe.withDefault Cmd.none)
+
+                ( LoginMsg imsg, LoginModel page ) ->
+                    Login.update imsg page
+                        |> Tuple.mapFirst (LoginModel >> updatePageStackHead)
+
+                ( CiphersMsg imsg, CiphersModel page ) ->
+                    Ciphers.update imsg page
+                        |> Tuple.mapFirst (CiphersModel >> updatePageStackHead)
+
+                ( MasterPasswordMsg imsg, MasterPasswordModel page ) ->
+                    MasterPassword.update imsg page
+                        |> Tuple.mapFirst (MasterPasswordModel >> updatePageStackHead)
+
+                ( CipherMsg imsg, CipherModel page ) ->
+                    Cipher.update imsg page
+                        |> Tuple.mapFirst (CipherModel >> updatePageStackHead)
+
+                ( EditCipherMsg imsg, EditCipherModel page ) ->
+                    EditCipher.update imsg page
+                        |> Tuple.mapFirst (EditCipherModel >> updatePageStackHead)
+
+                ( SecondFactorSelectMsg imsg, SecondFactorSelectModel m ) ->
+                    SecondFactorSelect.update imsg m
+                        |> Tuple.mapFirst (SecondFactorSelectModel >> updatePageStackHead)
 
                 _ ->
                     ( model, Cmd.none )
@@ -761,7 +761,7 @@ ciphersCallbacks =
     { selected = RequestCipher
     , logOut = NeedsReset
     , createNewCipher = OpenNewCipherEditPage
-    , lift = CiphersMsg
+    , lift = CiphersMsg >> PageMsg
     }
 
 

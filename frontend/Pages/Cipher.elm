@@ -34,6 +34,7 @@ type Msg
     | ToggleCVVVisiblity
     | Copy String
     | Open String
+    | Edit Bridge.FullCipher
 
 
 type alias Callbacks msg =
@@ -73,10 +74,10 @@ event model ev =
             model
 
 
-title : Model emsg -> List (Html emsg)
-title { cipher, callbacks } =
+title : Model emsg -> List (Html Msg)
+title { cipher } =
     [ text cipher.name
-    , span [ Attr.class "u-float-right" ] [ iconButton "edit" (callbacks.edit cipher) ]
+    , span [ Attr.class "u-float-right" ] [ iconButton "edit" (Edit cipher) ]
     ]
 
 
@@ -116,6 +117,9 @@ update msg model =
 
         Open uri ->
             ( model, model.callbacks.open uri |> pureCmd )
+
+        Edit cipher ->
+            ( model, model.callbacks.edit cipher |> pureCmd )
 
 
 subscriptions : Model msg -> Sub msg
