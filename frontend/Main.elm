@@ -30,9 +30,7 @@ notificationLingerSeconds =
 
 
 type Msg
-    = Noop
-    | RecieveMessage String
-    | ShowLoginPage
+    = ShowLoginPage
     | ShowError String String
     | ShowInfo String String
     | CloseNotification
@@ -389,14 +387,6 @@ update msg model =
             { model | pageStack = Nonempty.cons mdl model.pageStack }
     in
     case msg of
-        RecieveMessage x ->
-            appendNotification
-                { title = "Got a message!"
-                , message = x
-                , severity = Notification.Info
-                }
-                model
-
         ShowError title err ->
             appendNotification
                 { title = title
@@ -522,9 +512,6 @@ update msg model =
 
         UpdateLastNotificatioTime time ->
             ( { model | lastNotificationTime = time }, Cmd.none )
-
-        Noop ->
-            ( model, Cmd.none )
 
         EditCipher cipher ->
             EditCipher.init { fullCipher = cipher, callbacks = editCipherCallbacks }
