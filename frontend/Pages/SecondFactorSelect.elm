@@ -10,9 +10,10 @@ module Pages.SecondFactorSelect exposing
     )
 
 import Bridge
-import Element
+import Element as El
+import Element.Font as Font
 import Element.Input as Input
-import Html exposing (..)
+import Html
 import Html.Attributes as Attr
 import Logic.SecondFactor exposing (secondFactorName)
 import Page exposing (..)
@@ -24,8 +25,7 @@ main =
     Page.page
         { init =
             init { selectFactor = always Nothing }
-                [ Bridge.Authenticator
-                , Bridge.Duo
+                [ Bridge.Duo
                 , Bridge.Email
                 ]
         , view = view
@@ -67,20 +67,97 @@ update msg model =
             ( model, model.callbacks.selectFactor factor |> pureCmd )
 
 
-view : Model emsg -> List (Html Msg)
+view : Model emsg -> List (Html.Html Msg)
 view { availableFactors } =
-    [ Element.layout []
-        (Element.column [ Element.centerX ]
-            (availableFactors
-                |> List.map
-                    (\factor ->
-                        Input.button [ Element.centerX ]
-                            { label =
-                                button [ Attr.class "p-button" ] [ secondFactorName factor |> text ]
-                                    |> Element.html
-                            , onPress = SelectFactor factor |> Just
-                            }
+    let
+        ( supportedProviders, unsupportedProviders ) =
+            List.partition providerIsSupported availableFactors
+    in
+    [ El.layout [ El.padding 8 ]
+        (El.column
+            [ El.width El.fill
+            , El.spacing 8
+            ]
+            ([ if List.isEmpty supportedProviders then
+                El.column []
+                    [ El.paragraph []
+                        [ El.text "Unfortunately, your account has no compatible 2FA providers."
+                        ]
+                    , El.el
+                        [ El.height (El.px 16)
+                        ]
+                        El.none
+                    ]
+
+               else
+                El.column [ El.centerX ]
+                    (supportedProviders
+                        |> List.map
+                            (\factor ->
+                                Input.button [ El.centerX ]
+                                    { label =
+                                        Html.button [ Attr.class "p-button" ] [ secondFactorName factor |> Html.text ]
+                                            |> El.html
+                                    , onPress = SelectFactor factor |> Just
+                                    }
+                            )
                     )
+             ]
+                ++ (if List.isEmpty unsupportedProviders |> not then
+                        [ Html.div
+                            [ Attr.class "p-notification--information"
+                            ]
+                            [ Html.div [ Attr.class "p-notification__content" ]
+                                [ Html.h5 [ Attr.class "p-notification__title" ]
+                                    [ Html.text "The following 2FA providers are not supported"
+                                    ]
+                                , Html.p [ Attr.class "notification__message" ]
+                                    [ Html.ul []
+                                        (List.map
+                                            (secondFactorName >> Html.text >> List.singleton >> Html.li [])
+                                            unsupportedProviders
+                                        )
+                                    ]
+                                ]
+                            ]
+                            |> El.html
+                            |> El.el
+                                [ Font.size 16
+                                , El.width El.fill
+                                ]
+                        ]
+
+                    else
+                        []
+                   )
             )
         )
     ]
+
+
+providerIsSupported : Bridge.TwoFactorProviderType -> Bool
+providerIsSupported provider =
+    case provider of
+        Bridge.Authenticator ->
+            True
+
+        Bridge.Duo ->
+            False
+
+        Bridge.Email ->
+            True
+
+        Bridge.OrganizationDuo ->
+            False
+
+        Bridge.Remember ->
+            False
+
+        Bridge.U2f ->
+            False
+
+        Bridge.WebAuthn ->
+            False
+
+        Bridge.Yubikey ->
+            False
