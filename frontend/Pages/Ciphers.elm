@@ -1,4 +1,4 @@
-module Pages.Ciphers exposing (Callbacks, Model, Msg, menuConfig, page)
+module Pages.Ciphers exposing (Callbacks, Model, Msg, event, init, menuConfig, title, update, view)
 
 import Bridge
 import GlobalEvents
@@ -14,7 +14,7 @@ import Search
 import Utils exposing (..)
 
 
-type alias Model =
+type alias Model emsg =
     { ciphers : Bridge.Sub_LoadCiphers_List
     , search : String
     , menuVisible : Bool
@@ -22,6 +22,7 @@ type alias Model =
     , scroll : InfiniteScroll.Model Msg
     , sublist : { end : Int }
     , cipherSelectDropdownVisivble : Bool
+    , callbacks : Callbacks emsg
     }
 
 
@@ -40,7 +41,7 @@ applyCipherFilter filter list =
             list |> List.filter (.cipherType >> (==) t)
 
 
-menuConfig : String -> Model -> Navigation.MenuConfig Msg
+menuConfig : String -> Model emsg -> Navigation.MenuConfig Msg
 menuConfig email { ciphersListFilter, menuVisible } =
     { title = email
     , items =
@@ -86,139 +87,135 @@ type Msg
     | InfiniteScrollMsg InfiniteScroll.Msg
     | CreateNewCipher Bridge.CipherType
     | ToggleSelectCipherTypeVisible
+    | SelectCipher String
 
 
 type alias Callbacks msg =
     { selected : String -> msg
     , logOut : msg
     , createNewCipher : Bridge.CipherType -> msg
+    , lift : Msg -> msg
     }
 
 
-page : Callbacks emsg -> Page Bridge.Sub_LoadCiphers_List Model Msg emsg
-page callbacks liftMsg =
-    { init = \ciphers -> Tuple.mapSecond (Cmd.map liftMsg) (init ciphers)
-    , view = view callbacks liftMsg
-    , update = \msg model -> update callbacks liftMsg msg model
-    , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title =
-        \{ ciphersListFilter, cipherSelectDropdownVisivble } ->
-            [ text
-                (case ciphersListFilter of
-                    AllCiphers ->
-                        "All items"
+event : Model emsg -> GlobalEvents.Event -> Model emsg
+event model ev =
+    case ev of
+        GlobalEvents.UpdateCipher c ->
+            { model
+                | ciphers =
+                    model.ciphers
+                        |> List.map
+                            (\cipher ->
+                                if cipher.id == c.id then
+                                    { cipher | name = c.name }
 
-                    SpecificCiphers cipherType ->
-                        case cipherType of
-                            Bridge.CardType ->
-                                "Cards"
+                                else
+                                    cipher
+                            )
+            }
 
-                            Bridge.IdentityType ->
-                                "Identities"
+        _ ->
+            model
 
-                            Bridge.LoginType ->
-                                "Passwords"
 
-                            Bridge.NoteType ->
-                                "Notes"
-                )
-            , span [ Attr.class "u-float-right" ]
-                [ span [ Attr.class "p-contextual-menu" ]
-                    ([ span [] [ iconButton "plus" (liftMsg ToggleSelectCipherTypeVisible) ]
-                     ]
-                        ++ optionals cipherSelectDropdownVisivble
-                            [ div
-                                [ Attr.class "overlay"
-                                , Ev.onClick (liftMsg ToggleSelectCipherTypeVisible)
-                                ]
-                                []
-                            , span
-                                [ Attr.class "p-contextual-menu__dropdown"
-                                , Attr.attribute "aria-hidden" "false"
-                                ]
-                                (let
-                                    create t =
-                                        liftMsg (CreateNewCipher t)
-                                 in
-                                 [ button
-                                    [ Attr.class "p-contextual-menu__link"
-                                    , Ev.onClick (create Bridge.LoginType)
-                                    ]
-                                    [ text "Login" ]
-                                 , button
-                                    [ Attr.class "p-contextual-menu__link"
-                                    , Ev.onClick (create Bridge.CardType)
-                                    ]
-                                    [ text "Card" ]
-                                 , button
-                                    [ Attr.class "p-contextual-menu__link"
-                                    , Ev.onClick (create Bridge.NoteType)
-                                    ]
-                                    [ text "Note" ]
-                                 , button
-                                    [ Attr.class "p-contextual-menu__link"
-                                    , Ev.onClick (create Bridge.IdentityType)
-                                    ]
-                                    [ text "Contact" ]
-                                 ]
-                                )
+title : Model emsg -> List (Html Msg)
+title { ciphersListFilter, cipherSelectDropdownVisivble } =
+    [ text
+        (case ciphersListFilter of
+            AllCiphers ->
+                "All items"
+
+            SpecificCiphers cipherType ->
+                case cipherType of
+                    Bridge.CardType ->
+                        "Cards"
+
+                    Bridge.IdentityType ->
+                        "Identities"
+
+                    Bridge.LoginType ->
+                        "Passwords"
+
+                    Bridge.NoteType ->
+                        "Notes"
+        )
+    , span [ Attr.class "u-float-right" ]
+        [ span [ Attr.class "p-contextual-menu" ]
+            ([ span [] [ iconButton "plus" ToggleSelectCipherTypeVisible ]
+             ]
+                ++ optionals cipherSelectDropdownVisivble
+                    [ div
+                        [ Attr.class "overlay"
+                        , Ev.onClick ToggleSelectCipherTypeVisible
+                        ]
+                        []
+                    , span
+                        [ Attr.class "p-contextual-menu__dropdown"
+                        , Attr.attribute "aria-hidden" "false"
+                        ]
+                        (let
+                            create t =
+                                CreateNewCipher t
+                         in
+                         [ button
+                            [ Attr.class "p-contextual-menu__link"
+                            , Ev.onClick (create Bridge.LoginType)
                             ]
-                    )
-                ]
-            ]
-    , event =
-        \model ev ->
-            case ev of
-                GlobalEvents.UpdateCipher c ->
-                    { model
-                        | ciphers =
-                            model.ciphers
-                                |> List.map
-                                    (\cipher ->
-                                        if cipher.id == c.id then
-                                            { cipher | name = c.name }
+                            [ text "Login" ]
+                         , button
+                            [ Attr.class "p-contextual-menu__link"
+                            , Ev.onClick (create Bridge.CardType)
+                            ]
+                            [ text "Card" ]
+                         , button
+                            [ Attr.class "p-contextual-menu__link"
+                            , Ev.onClick (create Bridge.NoteType)
+                            ]
+                            [ text "Note" ]
+                         , button
+                            [ Attr.class "p-contextual-menu__link"
+                            , Ev.onClick (create Bridge.IdentityType)
+                            ]
+                            [ text "Contact" ]
+                         ]
+                        )
+                    ]
+            )
+        ]
+    ]
 
-                                        else
-                                            cipher
-                                    )
-                    }
 
-                _ ->
-                    model
+init : Callbacks emsg -> Bridge.Sub_LoadCiphers_List -> Model emsg
+init callbacks ciphers =
+    { ciphers = ciphers
+    , search = ""
+    , menuVisible = False
+    , ciphersListFilter = AllCiphers
+    , scroll = InfiniteScroll.init (LoadMore >> pureCmd)
+    , sublist = { end = 20 }
+    , cipherSelectDropdownVisivble = False
+    , callbacks = callbacks
     }
 
 
-init : Bridge.Sub_LoadCiphers_List -> ( Model, Cmd Msg )
-init ciphers =
-    ( { ciphers = ciphers
-      , search = ""
-      , menuVisible = False
-      , ciphersListFilter = AllCiphers
-      , scroll = InfiniteScroll.init (LoadMore >> pureCmd)
-      , sublist = { end = 20 }
-      , cipherSelectDropdownVisivble = False
-      }
-    , Cmd.none
-    )
-
-
-update : Callbacks emsg -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update { logOut, createNewCipher } liftMsg msg model =
+update : Msg -> Model emsg -> ( Model emsg, Cmd emsg )
+update msg model =
     case msg of
         Noop ->
-            ( Ok model, Cmd.none )
+            ( model, Cmd.none )
 
         UpdateSearch s ->
-            ( Ok { model | search = s }, Cmd.none )
+            ( { model | search = s }, Cmd.none )
 
         ToggleMenu ->
-            ( Ok { model | menuVisible = not model.menuVisible }, Cmd.none )
+            ( { model | menuVisible = not model.menuVisible }, Cmd.none )
 
         UpdateFilter filter ->
-            ( Ok { model | ciphersListFilter = filter, menuVisible = False }, Cmd.none )
+            ( { model | ciphersListFilter = filter, menuVisible = False }, Cmd.none )
 
         LogOut ->
-            ( Ok model, pureCmd logOut )
+            ( model, pureCmd model.callbacks.logOut )
 
         LoadMore direction ->
             let
@@ -230,53 +227,51 @@ update { logOut, createNewCipher } liftMsg msg model =
                         InfiniteScroll.Bottom ->
                             { end = min (model.sublist.end + 10) (List.length model.ciphers) }
             in
-            ( Ok { model | sublist = newSublist, scroll = InfiniteScroll.stopLoading model.scroll }, Cmd.none )
+            ( { model | sublist = newSublist, scroll = InfiniteScroll.stopLoading model.scroll }, Cmd.none )
 
         InfiniteScrollMsg msg_ ->
             let
                 ( scroll, cmd ) =
                     InfiniteScroll.update InfiniteScrollMsg msg_ model.scroll
             in
-            ( Ok { model | scroll = scroll }, Cmd.map liftMsg cmd )
+            ( { model | scroll = scroll }, Cmd.map model.callbacks.lift cmd )
 
         CreateNewCipher t ->
-            ( Ok { model | cipherSelectDropdownVisivble = False }, pureCmd (createNewCipher t) )
+            ( { model | cipherSelectDropdownVisivble = False }, pureCmd (model.callbacks.createNewCipher t) )
 
         ToggleSelectCipherTypeVisible ->
-            ( Ok { model | cipherSelectDropdownVisivble = not model.cipherSelectDropdownVisivble }
+            ( { model | cipherSelectDropdownVisivble = not model.cipherSelectDropdownVisivble }
             , Cmd.none
             )
 
-
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+        SelectCipher id ->
+            ( model, model.callbacks.selected id |> pureCmd )
 
 
-view : Callbacks emsg -> (Msg -> emsg) -> Model -> List (Html emsg)
-view { selected } liftMsg { ciphers, search, ciphersListFilter, sublist } =
+view : Model emsg -> List (Html Msg)
+view { ciphers, search, ciphersListFilter, sublist } =
     [ input
         [ Attr.type_ "search"
         , Attr.value search
-        , Ev.onInput (liftMsg << UpdateSearch)
+        , Ev.onInput UpdateSearch
         , Attr.placeholder "Search"
         , Attr.attribute "autocomplete" "off"
         ]
         []
     , ciphers
         |> applyCipherFilter ciphersListFilter
-        |> Search.searchList search .name (List.take sublist.end >> Lazy.lazy3 showCiphers liftMsg selected)
+        |> Search.searchList search .name (List.take sublist.end >> Lazy.lazy showCiphers)
     ]
 
 
-showCiphers : (Msg -> msg) -> (String -> msg) -> Bridge.Sub_LoadCiphers_List -> Html msg
-showCiphers liftMsg selected ciphers =
-    Keyed.ul [ Attr.class "p-list--divided", InfiniteScroll.infiniteScroll (InfiniteScrollMsg >> liftMsg), Attr.class "ciphers-list no-scroll-bar" ]
+showCiphers : Bridge.Sub_LoadCiphers_List -> Html Msg
+showCiphers ciphers =
+    Keyed.ul [ Attr.class "p-list--divided", InfiniteScroll.infiniteScroll InfiniteScrollMsg, Attr.class "ciphers-list no-scroll-bar" ]
         (ciphers
             |> List.map
                 (\{ name, date, id } ->
                     ( id
-                    , li [ Attr.class "p-list__item cipher-row", Ev.onClick (selected id) ]
+                    , li [ Attr.class "p-list__item cipher-row", Ev.onClick (SelectCipher id) ]
                         [ div [ Attr.class "cipher-row-container" ]
                             [ p [] [ text name ]
                             , p [ Attr.class "p-text--small u-align-text--right u-text--muted" ] [ text date ]

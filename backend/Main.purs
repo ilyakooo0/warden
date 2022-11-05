@@ -5,11 +5,12 @@ module Main
 import Prelude
 import BW (ApiService, CryptoFunctions, Services, CryptoService)
 import BW as WB
-import BW.Logic (decodeCipher, decrypt, encodeCipher, hashPassword, liftPromise)
+import BW.Logic (bwPasswordStringHash, decodeCipher, decrypt, encodeCipher, hashPassword, liftPromise)
 import BW.Logic as Logic
-import BW.Types (CipherResponse, Email(..), Password(..), Urls, SyncResponse, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote)
+import BW.Types (CipherResponse, Email(..), Password(..), TwoFactorProviderTypes(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote, secondFactorTypeToBridge)
 import Bridge as Bridge
 import Control.Monad.Error.Class (catchError, throwError)
+import Control.Monad.Error.Class as Error
 import Data.Argonaut (class DecodeJson)
 import Data.Array as Array
 import Data.Clipboard as Clipboard
@@ -104,8 +105,10 @@ main = do
               runReaderAt (Proxy :: _ "key") key $ act
             Nothing -> requestMasterPassword
   Elm.subscribe app \cmd -> case cmd of
-    Bridge.Login (Bridge.Cmd_Login { email, server, password }) -> do
-      captchaToken <- Ref.read hCaptchaTokenRef
+    Bridge.Login (Bridge.Cmd_Login { email: email', server, password, secondFactor }) -> do
+      let
+        email = Email email'
+      captchaResponse <- Ref.read hCaptchaTokenRef
       Ref.write Nothing hCaptchaTokenRef
       let
         urls = baseUrl server
@@ -119,15 +122,21 @@ main = do
                   ( do
                       resp <-
                         runBaseAff' $ run $ runReaderAt (Proxy :: _ "api") unauthedApi
-                          $ Logic.getLogInRequestToken prelogin (Email email) (Password password) captchaToken
+                          $ Logic.getLogInRequestToken
+                              { prelogin
+                              , email
+                              , password: Password password
+                              , captchaResponse
+                              , secondFactor
+                              }
                       pure $ Right resp
                   )
                   (const $ pure $ Left unit)
-          case map toEither1 loginResponse of
+          case map (toEither1 >>> map toEither1) $ loginResponse of
             Left _ -> send Bridge.WrongPassword
             Right (Left { siteKey }) -> send $ Bridge.NeedsCaptcha siteKey
-            Right (Right token) -> do
-              masterKey <- Logic.makePreloginKey prelogin (Email email) (Password password)
+            Right (Right (Right token)) -> do
+              masterKey <- Logic.makePreloginKey prelogin email (Password password)
               api <- liftPromise $ services.getApi urls (nullify token)
               sync <- liftPromise $ api.getSync unit
               hash <- hashPassword (Password password)
@@ -140,6 +149,21 @@ main = do
                 Storage.store storage SyncKey sync
                 Storage.store storage TokenKey token
               send Bridge.LoginSuccessful
+            Right (Right (Left { twoFactorProviders: TwoFactorProviderTypes rawProviders, captchaToken })) -> do
+              case toEither1 captchaToken of
+                Left captchaTokenString ->
+                  liftEffect
+                    $ Ref.write (Just captchaTokenString) hCaptchaTokenRef
+                Right _ -> pure unit
+              providers <-
+                liftEffect
+                  $ traverse
+                      ( \x ->
+                          secondFactorTypeToBridge x
+                            # Error.liftMaybe (error $ "Unknown second factor provider: " <> show x)
+                      )
+                      rawProviders
+              send $ Bridge.NeedsSecondFactor $ Bridge.Sub_NeedsSecondFactor_List providers
     Bridge.NeedCiphersList ->
       runWithDecryptionKey do
         sendCiphers
@@ -224,6 +248,26 @@ main = do
               { interval, code, source: totp
               }
         pure unit
+    Bridge.ChooseSecondFactor
+      ( Bridge.Cmd_ChooseSecondFactor
+        { email: email', factor, server, password, requestFromServer
+      }
+    ) ->
+      when requestFromServer
+        let
+          email = Email email'
+        in
+          case factor of
+            Bridge.Email ->
+              runAff do
+                let
+                  urls = baseUrl server
+                unauthedApi <- liftPromise $ services.getApi urls jnull
+                prelogin <- liftPromise $ unauthedApi.postPrelogin { email }
+                masterPasswordHash <- bwPasswordStringHash prelogin email (Password password)
+                liftPromise $ unauthedApi.postTwoFactorEmail { email, masterPasswordHash }
+                pure unit
+            _ -> pure unit
 
 processCipher ::
   forall r.

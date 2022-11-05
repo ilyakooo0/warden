@@ -73,7 +73,11 @@ export function getServices() {
             req.email,
             req.masterPasswordHash,
             req.captchaResponse,
-            new TokenRequestTwoFactor(req.twoFactor),
+            new TokenRequestTwoFactor(
+              req.twoFactor.provider,
+              req.twoFactor.token,
+              req.twoFactor.remember
+            ),
             req.device
           )
         ),
@@ -81,6 +85,7 @@ export function getServices() {
         postCipherCreate: (cipher) => api.postCipherCreate(makeCipherCreateRequest(cipher)),
         putCipher: (cipher) => api.putCipher(cipher.id, makeCipherRequest(cipher)),
         deleteCipher: (id) => api.deleteCipher(id),
+        postTwoFactorEmail: (req) => api.postTwoFactorEmail(req),
       }
     },
     crypto: bg.cryptoService,

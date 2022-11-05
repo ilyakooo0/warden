@@ -2,11 +2,21 @@ module BW.Types where
 
 import Prelude
 
+import Bridge as Bridge
 import Data.Argonaut (class DecodeJson, class EncodeJson)
 import Data.JNullable (JNullable)
 import Data.JOpt (JOpt)
+import Data.Maybe (Maybe(..))
 import Data.ShowableJson (ShowableJson)
 import Data.Timestamp (Timestamp)
+import Data.Traversable (traverse)
+import Foreign (Foreign)
+import Foreign as Foreign
+import Foreign.Object (Object)
+import Literals.Undefined (Undefined)
+import Type.Prelude (Proxy(..))
+import Untagged.TypeCheck (class HasRuntimeType, hasRuntimeType)
+import Untagged.Union (type (|+|))
 
 newtype EncryptedString
   = EncryptedString String
@@ -28,7 +38,7 @@ type PreloginResponse
     }
 
 type PreloginRequest
-  = { email :: String
+  = { email :: Email
     }
 
 type ProfileResponse
@@ -307,6 +317,38 @@ twoFactorProviderTypeWebAuthn = 7 :: TwoFactorProviderType
 type TwoFactorProviderType
   = Int
 
+secondFactorTypeToBridge ::
+  TwoFactorProviderType ->
+  Maybe Bridge.TwoFactorProviderType
+secondFactorTypeToBridge x = case x of
+  n
+    | n == twoFactorProviderTypeAuthenticator -> Just Bridge.Authenticator
+  n
+    | n == twoFactorProviderTypeEmail -> Just Bridge.Email
+  n
+    | n == twoFactorProviderTypeDuo -> Just Bridge.Duo
+  n
+    | n == twoFactorProviderTypeYubikey -> Just Bridge.Yubikey
+  n
+    | n == twoFactorProviderTypeU2f -> Just Bridge.U2f
+  n
+    | n == twoFactorProviderTypeRemember -> Just Bridge.Remember
+  n
+    | n == twoFactorProviderTypeOrganizationDuo -> Just Bridge.OrganizationDuo
+  n
+    | n == twoFactorProviderTypeWebAuthn -> Just Bridge.WebAuthn
+  _ -> Nothing
+
+bridgeToSecondFactorType :: Bridge.TwoFactorProviderType -> TwoFactorProviderType
+bridgeToSecondFactorType Bridge.Authenticator = twoFactorProviderTypeAuthenticator
+bridgeToSecondFactorType Bridge.Email = twoFactorProviderTypeEmail
+bridgeToSecondFactorType Bridge.Duo = twoFactorProviderTypeDuo
+bridgeToSecondFactorType Bridge.Yubikey = twoFactorProviderTypeYubikey
+bridgeToSecondFactorType Bridge.U2f = twoFactorProviderTypeU2f
+bridgeToSecondFactorType Bridge.Remember = twoFactorProviderTypeRemember
+bridgeToSecondFactorType Bridge.OrganizationDuo = twoFactorProviderTypeOrganizationDuo
+bridgeToSecondFactorType Bridge.WebAuthn = twoFactorProviderTypeWebAuthn
+
 newtype Password
   = Password String
 
@@ -357,6 +399,18 @@ type IdentityTokenResponse
     , apiUseKeyConnector :: JNullable Boolean
     , keyConnectorUrl :: JNullable String
     }
+
+newtype TwoFactorProviderTypes = TwoFactorProviderTypes (Array TwoFactorProviderType)
+
+instance HasRuntimeType TwoFactorProviderTypes where
+  hasRuntimeType Proxy = Foreign.isArray
+
+type IdentityTwoFactorResponse =
+  { twoFactorProviders :: TwoFactorProviderTypes
+  -- it is a Map type and untaged unions gets confused
+  -- , twoFactorProviders2 :: Object (Object String)
+  , captchaToken :: String |+| Undefined
+  }
 
 newtype Email
   = Email String
@@ -669,3 +723,8 @@ type SendTextApi
   = { text :: JNullable String
     , hidden :: Boolean
     }
+
+type TwoFactorEmailRequest =
+  { email :: Email
+  , masterPasswordHash :: StringHash
+  }

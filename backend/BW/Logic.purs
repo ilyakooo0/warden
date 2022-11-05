@@ -12,7 +12,7 @@ import Data.Function.Uncurried (runFn2, runFn3, runFn4)
 import Data.JNullable (JNullable, fromJNullable, jnull, nullify)
 import Data.JNullable as JNullable
 import Data.JOpt (JOpt(..), fromJOpt)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Newtype (class Newtype, unwrap, wrap)
 import Data.String as String
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
@@ -80,10 +80,12 @@ makeDecryptionKey masterKey str = do
 
 getLogInRequestToken ::
   forall r.
-  PreloginResponse ->
-  Email ->
-  Password ->
-  Maybe String ->
+  { prelogin :: PreloginResponse
+  , email :: Email
+  , password :: Password
+  , captchaResponse :: Maybe String
+  , secondFactor :: Bridge.Cmd_Login_secondFactor_Maybe
+  } ->
   Run
     ( api :: Reader ApiService
     , crypto :: Reader CryptoService
@@ -91,25 +93,32 @@ getLogInRequestToken ::
     , aff :: Aff
     | r
     )
-    (IdentityCaptchaResponse |+| IdentityTokenResponse)
-getLogInRequestToken prelogin email password captchaResponse = do
-  key <- makePreloginKey prelogin email password
-  crypto <- askAt (Proxy :: _ "crypto")
+    (IdentityCaptchaResponse |+| IdentityTwoFactorResponse |+| IdentityTokenResponse)
+getLogInRequestToken { prelogin
+, email
+, password
+, captchaResponse
+, secondFactor: Bridge.Cmd_Login_secondFactor_Maybe secondFactor
+} = do
+  let
+    twoFactor =
+      maybe
+        { provider: twoFactorProviderTypeEmail
+        , token: ""
+        , remember: false
+        }
+        ( \(Bridge.Cmd_Login_secondFactor x@{ provider }) ->
+            x { provider = bridgeToSecondFactorType provider }
+        )
+        secondFactor
+  StringHash hashedPassword <- bwPasswordStringHash prelogin email password
   api :: ApiService <- askAt (Proxy :: _ "api")
-  _localHashedPassword <-
-    liftPromise
-      $ runFn3 crypto.hashPassword password key (nullify hashPurposeLocalAuthorization)
-  StringHash hashedPassword <- liftPromise $ runFn3 crypto.hashPassword password key jnull
   liftPromise
     $ api.postIdentityToken
         { email: email
         , masterPasswordHash: hashedPassword
         , captchaResponse: fromMaybe "" captchaResponse
-        , twoFactor:
-            { provider: twoFactorProviderTypeEmail
-            , token: ""
-            , remember: false
-            }
+        , twoFactor
         , device:
             { type: deviceTypeUnknownBrowser
             , name: "Temporary device name"
@@ -117,6 +126,26 @@ getLogInRequestToken prelogin email password captchaResponse = do
             , pushToken: jnull
             }
         }
+
+bwPasswordStringHash ::
+  forall r.
+  PreloginResponse ->
+  Email ->
+  Password ->
+  Run
+    ( crypto :: Reader CryptoService
+    , effect :: Effect
+    , aff :: Aff
+    | r
+    )
+    StringHash
+bwPasswordStringHash prelogin email password = do
+  key <- makePreloginKey prelogin email password
+  crypto <- askAt (Proxy :: _ "crypto")
+  _localHashedPassword <-
+    liftPromise
+      $ runFn3 crypto.hashPassword password key (nullify hashPurposeLocalAuthorization)
+  liftPromise $ runFn3 crypto.hashPassword password key jnull
 
 hashPassword ::
   forall r.
@@ -164,7 +193,7 @@ encrypt input = do
   key <- askAt (Proxy :: _ "key")
   map EncString.toString $ liftPromise $ runFn2 crypto.encrypt input key
 
-liftPromise ∷ forall m a. MonadAff m ⇒ Promise a → m a
+liftPromise :: forall m a. MonadAff m => Promise a -> m a
 liftPromise = liftAff <<< Promise.toAff
 
 encodeCipher ::

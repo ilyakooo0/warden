@@ -443,10 +443,57 @@ derive instance genericCipherType :: Generic CipherType _
 derive instance eqCipherType :: Eq CipherType
 derive instance ordCipherType :: Ord CipherType
 
+newtype Cmd_ChooseSecondFactor =
+    Cmd_ChooseSecondFactor {
+      email :: String
+    , factor :: TwoFactorProviderType
+    , password :: String
+    , requestFromServer :: Boolean
+    , server :: String
+    }
+
+derive instance newtypeCmd_ChooseSecondFactor :: Newtype Cmd_ChooseSecondFactor _
+instance encodeJsonCmd_ChooseSecondFactor :: EncodeJson Cmd_ChooseSecondFactor where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCmd_ChooseSecondFactor :: DecodeJson Cmd_ChooseSecondFactor where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCmd_ChooseSecondFactor :: Generic Cmd_ChooseSecondFactor _
+derive instance eqCmd_ChooseSecondFactor :: Eq Cmd_ChooseSecondFactor
+derive instance ordCmd_ChooseSecondFactor :: Ord Cmd_ChooseSecondFactor
+
+newtype Cmd_Login_secondFactor =
+    Cmd_Login_secondFactor {
+      provider :: TwoFactorProviderType
+    , remember :: Boolean
+    , token :: String
+    }
+
+derive instance newtypeCmd_Login_secondFactor :: Newtype Cmd_Login_secondFactor _
+instance encodeJsonCmd_Login_secondFactor :: EncodeJson Cmd_Login_secondFactor where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCmd_Login_secondFactor :: DecodeJson Cmd_Login_secondFactor where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCmd_Login_secondFactor :: Generic Cmd_Login_secondFactor _
+derive instance eqCmd_Login_secondFactor :: Eq Cmd_Login_secondFactor
+derive instance ordCmd_Login_secondFactor :: Ord Cmd_Login_secondFactor
+
+newtype Cmd_Login_secondFactor_Maybe =
+    Cmd_Login_secondFactor_Maybe (Maybe Cmd_Login_secondFactor)
+
+derive instance newtypeCmd_Login_secondFactor_Maybe :: Newtype Cmd_Login_secondFactor_Maybe _
+instance encodeJsonCmd_Login_secondFactor_Maybe :: EncodeJson Cmd_Login_secondFactor_Maybe where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonCmd_Login_secondFactor_Maybe :: DecodeJson Cmd_Login_secondFactor_Maybe where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericCmd_Login_secondFactor_Maybe :: Generic Cmd_Login_secondFactor_Maybe _
+derive instance eqCmd_Login_secondFactor_Maybe :: Eq Cmd_Login_secondFactor_Maybe
+derive instance ordCmd_Login_secondFactor_Maybe :: Ord Cmd_Login_secondFactor_Maybe
+
 newtype Cmd_Login =
     Cmd_Login {
       email :: String
     , password :: String
+    , secondFactor :: Cmd_Login_secondFactor_Maybe
     , server :: String
     }
 
@@ -460,7 +507,8 @@ derive instance eqCmd_Login :: Eq Cmd_Login
 derive instance ordCmd_Login :: Ord Cmd_Login
 
 data Cmd =
-    Copy String
+    ChooseSecondFactor Cmd_ChooseSecondFactor
+  | Copy String
   | CreateCipher FullCipher
   | DeleteCipher FullCipher
   | GeneratePassword PasswordGeneratorConfig
@@ -573,6 +621,18 @@ derive instance genericSub_NeedsMasterPassword :: Generic Sub_NeedsMasterPasswor
 derive instance eqSub_NeedsMasterPassword :: Eq Sub_NeedsMasterPassword
 derive instance ordSub_NeedsMasterPassword :: Ord Sub_NeedsMasterPassword
 
+newtype Sub_NeedsSecondFactor_List =
+    Sub_NeedsSecondFactor_List (Array TwoFactorProviderType)
+
+derive instance newtypeSub_NeedsSecondFactor_List :: Newtype Sub_NeedsSecondFactor_List _
+instance encodeJsonSub_NeedsSecondFactor_List :: EncodeJson Sub_NeedsSecondFactor_List where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonSub_NeedsSecondFactor_List :: DecodeJson Sub_NeedsSecondFactor_List where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericSub_NeedsSecondFactor_List :: Generic Sub_NeedsSecondFactor_List _
+derive instance eqSub_NeedsSecondFactor_List :: Eq Sub_NeedsSecondFactor_List
+derive instance ordSub_NeedsSecondFactor_List :: Ord Sub_NeedsSecondFactor_List
+
 newtype Sub_Totp =
     Sub_Totp {
       code :: String
@@ -601,6 +661,7 @@ data Sub =
   | NeedsCaptcha String
   | NeedsLogin
   | NeedsMasterPassword Sub_NeedsMasterPassword
+  | NeedsSecondFactor Sub_NeedsSecondFactor_List
   | RecieveEmail String
   | Reset
   | Totp Sub_Totp
@@ -613,4 +674,22 @@ instance decodeJsonSub :: DecodeJson Sub where
 derive instance genericSub :: Generic Sub _
 derive instance eqSub :: Eq Sub
 derive instance ordSub :: Ord Sub
+
+data TwoFactorProviderType =
+    Authenticator
+  | Duo
+  | Email
+  | OrganizationDuo
+  | Remember
+  | U2f
+  | WebAuthn
+  | Yubikey
+
+instance encodeJsonTwoFactorProviderType :: EncodeJson TwoFactorProviderType where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonTwoFactorProviderType :: DecodeJson TwoFactorProviderType where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericTwoFactorProviderType :: Generic TwoFactorProviderType _
+derive instance eqTwoFactorProviderType :: Eq TwoFactorProviderType
+derive instance ordTwoFactorProviderType :: Ord TwoFactorProviderType
 

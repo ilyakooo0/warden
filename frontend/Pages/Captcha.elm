@@ -1,4 +1,4 @@
-module Pages.Captcha exposing (Callbacks, HCaptchSiteKey, Model, Msg, page)
+module Pages.Captcha exposing (HCaptchSiteKey, Model, init, title, view)
 
 import Html exposing (..)
 import Html.Attributes as Attr
@@ -15,43 +15,17 @@ type alias Model =
     }
 
 
-type Msg
-    = Noop
+title : String
+title =
+    "Captcha"
 
 
-type alias Callbacks =
-    {}
-
-
-page : Callbacks -> Page HCaptchSiteKey Model Msg emsg
-page callbacks liftMsg =
-    { init = \siteKey -> Tuple.mapSecond (Cmd.map liftMsg) (init siteKey)
-    , view = \model -> view model |> List.map (Html.map liftMsg)
-    , update = \msg model -> update callbacks liftMsg msg model
-    , subscriptions = \model -> subscriptions model |> Sub.map liftMsg
-    , title = always [ text "Captcha" ]
-    , event = \model _ -> model
-    }
-
-
-init : HCaptchSiteKey -> ( Model, Cmd Msg )
+init : HCaptchSiteKey -> Model
 init siteKey =
-    ( { siteKey = siteKey }, Cmd.none )
+    { siteKey = siteKey }
 
 
-update : Callbacks -> (Msg -> emsg) -> Msg -> Model -> ( Result String Model, Cmd emsg )
-update _ _ msg model =
-    case msg of
-        Noop ->
-            ( Ok model, Cmd.none )
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
-
-
-view : Model -> List (Html Msg)
+view : Model -> List (Html msg)
 view { siteKey } =
     [ div [ Attr.class "u-embedded-media" ]
         [ iframe [ Attr.src ("https://iko.soy/warden/hcaptcha.html?" ++ siteKey) ] [] ]

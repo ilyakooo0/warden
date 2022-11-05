@@ -1,136 +1,158 @@
 Sub:
-- NeedsLogin
-- NeedsCaptcha: String
-- CaptchaDone
-- Error: String
-- LoadCiphers:
-    List:
+  - NeedsLogin
+  - NeedsCaptcha: String
+  - NeedsSecondFactor: { List: TwoFactorProviderType }
+  - CaptchaDone
+  - Error: String
+  - LoadCiphers:
+      List:
         name: String
         date: String
         id: String
         cipherType: CipherType
-- LoginSuccessful
-- WrongPassword
-- NeedsMasterPassword:
-    server: String
-    login: String
-- Reset
-- LoadCipher: FullCipher
-- RecieveEmail: String
-- CipherChanged: FullCipher
-- GeneratedPassword: String
-- CipherDeleted: FullCipher
-- Totp:
-    source: String
-    code: String
-    interval: Int
+  - LoginSuccessful
+  - WrongPassword
+  - NeedsMasterPassword:
+      server: String
+      login: String
+  - Reset
+  - LoadCipher: FullCipher
+  - RecieveEmail: String
+  - CipherChanged: FullCipher
+  - GeneratedPassword: String
+  - CipherDeleted: FullCipher
+  - Totp:
+      source: String
+      code: String
+      interval: Int
 
 Cmd:
-- Init
-- Login:
-    email: String
-    server: String
-    password: String
-- NeedCiphersList
-- SendMasterPassword: String
-- NeedsReset
-- RequestCipher: String
-- NeedEmail
-- Copy: String
-- Open: String
-- UpdateCipher: FullCipher
-- CreateCipher: FullCipher
-- GeneratePassword: PasswordGeneratorConfig
-- DeleteCipher: FullCipher
-- RequestTotp: String
+  - Init
+  - Login:
+      email: String
+      server: String
+      password: String
+      secondFactor:
+        Maybe:
+          provider: TwoFactorProviderType
+          token: String
+          remember: Bool
+  - ChooseSecondFactor:
+      factor: TwoFactorProviderType
+      email: String
+      server: String
+      password: String
+      requestFromServer: Bool
+  - NeedCiphersList
+  - SendMasterPassword: String
+  - NeedsReset
+  - RequestCipher: String
+  - NeedEmail
+  - Copy: String
+  - Open: String
+  - UpdateCipher: FullCipher
+  - CreateCipher: FullCipher
+  - GeneratePassword: PasswordGeneratorConfig
+  - DeleteCipher: FullCipher
+  - RequestTotp: String
 
 FullCipher:
-    reprompt: Int
-    favorite: Bool
-    id: String
-    name: String
-    cipher: Cipher
+  reprompt: Int
+  favorite: Bool
+  id: String
+  name: String
+  cipher: Cipher
 
 Cipher:
-- LoginCipher:
-    uris: {List: String}
-    username:
+  - LoginCipher:
+      uris: { List: String }
+      username:
         Maybe: String
-    password:
+      password:
         Maybe: String
-    totp:
+      totp:
         Maybe: String
-- NoteCipher: String
-- CardCipher:
-    cardholderName:
+  - NoteCipher: String
+  - CardCipher:
+      cardholderName:
         Maybe: String
-    brand:
+      brand:
         Maybe: String
-    number:
+      number:
         Maybe: String
-    expMonth:
+      expMonth:
         Maybe: String
-    expYear:
+      expYear:
         Maybe: String
-    code:
+      code:
         Maybe: String
-- IdentityCipher:
-    title:
+  - IdentityCipher:
+      title:
         Maybe: String
-    firstName:
+      firstName:
         Maybe: String
-    middleName:
+      middleName:
         Maybe: String
-    lastName:
+      lastName:
         Maybe: String
-    address1:
+      address1:
         Maybe: String
-    address2:
+      address2:
         Maybe: String
-    address3:
+      address3:
         Maybe: String
-    city:
+      city:
         Maybe: String
-    state:
+      state:
         Maybe: String
-    postalCode:
+      postalCode:
         Maybe: String
-    country:
+      country:
         Maybe: String
-    company:
+      company:
         Maybe: String
-    email:
+      email:
         Maybe: String
-    phone:
+      phone:
         Maybe: String
-    ssn:
+      ssn:
         Maybe: String
-    username:
+      username:
         Maybe: String
-    passportNumber:
+      passportNumber:
         Maybe: String
-    licenseNumber:
+      licenseNumber:
         Maybe: String
 
 CipherType:
-- LoginType
-- CardType
-- NoteType
-- IdentityType
+  - LoginType
+  - CardType
+  - NoteType
+  - IdentityType
 
 PasswordGeneratorConfig:
-    length: Int
-    ambiguous: Bool
-    number: Bool
-    minNumber: Int
-    uppercase: Bool
-    minUppercase: Int
-    lowercase: Bool
-    minLowercase: Int
-    special: Bool
-    minSpecial: Int
-    type: String
-    numWords: Int
-    wordSeparator: String
-    capitalize: Bool
-    includeNumber: Bool
+  length: Int
+  ambiguous: Bool
+  number: Bool
+  minNumber: Int
+  uppercase: Bool
+  minUppercase: Int
+  lowercase: Bool
+  minLowercase: Int
+  special: Bool
+  minSpecial: Int
+  type: String
+  numWords: Int
+  wordSeparator: String
+  capitalize: Bool
+  includeNumber: Bool
+
+TwoFactorProviderType:
+  - Authenticator
+  - Email
+  - Duo
+  - Yubikey
+  - U2f
+  - Remember
+  - OrganizationDuo
+  - WebAuthn
