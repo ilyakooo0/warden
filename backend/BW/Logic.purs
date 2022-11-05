@@ -121,7 +121,7 @@ getLogInRequestToken { prelogin
         , twoFactor
         , device:
             { type: deviceTypeUnknownBrowser
-            , name: "Temporary device name"
+            , name: "Ubuntu Touch"
             , identifier: "42"
             , pushToken: jnull
             }
