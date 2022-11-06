@@ -641,8 +641,20 @@ jsonEncCmd  val =
 
 
 
+type alias FullCipher_collectionIds_List  = (List String)
+
+jsonDecFullCipher_collectionIds_List : Json.Decode.Decoder ( FullCipher_collectionIds_List )
+jsonDecFullCipher_collectionIds_List =
+    Json.Decode.list (Json.Decode.string)
+
+jsonEncFullCipher_collectionIds_List : FullCipher_collectionIds_List -> Value
+jsonEncFullCipher_collectionIds_List  val = (Json.Encode.list Json.Encode.string) val
+
+
+
 type alias FullCipher  =
    { cipher: Cipher
+   , collectionIds: FullCipher_collectionIds_List
    , favorite: Bool
    , id: String
    , name: String
@@ -651,8 +663,9 @@ type alias FullCipher  =
 
 jsonDecFullCipher : Json.Decode.Decoder ( FullCipher )
 jsonDecFullCipher =
-   Json.Decode.succeed (\pcipher pfavorite pid pname preprompt -> {cipher = pcipher, favorite = pfavorite, id = pid, name = pname, reprompt = preprompt})
+   Json.Decode.succeed (\pcipher pcollectionIds pfavorite pid pname preprompt -> {cipher = pcipher, collectionIds = pcollectionIds, favorite = pfavorite, id = pid, name = pname, reprompt = preprompt})
    |> required "cipher" (jsonDecCipher)
+   |> required "collectionIds" (jsonDecFullCipher_collectionIds_List)
    |> required "favorite" (Json.Decode.bool)
    |> required "id" (Json.Decode.string)
    |> required "name" (Json.Decode.string)
@@ -662,6 +675,7 @@ jsonEncFullCipher : FullCipher -> Value
 jsonEncFullCipher  val =
    Json.Encode.object
    [ ("cipher", jsonEncCipher val.cipher)
+   , ("collectionIds", jsonEncFullCipher_collectionIds_List val.collectionIds)
    , ("favorite", Json.Encode.bool val.favorite)
    , ("id", Json.Encode.string val.id)
    , ("name", Json.Encode.string val.name)
