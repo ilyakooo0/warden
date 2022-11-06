@@ -618,7 +618,7 @@ type SecureNoteType
   = Int
 
 type SecureNoteApi = {
-  type :: SecureNoteType
+  -- type :: SecureNoteType
 }
 
 type AttachmentResponse

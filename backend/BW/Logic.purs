@@ -207,7 +207,8 @@ encodeCipher ::
     | r
     )
     CipherResponse
-encodeCipher (Bridge.FullCipher { name, cipher, id, favorite, reprompt }) = do
+encodeCipher
+  (Bridge.FullCipher { name, cipher, id, favorite, reprompt, collectionIds }) = do
   let
     f :: CipherResponse -> Run _ CipherResponse
     f x = case cipher of
@@ -326,7 +327,7 @@ encodeCipher (Bridge.FullCipher { name, cipher, id, favorite, reprompt }) = do
     , revisionDate: jnull
     , attachments: jnull
     , passwordHistory: jnull
-    , collectionIds: jnull
+    , collectionIds: nullify $ unwrap collectionIds
     , deletedDate: jnull
     , reprompt
     }
@@ -431,6 +432,7 @@ decodeCipher cipher = do
         , id: cipher.id
         , favorite: cipher.favorite
         , reprompt: cipher.reprompt
+        , collectionIds: wrap <<< fromJNullable [] $ cipher.collectionIds
         }
 
 decryptNullable ::

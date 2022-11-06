@@ -583,6 +583,7 @@ update msg model =
                     , favorite = False
                     , id = ""
                     , name = ""
+                    , collectionIds = []
                     , cipher =
                         case t of
                             Bridge.LoginType ->

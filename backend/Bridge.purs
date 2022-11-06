@@ -531,9 +531,22 @@ derive instance genericCmd :: Generic Cmd _
 derive instance eqCmd :: Eq Cmd
 derive instance ordCmd :: Ord Cmd
 
+newtype FullCipher_collectionIds_List =
+    FullCipher_collectionIds_List (Array String)
+
+derive instance newtypeFullCipher_collectionIds_List :: Newtype FullCipher_collectionIds_List _
+instance encodeJsonFullCipher_collectionIds_List :: EncodeJson FullCipher_collectionIds_List where
+  encodeJson = genericEncodeAeson Argonaut.defaultOptions
+instance decodeJsonFullCipher_collectionIds_List :: DecodeJson FullCipher_collectionIds_List where
+  decodeJson = genericDecodeAeson Argonaut.defaultOptions
+derive instance genericFullCipher_collectionIds_List :: Generic FullCipher_collectionIds_List _
+derive instance eqFullCipher_collectionIds_List :: Eq FullCipher_collectionIds_List
+derive instance ordFullCipher_collectionIds_List :: Ord FullCipher_collectionIds_List
+
 newtype FullCipher =
     FullCipher {
       cipher :: Cipher
+    , collectionIds :: FullCipher_collectionIds_List
     , favorite :: Boolean
     , id :: String
     , name :: String
