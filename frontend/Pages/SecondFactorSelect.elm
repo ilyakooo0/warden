@@ -121,7 +121,8 @@ view { availableFactors } =
                                 ]
                             ]
                             |> El.html
-                            |> El.el
+                            |> List.singleton
+                            |> El.paragraph
                                 [ Font.size 16
                                 , El.width El.fill
                                 ]
