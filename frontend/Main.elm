@@ -499,7 +499,7 @@ update msg model =
             ( model, FFI.sendBridge (Bridge.Open uri) )
 
         ShowCaptcha uri ->
-            ( Captcha.init uri |> CaptchaModel |> keepStackWith, Cmd.none )
+            ( Captcha.init uri |> CaptchaModel |> appendPageStack, Cmd.none )
 
         ClearNotification { currentTime } ->
             if Time.posixToMillis model.lastNotificationTime + notificationLingerSeconds * 1000 > Time.posixToMillis currentTime then
