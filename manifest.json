@@ -9,7 +9,7 @@
             "desktop": "appname.desktop"
         }
     },
-    "version": "1.1.0",
-    "maintainer": "Ilia Kostiuchenko <email@iko.soy>",
+    "version": "1.2.0",
+    "maintainer": "Ilia Kostiuchenko <mail@iko.soy>",
     "framework": "@CLICK_FRAMEWORK@"
 }
