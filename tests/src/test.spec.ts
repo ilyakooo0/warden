@@ -217,4 +217,40 @@ if (process.env.RECORD_TEST === "true") {
 
     await screenshot(page)
   })
+
+  test('Passwords view', async ({ page }) => {
+    await logIn(page)
+
+    await page.getByRole('button').nth(1).click();
+    await page.getByText('Passwords').click();
+
+    await screenshot(page)
+  })
+
+  test('Notes view', async ({ page }) => {
+    await logIn(page)
+
+    await page.getByRole('button').nth(1).click();
+    await page.getByText('Notes').click();
+
+    await screenshot(page)
+  })
+
+  test('Cards view', async ({ page }) => {
+    await logIn(page)
+
+    await page.getByRole('button').nth(1).click();
+    await page.getByText('Cards').click();
+
+    await screenshot(page)
+  })
+
+  test('Contacts view', async ({ page }) => {
+    await logIn(page)
+
+    await page.getByRole('button').nth(1).click();
+    await page.getByText('Contacts').click();
+
+    await screenshot(page)
+  })
 }
