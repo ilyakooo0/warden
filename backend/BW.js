@@ -36,7 +36,7 @@ export function getServices() {
 
       await bg.bootstrap()
 
-      bg.environmentService.setUrls(urls)
+      await bg.environmentService.setUrls(urls)
 
       if (tokenResponse != null) {
         const accountInformation = await bg.tokenService.decodeToken(tokenResponse.accessToken);
