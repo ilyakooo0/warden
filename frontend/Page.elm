@@ -25,3 +25,8 @@ page { init, view, update } =
                     Just msg ->
                         update msg model
         }
+
+
+noUpdate : a -> model -> ( model, Cmd msg )
+noUpdate _ model =
+    ( model, Cmd.none )

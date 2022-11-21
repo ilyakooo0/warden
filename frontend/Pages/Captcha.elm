@@ -1,9 +1,18 @@
-module Pages.Captcha exposing (HCaptchSiteKey, Model, init, title, view)
+module Pages.Captcha exposing (HCaptchSiteKey, Model, init, main, title, view)
 
 import Html exposing (..)
 import Html.Attributes as Attr
 import Page exposing (..)
 import Utils exposing (..)
+
+
+main : Program () Model (Maybe (Maybe ()))
+main =
+    page
+        { init = init "10000000-ffff-ffff-ffff-000000000001"
+        , view = view
+        , update = noUpdate
+        }
 
 
 type alias HCaptchSiteKey =
@@ -27,6 +36,10 @@ init siteKey =
 
 view : Model -> List (Html msg)
 view { siteKey } =
-    [ div [ Attr.class "u-embedded-media" ]
-        [ iframe [ Attr.src ("https://iko.soy/warden/hcaptcha.html?" ++ siteKey) ] [] ]
+    [ iframe
+        [ Attr.src ("https://iko.soy/warden/hcaptcha.html?" ++ siteKey)
+        , Attr.style "width" "100%"
+        , Attr.style "height" "80vh"
+        ]
+        []
     ]
