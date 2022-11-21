@@ -432,9 +432,6 @@ update msg model =
                                     _ ->
                                         False
                             )
-
-                pageModel =
-                    Ciphers.init ciphersCallbacks ciphers
             in
             ( if ciphersShown then
                 { model
@@ -443,8 +440,8 @@ update msg model =
                             |> Nonempty.map
                                 (\x ->
                                     case x of
-                                        CiphersModel _ ->
-                                            CiphersModel pageModel
+                                        CiphersModel pageModel ->
+                                            CiphersModel (Ciphers.updateCiphers ciphers pageModel)
 
                                         other ->
                                             other
@@ -452,7 +449,7 @@ update msg model =
                 }
 
               else
-                appendPageStack <| CiphersModel pageModel
+                appendPageStack <| CiphersModel (Ciphers.init ciphersCallbacks ciphers)
             , Cmd.none
             )
 
