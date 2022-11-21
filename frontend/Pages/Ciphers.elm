@@ -274,7 +274,7 @@ showCiphers ciphers =
                     , li [ Attr.class "p-list__item cipher-row", Ev.onClick (SelectCipher id) ]
                         [ div [ Attr.class "cipher-row-container" ]
                             [ p [] [ text name ]
-                            , p [ Attr.class "p-text--small u-align-text--right u-text--muted" ] [ text date ]
+                            , p [ Attr.class "p-text--small u-align-text--right u-text--muted hide-in-test" ] [ text date ]
                             ]
                         ]
                     )

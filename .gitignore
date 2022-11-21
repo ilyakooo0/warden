@@ -11,3 +11,7 @@ backend.js
 elm.js
 output-es
 elm-stuff
+node_modules/
+/tests/test-results/
+/tests/playwright-report/
+/tests/playwright/.cache/
