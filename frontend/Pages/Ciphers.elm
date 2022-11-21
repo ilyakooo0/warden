@@ -1,4 +1,15 @@
-module Pages.Ciphers exposing (Callbacks, Model, Msg, event, init, menuConfig, title, update, view)
+module Pages.Ciphers exposing
+    ( Callbacks
+    , Model
+    , Msg
+    , event
+    , init
+    , menuConfig
+    , title
+    , update
+    , updateCiphers
+    , view
+    )
 
 import Bridge
 import GlobalEvents
@@ -24,6 +35,11 @@ type alias Model emsg =
     , cipherSelectDropdownVisivble : Bool
     , callbacks : Callbacks emsg
     }
+
+
+updateCiphers : Bridge.Sub_LoadCiphers_List -> Model emsg -> Model emsg
+updateCiphers ciphers model =
+    { model | ciphers = ciphers }
 
 
 type CiphersFilter
