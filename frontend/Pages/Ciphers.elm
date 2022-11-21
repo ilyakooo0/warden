@@ -132,7 +132,7 @@ title { ciphersListFilter, cipherSelectDropdownVisivble } =
                         "Cards"
 
                     Bridge.IdentityType ->
-                        "Identities"
+                        "Contacts"
 
                     Bridge.LoginType ->
                         "Passwords"
