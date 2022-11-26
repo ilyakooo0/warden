@@ -4,7 +4,7 @@ set -e
 
 TEMP=$(mktemp -d)
 
-cp -r "$SRC_DIR"/{appname.apparmor,appname.desktop,manifest.json,logo.png,index.html,style.css} "$INSTALL_DIR"
+cp -r "$SRC_DIR"/{warden.apparmor,warden.desktop,manifest.json,logo.png,index.html,style.css} "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"/vanilla
 cp -r "$SRC_DIR"/vanilla/dist "$INSTALL_DIR"/vanilla
 
