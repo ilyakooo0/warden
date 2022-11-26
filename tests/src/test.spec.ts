@@ -85,7 +85,7 @@ async function screenshot(page: Page) {
     await page.locator('.p-icon--spinner.u-animation--spin.spinner').waitFor({ state: "hidden" })
     await screenshot(page)
   } else {
-    await expect.soft(page).toHaveScreenshot({ mask: [page.locator(".hide-in-test")], animations: "disabled", fullPage: true })
+    await expect.soft(page).toHaveScreenshot({ animations: "disabled", fullPage: true })
   }
 }
 
@@ -109,6 +109,7 @@ function cipherPage(name: string) {
 
 test.beforeEach(async ({ page }) => {
   await page.goto(`file://${__dirname}/../../build/all/app/install/index.html`);
+  await page.addStyleTag({ content: '.hide-in-test {opacity: 0;}' })
 })
 
 if (process.env.RECORD_TEST === "true") {
