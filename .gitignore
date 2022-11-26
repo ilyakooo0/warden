@@ -15,3 +15,5 @@ node_modules/
 /tests/test-results/
 /tests/playwright-report/
 /tests/playwright/.cache/
+generated-docs
+backend.js.map

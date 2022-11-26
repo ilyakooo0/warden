@@ -4,19 +4,22 @@ import Prelude
 
 import Bridge as Bridge
 import Data.Argonaut (class DecodeJson, class EncodeJson)
+import Data.Either (Either)
+import Data.Either as Either
+import Data.Int as Int
 import Data.JNullable (JNullable)
 import Data.JOpt (JOpt)
 import Data.Maybe (Maybe(..))
 import Data.ShowableJson (ShowableJson)
 import Data.Timestamp (Timestamp)
-import Data.Traversable (traverse)
-import Foreign (Foreign)
+import Data.Traversable (for)
+import Data.Tuple.Nested ((/\))
 import Foreign as Foreign
-import Foreign.Object (Object)
 import Literals.Undefined (Undefined)
 import Type.Prelude (Proxy(..))
-import Untagged.TypeCheck (class HasRuntimeType, hasRuntimeType)
+import Untagged.TypeCheck (class HasRuntimeType)
 import Untagged.Union (type (|+|))
+import Untagged.Union as Union
 
 newtype EncryptedString
   = EncryptedString String
@@ -400,10 +403,16 @@ type IdentityTokenResponse
     , keyConnectorUrl :: JNullable String
     }
 
-newtype TwoFactorProviderTypes = TwoFactorProviderTypes (Array TwoFactorProviderType)
+newtype TwoFactorProviderTypes = TwoFactorProviderTypes (Array (Int |+| String))
 
 instance HasRuntimeType TwoFactorProviderTypes where
   hasRuntimeType Proxy = Foreign.isArray
+
+fromTwoFactorProviderType :: TwoFactorProviderTypes -> Either String (Array Bridge.TwoFactorProviderType)
+fromTwoFactorProviderType (TwoFactorProviderTypes xs) =
+  for xs $ \rawProvider -> do
+    providerInt <- Union.reduce (Either.Right /\ (\x -> Either.note x $ Int.fromString x)) rawProvider
+    Either.note (show providerInt) $ secondFactorTypeToBridge providerInt
 
 type IdentityTwoFactorResponse =
   { twoFactorProviders :: TwoFactorProviderTypes

@@ -3,14 +3,14 @@ module Main
   ) where
 
 import Prelude
+
 import BW (ApiService, CryptoFunctions, Services, CryptoService)
 import BW as WB
 import BW.Logic (bwPasswordStringHash, decodeCipher, decrypt, encodeCipher, hashPassword, liftPromise)
 import BW.Logic as Logic
-import BW.Types (CipherResponse, Email(..), Password(..), TwoFactorProviderTypes(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote, secondFactorTypeToBridge)
+import BW.Types (CipherResponse, Email(..), Password(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote, fromTwoFactorProviderType)
 import Bridge as Bridge
-import Control.Monad.Error.Class (catchError, throwError)
-import Control.Monad.Error.Class as Error
+import Control.Monad.Error.Class (catchError)
 import Data.Argonaut (class DecodeJson)
 import Data.Array as Array
 import Data.Clipboard as Clipboard
@@ -29,7 +29,7 @@ import Effect (Effect)
 import Effect.Aff (Aff, runAff_, try)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Effect.Exception (error)
+import Effect.Exception (throw)
 import Effect.Exception as Exc
 import Effect.Ref as Ref
 import Elm as Elm
@@ -149,20 +149,15 @@ main = do
                 Storage.store storage SyncKey sync
                 Storage.store storage TokenKey token
               send Bridge.LoginSuccessful
-            Right (Right (Left { twoFactorProviders: TwoFactorProviderTypes rawProviders, captchaToken })) -> do
+            Right (Right (Left { twoFactorProviders, captchaToken })) -> do
               case toEither1 captchaToken of
                 Left captchaTokenString ->
                   liftEffect
                     $ Ref.write (Just captchaTokenString) hCaptchaTokenRef
                 Right _ -> pure unit
-              providers <-
-                liftEffect
-                  $ traverse
-                      ( \x ->
-                          secondFactorTypeToBridge x
-                            # Error.liftMaybe (error $ "Unknown second factor provider: " <> show x)
-                      )
-                      rawProviders
+              providers <- case fromTwoFactorProviderType twoFactorProviders of
+                Left x -> liftEffect $ throw $ "Unknown second factor provider: " <> x
+                Right x -> pure x
               send $ Bridge.NeedsSecondFactor $ Bridge.Sub_NeedsSecondFactor_List providers
     Bridge.NeedCiphersList ->
       runWithDecryptionKey do
@@ -291,7 +286,7 @@ processCipher cipher = do
       | n == cipherTypeCard -> pure Bridge.CardType
     n
       | n == cipherTypeIdentity -> pure Bridge.IdentityType
-    n -> liftEffect $ throwError $ error $ "Unsupported cipher type: " <> show n
+    n -> liftEffect $ throw $ "Unsupported cipher type: " <> show n
   date <- liftEffect $ maybe (pure bottom) (Timestamp.toDateTime) $ JNullable.toMaybe cipher.revisionDate
   pure
     $ { cipher:
