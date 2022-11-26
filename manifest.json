@@ -4,9 +4,9 @@
     "architecture": "@CLICK_ARCH@",
     "title": "Warden",
     "hooks": {
-        "appname": {
-            "apparmor": "appname.apparmor",
-            "desktop": "appname.desktop"
+        "warden": {
+            "apparmor": "warden.apparmor",
+            "desktop": "warden.desktop"
         }
     },
     "version": "1.2.0",
