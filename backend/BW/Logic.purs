@@ -3,6 +3,7 @@ module BW.Logic where
 import BW
 import BW.Types
 import Prelude
+
 import Bridge as Bridge
 import Control.Monad.Error.Class (throwError)
 import Control.Promise (Promise)
@@ -31,37 +32,38 @@ import Type.Prelude (Proxy(..))
 import Untagged.Union (type (|+|))
 
 -- | Creates the master key
-makePreloginKey ::
-  forall r.
-  PreloginResponse ->
-  Email ->
-  Password ->
-  Run
-    ( crypto ::
-        Reader CryptoService
-    , effect :: Effect
-    , aff :: Aff
-    | r
-    )
-    SymmetricCryptoKey
+makePreloginKey
+  :: forall r
+   . PreloginResponse
+  -> Email
+  -> Password
+  -> Run
+       ( crypto ::
+           Reader CryptoService
+       , effect :: Effect
+       , aff :: Aff
+       | r
+       )
+       SymmetricCryptoKey
 makePreloginKey { kdf, kdfIterations } (Email email') password = do
   crypto <- askAt (Proxy :: _ "crypto")
   let
     email = (String.trim >>> String.toLower) email'
   liftPromise $ runFn4 crypto.makeKey password email kdf kdfIterations
 
-makeDecryptionKey ::
-  forall r.
+makeDecryptionKey
+  :: forall r
+   .
   -- | Matser key (prelogin key)
-  SymmetricCryptoKey ->
-  EncryptedString ->
-  Run
-    ( crypto :: Reader CryptoService
-    , effect :: Effect
-    , aff :: Aff
-    | r
-    )
-    SymmetricCryptoKey
+  SymmetricCryptoKey
+  -> EncryptedString
+  -> Run
+       ( crypto :: Reader CryptoService
+       , effect :: Effect
+       , aff :: Aff
+       | r
+       )
+       SymmetricCryptoKey
 makeDecryptionKey masterKey str = do
   crypto <- askAt (Proxy :: _ "crypto")
   let
@@ -78,28 +80,29 @@ makeDecryptionKey masterKey str = do
       liftEffect $ Exc.throw $ "Unsupported key encryption type: " <> show encType
   pure $ SymmetricCryptoKey.fromArrayBuffer key
 
-getLogInRequestToken ::
-  forall r.
-  { prelogin :: PreloginResponse
-  , email :: Email
-  , password :: Password
-  , captchaResponse :: Maybe String
-  , secondFactor :: Bridge.Cmd_Login_secondFactor_Maybe
-  } ->
-  Run
-    ( api :: Reader ApiService
-    , crypto :: Reader CryptoService
-    , effect :: Effect
-    , aff :: Aff
-    | r
-    )
-    (IdentityCaptchaResponse |+| IdentityTwoFactorResponse |+| IdentityTokenResponse)
-getLogInRequestToken { prelogin
-, email
-, password
-, captchaResponse
-, secondFactor: Bridge.Cmd_Login_secondFactor_Maybe secondFactor
-} = do
+getLogInRequestToken
+  :: forall r
+   . { prelogin :: PreloginResponse
+     , email :: Email
+     , password :: Password
+     , captchaResponse :: Maybe String
+     , secondFactor :: Bridge.Cmd_Login_secondFactor_Maybe
+     }
+  -> Run
+       ( api :: Reader ApiService
+       , crypto :: Reader CryptoService
+       , effect :: Effect
+       , aff :: Aff
+       | r
+       )
+       (IdentityCaptchaResponse |+| IdentityTwoFactorResponse |+| IdentityTokenResponse)
+getLogInRequestToken
+  { prelogin
+  , email
+  , password
+  , captchaResponse
+  , secondFactor: Bridge.Cmd_Login_secondFactor_Maybe secondFactor
+  } = do
   let
     twoFactor =
       maybe
@@ -127,18 +130,18 @@ getLogInRequestToken { prelogin
             }
         }
 
-bwPasswordStringHash ::
-  forall r.
-  PreloginResponse ->
-  Email ->
-  Password ->
-  Run
-    ( crypto :: Reader CryptoService
-    , effect :: Effect
-    , aff :: Aff
-    | r
-    )
-    StringHash
+bwPasswordStringHash
+  :: forall r
+   . PreloginResponse
+  -> Email
+  -> Password
+  -> Run
+       ( crypto :: Reader CryptoService
+       , effect :: Effect
+       , aff :: Aff
+       | r
+       )
+       StringHash
 bwPasswordStringHash prelogin email password = do
   key <- makePreloginKey prelogin email password
   crypto <- askAt (Proxy :: _ "crypto")
@@ -147,47 +150,47 @@ bwPasswordStringHash prelogin email password = do
       $ runFn3 crypto.hashPassword password key (nullify hashPurposeLocalAuthorization)
   liftPromise $ runFn3 crypto.hashPassword password key jnull
 
-hashPassword ::
-  forall r.
-  Password ->
-  Run
-    ( cryptoFunctions :: Reader CryptoFunctions
-    , aff :: Aff
-    , effect :: Effect
-    | r
-    )
-    Hash
+hashPassword
+  :: forall r
+   . Password
+  -> Run
+       ( cryptoFunctions :: Reader CryptoFunctions
+       , aff :: Aff
+       , effect :: Effect
+       | r
+       )
+       Hash
 hashPassword (Password password) = do
   cryptoFunctions <- askAt (Proxy :: _ "cryptoFunctions")
   liftPromise $ runFn2 cryptoFunctions.hash password cryptoFunctionsTypeSha512
 
-decrypt ::
-  forall r.
-  EncryptedString ->
-  Run
-    ( key :: Reader SymmetricCryptoKey
-    , crypto :: Reader CryptoService
-    , aff :: Aff
-    , effect :: Effect
-    | r
-    )
-    String
+decrypt
+  :: forall r
+   . EncryptedString
+  -> Run
+       ( key :: Reader SymmetricCryptoKey
+       , crypto :: Reader CryptoService
+       , aff :: Aff
+       , effect :: Effect
+       | r
+       )
+       String
 decrypt input = do
   crypto <- askAt (Proxy :: _ "crypto")
   key <- askAt (Proxy :: _ "key")
   liftPromise $ runFn2 crypto.decryptToUtf8 (EncString.fromString input) key
 
-encrypt ::
-  forall r.
-  String ->
-  Run
-    ( key :: Reader SymmetricCryptoKey
-    , crypto :: Reader CryptoService
-    , aff :: Aff
-    , effect :: Effect
-    | r
-    )
-    EncryptedString
+encrypt
+  :: forall r
+   . String
+  -> Run
+       ( key :: Reader SymmetricCryptoKey
+       , crypto :: Reader CryptoService
+       , aff :: Aff
+       , effect :: Effect
+       | r
+       )
+       EncryptedString
 encrypt input = do
   crypto <- askAt (Proxy :: _ "crypto")
   key <- askAt (Proxy :: _ "key")
@@ -196,17 +199,17 @@ encrypt input = do
 liftPromise :: forall m a. MonadAff m => Promise a -> m a
 liftPromise = liftAff <<< Promise.toAff
 
-encodeCipher ::
-  forall r.
-  Bridge.FullCipher ->
-  Run
-    ( key :: Reader SymmetricCryptoKey
-    , crypto :: Reader CryptoService
-    , aff :: Aff
-    , effect :: Effect
-    | r
-    )
-    CipherResponse
+encodeCipher
+  :: forall r
+   . Bridge.FullCipher
+  -> Run
+       ( key :: Reader SymmetricCryptoKey
+       , crypto :: Reader CryptoService
+       , aff :: Aff
+       , effect :: Effect
+       | r
+       )
+       CipherResponse
 encodeCipher
   (Bridge.FullCipher { name, cipher, id, favorite, reprompt, collectionIds }) = do
   let
@@ -222,14 +225,14 @@ encodeCipher
         pure
           x
             { card =
-              nullify
-                { cardholderName
-                , brand
-                , number
-                , expMonth
-                , expYear
-                , code
-                }
+                nullify
+                  { cardholderName
+                  , brand
+                  , number
+                  , expMonth
+                  , expYear
+                  , code
+                  }
             , type = cipherTypeCard
             }
       Bridge.IdentityCipher (Bridge.Cipher_IdentityCipher identity) -> do
@@ -254,26 +257,26 @@ encodeCipher
         pure
           x
             { identity =
-              nullify
-                { address1
-                , address2
-                , address3
-                , city
-                , company
-                , country
-                , email
-                , firstName
-                , lastName
-                , licenseNumber
-                , middleName
-                , passportNumber
-                , phone
-                , postalCode
-                , ssn
-                , state
-                , title
-                , username
-                }
+                nullify
+                  { address1
+                  , address2
+                  , address3
+                  , city
+                  , company
+                  , country
+                  , email
+                  , firstName
+                  , lastName
+                  , licenseNumber
+                  , middleName
+                  , passportNumber
+                  , phone
+                  , postalCode
+                  , ssn
+                  , state
+                  , title
+                  , username
+                  }
             , type = cipherTypeIdentity
             }
       Bridge.LoginCipher (Bridge.Cipher_LoginCipher login) -> do
@@ -281,7 +284,7 @@ encodeCipher
         uris <-
           traverse
             ( \uri -> do
-                uriEnc <- encrypt uri
+                uriEnc <- nullify <$> encrypt uri
                 pure { uri: uriEnc, match: jnull }
             )
             (unwrap login.uris)
@@ -290,14 +293,14 @@ encodeCipher
         pure
           x
             { login =
-              nullify
-                { password
-                , uris: JOpt $ opt uris
-                , username
-                , passwordRevisionDate: jnull
-                , totp: totp
-                , autofillOnPageLoad: JOpt undefined
-                }
+                nullify
+                  { password
+                  , uris: JOpt $ opt uris
+                  , username
+                  , passwordRevisionDate: jnull
+                  , totp: totp
+                  , autofillOnPageLoad: JOpt undefined
+                  }
             , type = cipherTypeLogin
             }
       Bridge.NoteCipher note -> do
@@ -332,98 +335,99 @@ encodeCipher
     , reprompt
     }
 
-decodeCipher ::
-  forall r.
-  CipherResponse ->
-  Run
-    ( key :: Reader SymmetricCryptoKey
-    , crypto :: Reader CryptoService
-    , aff :: Aff
-    , effect :: Effect
-    | r
-    )
-    Bridge.FullCipher
+decodeCipher
+  :: forall r
+   . CipherResponse
+  -> Run
+       ( key :: Reader SymmetricCryptoKey
+       , crypto :: Reader CryptoService
+       , aff :: Aff
+       , effect :: Effect
+       | r
+       )
+       Bridge.FullCipher
 decodeCipher cipher = do
   name <- decrypt cipher.name
   cipherType <- case cipher.type of
     n
       | cipherTypeSecureNote == n -> do
-        note <- fromJNullable "" <$> (traverse decrypt cipher.notes)
-        pure $ Bridge.NoteCipher note
+          note <- fromJNullable "" <$> (traverse decrypt cipher.notes)
+          pure $ Bridge.NoteCipher note
     n
       | cipherTypeLogin == n -> do
-        case JNullable.toMaybe cipher.login of
-          Nothing -> liftEffect $ throwError $ error "Login data is missing"
-          Just login -> do
-            username <- decryptNullable login.username
-            password <- decryptNullable login.password
-            totp <- decryptNullable login.totp
-            uris <- fromJOpt [] <$> ((traverse >>> traverse) (_.uri >>> decrypt) login.uris)
-            pure $ Bridge.LoginCipher
-              $ Bridge.Cipher_LoginCipher
-                  { username
-                  , password
-                  , uris: wrap uris
-                  , totp
-                  }
+          case JNullable.toMaybe cipher.login of
+            Nothing -> liftEffect $ throwError $ error "Login data is missing"
+            Just login -> do
+              username <- decryptNullable login.username
+              password <- decryptNullable login.password
+              totp <- decryptNullable login.totp
+              uris <- fromJOpt [] <$>
+                ((traverse >>> traverse) (_.uri >>> JNullable.toMaybe >>> maybe (pure "") decrypt) login.uris)
+              pure $ Bridge.LoginCipher
+                $ Bridge.Cipher_LoginCipher
+                    { username
+                    , password
+                    , uris: wrap uris
+                    , totp
+                    }
     n
       | cipherTypeCard == n -> do
-        case JNullable.toMaybe cipher.card of
-          Nothing -> liftEffect $ throwError $ error "Card data is missing"
-          Just card -> do
-            cardholderName <- decryptNullable card.cardholderName
-            number <- decryptNullable card.number
-            code <- decryptNullable card.code
-            brand <- decryptNullable card.brand
-            expMonth <- decryptNullable card.expMonth
-            expYear <- decryptNullable card.expYear
-            pure $ Bridge.CardCipher
-              $ Bridge.Cipher_CardCipher
-                  { brand, cardholderName, code, expMonth, expYear, number }
+          case JNullable.toMaybe cipher.card of
+            Nothing -> liftEffect $ throwError $ error "Card data is missing"
+            Just card -> do
+              cardholderName <- decryptNullable card.cardholderName
+              number <- decryptNullable card.number
+              code <- decryptNullable card.code
+              brand <- decryptNullable card.brand
+              expMonth <- decryptNullable card.expMonth
+              expYear <- decryptNullable card.expYear
+              pure $ Bridge.CardCipher
+                $ Bridge.Cipher_CardCipher
+                    { brand, cardholderName, code, expMonth, expYear, number }
     n
       | cipherTypeIdentity == n -> do
-        case JNullable.toMaybe cipher.identity of
-          Nothing -> liftEffect $ throwError $ error "Identity data is missing"
-          Just identity -> do
-            firstName <- decryptNullable identity.firstName
-            middleName <- decryptNullable identity.middleName
-            lastName <- decryptNullable identity.lastName
-            address1 <- decryptNullable identity.address1
-            address2 <- decryptNullable identity.address2
-            address3 <- decryptNullable identity.address3
-            city <- decryptNullable identity.city
-            company <- decryptNullable identity.company
-            country <- decryptNullable identity.country
-            email <- decryptNullable identity.email
-            licenseNumber <- decryptNullable identity.licenseNumber
-            passportNumber <- decryptNullable identity.passportNumber
-            phone <- decryptNullable identity.phone
-            postalCode <- decryptNullable identity.postalCode
-            ssn <- decryptNullable identity.ssn
-            state <- decryptNullable identity.state
-            title <- decryptNullable identity.title
-            username <- decryptNullable identity.username
-            pure $ Bridge.IdentityCipher
-              $ wrap
-                  { firstName
-                  , middleName
-                  , lastName
-                  , address1
-                  , address2
-                  , address3
-                  , city
-                  , company
-                  , country
-                  , email
-                  , licenseNumber
-                  , passportNumber
-                  , phone
-                  , postalCode
-                  , ssn
-                  , state
-                  , title
-                  , username
-                  }
+          case JNullable.toMaybe cipher.identity of
+            Nothing -> liftEffect $ throwError $ error "Identity data is missing"
+            Just identity -> do
+              firstName <- decryptNullable identity.firstName
+              middleName <- decryptNullable identity.middleName
+              lastName <- decryptNullable identity.lastName
+              address1 <- decryptNullable identity.address1
+              address2 <- decryptNullable identity.address2
+              address3 <- decryptNullable identity.address3
+              city <- decryptNullable identity.city
+              company <- decryptNullable identity.company
+              country <- decryptNullable identity.country
+              email <- decryptNullable identity.email
+              licenseNumber <- decryptNullable identity.licenseNumber
+              passportNumber <- decryptNullable identity.passportNumber
+              phone <- decryptNullable identity.phone
+              postalCode <- decryptNullable identity.postalCode
+              ssn <- decryptNullable identity.ssn
+              state <- decryptNullable identity.state
+              title <- decryptNullable identity.title
+              username <- decryptNullable identity.username
+              pure $ Bridge.IdentityCipher
+                $ wrap
+                    { firstName
+                    , middleName
+                    , lastName
+                    , address1
+                    , address2
+                    , address3
+                    , city
+                    , company
+                    , country
+                    , email
+                    , licenseNumber
+                    , passportNumber
+                    , phone
+                    , postalCode
+                    , ssn
+                    , state
+                    , title
+                    , username
+                    }
     n -> liftEffect $ throwError $ error $ "Unsupported cipher type: " <> show n
   pure
     $ wrap
@@ -435,32 +439,32 @@ decodeCipher cipher = do
         , collectionIds: wrap <<< fromJNullable [] $ cipher.collectionIds
         }
 
-decryptNullable ::
-  forall x r.
-  Newtype x (Maybe String) =>
-  JNullable EncryptedString ->
-  Run
-    ( key :: Reader SymmetricCryptoKey
-    , crypto :: Reader CryptoService
-    , aff :: Aff
-    , effect :: Effect
-    | r
-    )
-    x
+decryptNullable
+  :: forall x r
+   . Newtype x (Maybe String)
+  => JNullable EncryptedString
+  -> Run
+       ( key :: Reader SymmetricCryptoKey
+       , crypto :: Reader CryptoService
+       , aff :: Aff
+       , effect :: Effect
+       | r
+       )
+       x
 decryptNullable x = wrap <<< fromJNullable Nothing <<< map Just <$> (traverse decrypt x)
 
-encryptNullable ::
-  forall x r.
-  Newtype x (Maybe String) =>
-  x ->
-  Run
-    ( key :: Reader SymmetricCryptoKey
-    , crypto :: Reader CryptoService
-    , aff :: Aff
-    , effect :: Effect
-    | r
-    )
-    (JNullable EncryptedString)
+encryptNullable
+  :: forall x r
+   . Newtype x (Maybe String)
+  => x
+  -> Run
+       ( key :: Reader SymmetricCryptoKey
+       , crypto :: Reader CryptoService
+       , aff :: Aff
+       , effect :: Effect
+       | r
+       )
+       (JNullable EncryptedString)
 encryptNullable x = case unwrap x of
   Nothing -> pure jnull
   Just y -> nullify <$> encrypt y
