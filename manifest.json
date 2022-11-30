@@ -9,7 +9,7 @@
             "desktop": "warden.desktop"
         }
     },
-    "version": "1.2.1",
+    "version": "1.2.2",
     "maintainer": "Ilia Kostiuchenko <mail@iko.soy>",
     "framework": "@CLICK_FRAMEWORK@"
 }
