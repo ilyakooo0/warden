@@ -6,7 +6,7 @@ import Prelude
 
 import BW (ApiService, CryptoFunctions, Services, CryptoService)
 import BW as WB
-import BW.Logic (bwPasswordStringHash, decodeCipher, decrypt, encodeCipher, hashPassword, liftPromise)
+import BW.Logic (bwPasswordStringHash, decodeCipher, decrypt, encodeCipher, hashPassword, liftPromise, supportedCipher)
 import BW.Logic as Logic
 import BW.Types (CipherResponse, Email(..), Password(..), Urls, cipherTypeCard, cipherTypeIdentity, cipherTypeLogin, cipherTypeSecureNote, fromTwoFactorProviderType)
 import Bridge as Bridge
@@ -16,6 +16,7 @@ import Data.Array as Array
 import Data.Clipboard as Clipboard
 import Data.DateTime (DateTime)
 import Data.Either (Either(..))
+import Data.Foldable (for_)
 import Data.HCaptcha (bindHCaptchToken)
 import Data.JNullable (jnull, nullify)
 import Data.JNullable as JNullable
@@ -61,19 +62,19 @@ main = do
   let
     runAff act = runElmAff app $ run $ act
 
-    run ::
-      forall a.
-      Run
-        ( app :: Reader Elm
-        , aff :: Aff
-        , effect :: Effect
-        , crypto :: Reader CryptoService
-        , storage :: Reader Storage
-        , services :: Reader Services
-        , cryptoFunctions :: Reader CryptoFunctions
-        )
-        a ->
-      Run (EFFECT + AFF + ()) a
+    run
+      :: forall a
+       . Run
+           ( app :: Reader Elm
+           , aff :: Aff
+           , effect :: Effect
+           , crypto :: Reader CryptoService
+           , storage :: Reader Storage
+           , services :: Reader Services
+           , cryptoFunctions :: Reader CryptoFunctions
+           )
+           a
+      -> Run (EFFECT + AFF + ()) a
     run act =
       runReaderAt (Proxy :: _ "app") app
         $ runReaderAt (Proxy :: _ "crypto") services.crypto
@@ -82,19 +83,19 @@ main = do
         $ runReaderAt (Proxy :: _ "cryptoFunctions") services.cryptoFunctions
         $ act
 
-    runWithDecryptionKey ::
-      Run
-        ( app :: Reader Elm
-        , aff :: Aff
-        , effect :: Effect
-        , key :: Reader SymmetricCryptoKey
-        , crypto :: Reader CryptoService
-        , storage :: Reader Storage
-        , services :: Reader Services
-        , cryptoFunctions :: Reader CryptoFunctions
-        )
-        Unit ->
-      Effect Unit
+    runWithDecryptionKey
+      :: Run
+           ( app :: Reader Elm
+           , aff :: Aff
+           , effect :: Effect
+           , key :: Reader SymmetricCryptoKey
+           , crypto :: Reader CryptoService
+           , storage :: Reader Storage
+           , services :: Reader Services
+           , cryptoFunctions :: Reader CryptoFunctions
+           )
+           Unit
+      -> Effect Unit
     runWithDecryptionKey act = do
       maybeKey <- Ref.read masterKeyRef
       runAff
@@ -182,9 +183,9 @@ main = do
     Bridge.Init -> do
       Storage.get storage TokenKey
         >>= \x ->
-            Elm.send app case x of
-              Just _ -> Bridge.LoginSuccessful
-              Nothing -> Bridge.NeedsLogin
+          Elm.send app case x of
+            Just _ -> Bridge.LoginSuccessful
+            Nothing -> Bridge.NeedsLogin
     Bridge.RequestCipher id ->
       runWithDecryptionKey do
         sync <- getOrReset SyncKey
@@ -192,8 +193,7 @@ main = do
           Nothing -> pure unit
           Just cipherResponse -> do
             cipher <- decodeCipher cipherResponse
-            send $ Bridge.LoadCipher cipher
-            pure unit
+            for_ cipher $ send <<< Bridge.LoadCipher
         pure unit
     Bridge.NeedEmail ->
       runWithDecryptionKey do
@@ -209,7 +209,7 @@ main = do
         api <- getAuthedApi
         cipher <- encodeCipher fullCipher
         newCipher <- liftPromise (api.putCipher cipher) >>= decodeCipher
-        send $ Bridge.CipherChanged newCipher
+        for_ newCipher $ send <<< Bridge.CipherChanged
         performSync
         pure unit
     Bridge.GeneratePassword cfg ->
@@ -222,7 +222,7 @@ main = do
         api <- getAuthedApi
         cipher <- encodeCipher fullCipher
         newCipher <- liftPromise (api.postCipherCreate cipher) >>= decodeCipher
-        send $ Bridge.CipherChanged newCipher
+        for_ newCipher $ send <<< Bridge.CipherChanged
         performSync
         pure unit
     Bridge.DeleteCipher c@(Bridge.FullCipher { id }) ->
@@ -240,14 +240,20 @@ main = do
           interval = totpService.getTimeInterval totp
         send $ Bridge.Totp
           $ Bridge.Sub_Totp
-              { interval, code, source: totp
+              { interval
+              , code
+              , source: totp
               }
         pure unit
     Bridge.ChooseSecondFactor
       ( Bridge.Cmd_ChooseSecondFactor
-        { email: email', factor, server, password, requestFromServer
-      }
-    ) ->
+          { email: email'
+          , factor
+          , server
+          , password
+          , requestFromServer
+          }
+      ) ->
       when requestFromServer
         let
           email = Email email'
@@ -264,17 +270,18 @@ main = do
                 pure unit
             _ -> pure unit
 
-processCipher ::
-  forall r.
-  CipherResponse ->
-  Run
-    ( crypto :: Reader CryptoService
-    , key :: Reader SymmetricCryptoKey
-    , aff :: Aff
-    , effect :: Effect
-    | r
-    )
-    { cipher :: Bridge.Sub_LoadCiphers, date :: DateTime }
+processCipher
+  :: forall r
+   . CipherResponse
+  -> Run
+       ( crypto :: Reader CryptoService
+       , key :: Reader SymmetricCryptoKey
+       , aff :: Aff
+       , effect :: Effect
+       | r
+       )
+       (Maybe { cipher :: Bridge.Sub_LoadCiphers, date :: DateTime })
+processCipher cipher | not (supportedCipher cipher) = pure Nothing
 processCipher cipher = do
   name <- decrypt cipher.name
   cipherType <- case cipher.type of
@@ -289,7 +296,9 @@ processCipher cipher = do
     n -> liftEffect $ throw $ "Unsupported cipher type: " <> show n
   date <- liftEffect $ maybe (pure bottom) (Timestamp.toDateTime) $ JNullable.toMaybe cipher.revisionDate
   pure
-    $ { cipher:
+    $ Just
+    $
+      { cipher:
           Bridge.Sub_LoadCiphers
             { name: name
             , date: maybe "" Timestamp.toLocalDateTimeString $ JNullable.toMaybe cipher.revisionDate
@@ -323,18 +332,18 @@ baseUrl server =
   , keyConnector: jnull
   }
 
-getOrReset ::
-  forall k t r.
-  StorageKey k t =>
-  DecodeJson t =>
-  k ->
-  Run
-    ( storage :: Reader Storage
-    , app :: Reader Elm
-    , effect :: Effect
-    | r
-    )
-    t
+getOrReset
+  :: forall k t r
+   . StorageKey k t
+  => DecodeJson t
+  => k
+  -> Run
+       ( storage :: Reader Storage
+       , app :: Reader Elm
+       , effect :: Effect
+       | r
+       )
+       t
 getOrReset key = do
   storage <- askAt (Proxy :: _ "storage")
   app <- askAt (Proxy :: _ "app")
@@ -345,69 +354,69 @@ getOrReset key = do
       Exc.throw "Encountered an internal error. Resetting the app."
   liftEffect $ try (Storage.get storage key)
     >>= \x -> case x of
-        Left err -> do
-          log $ show err
-          handleError
-        Right Nothing -> handleError
-        Right (Just y) -> pure y
+      Left err -> do
+        log $ show err
+        handleError
+      Right Nothing -> handleError
+      Right (Just y) -> pure y
 
-getAuthedApi ::
-  forall r.
-  Run
-    ( storage :: Reader Storage
-    , app :: Reader Elm
-    , aff :: Aff
-    , effect :: Effect
-    , services :: Reader Services
-    | r
-    )
-    ApiService
+getAuthedApi
+  :: forall r
+   . Run
+       ( storage :: Reader Storage
+       , app :: Reader Elm
+       , aff :: Aff
+       , effect :: Effect
+       , services :: Reader Services
+       | r
+       )
+       ApiService
 getAuthedApi = do
   services <- askAt (Proxy :: _ "services")
   token <- getOrReset TokenKey
   url <- getOrReset UrlsKey
   liftPromise $ services.getApi (baseUrl url) (nullify token)
 
-requestMasterPassword ::
-  forall r.
-  Run
-    ( storage :: Reader Storage
-    , app :: Reader Elm
-    , effect :: Effect
-    | r
-    )
-    Unit
+requestMasterPassword
+  :: forall r
+   . Run
+       ( storage :: Reader Storage
+       , app :: Reader Elm
+       , effect :: Effect
+       | r
+       )
+       Unit
 requestMasterPassword = do
   url <- getOrReset UrlsKey
   sync <- getOrReset SyncKey
   send $ Bridge.NeedsMasterPassword $ Bridge.Sub_NeedsMasterPassword { server: url, login: sync.profile.email }
 
-send ::
-  forall r.
-  Bridge.Sub ->
-  Run
-    ( app :: Reader Elm
-    , effect :: Effect
-    | r
-    )
-    Unit
+send
+  :: forall r
+   . Bridge.Sub
+  -> Run
+       ( app :: Reader Elm
+       , effect :: Effect
+       | r
+       )
+       Unit
 send sub = do
   app <- askAt (Proxy :: _ "app")
   liftEffect $ Elm.send app sub
 
-performSync ::
-  forall r.
-  Run
-    ( storage :: Reader Storage
-    , app :: Reader Elm
-    , aff :: Aff
-    , effect :: Effect
-    , services :: Reader Services
-    , crypto :: Reader CryptoService
-    , key :: Reader SymmetricCryptoKey
-    | r
-    )
-    Unit
+performSync
+  :: forall r
+   . Run
+       ( storage :: Reader Storage
+       , app :: Reader Elm
+       , aff :: Aff
+       , effect :: Effect
+       , services :: Reader Services
+       , crypto :: Reader CryptoService
+       , key :: Reader SymmetricCryptoKey
+       | r
+       )
+       Unit
 performSync = do
   api <- getAuthedApi
   storage <- askAt (Proxy :: _ "storage")
@@ -415,22 +424,22 @@ performSync = do
   liftEffect $ Storage.store storage SyncKey newSync
   sendCiphers
 
-sendCiphers ::
-  forall r.
-  Run
-    ( storage :: Reader Storage
-    , app :: Reader Elm
-    , aff :: Aff
-    , effect :: Effect
-    , services :: Reader Services
-    , crypto :: Reader CryptoService
-    , key :: Reader SymmetricCryptoKey
-    | r
-    )
-    Unit
+sendCiphers
+  :: forall r
+   . Run
+       ( storage :: Reader Storage
+       , app :: Reader Elm
+       , aff :: Aff
+       , effect :: Effect
+       , services :: Reader Services
+       , crypto :: Reader CryptoService
+       , key :: Reader SymmetricCryptoKey
+       | r
+       )
+       Unit
 sendCiphers = do
   sync <- getOrReset SyncKey
-  ciphers <- traverse processCipher sync.ciphers
+  ciphers <- Array.catMaybes <$> traverse processCipher sync.ciphers
   let
     sortedCiphers = Array.sortWith (_.date >>> Down) ciphers
   send $ Bridge.LoadCiphers $ Bridge.Sub_LoadCiphers_List $ map _.cipher sortedCiphers
