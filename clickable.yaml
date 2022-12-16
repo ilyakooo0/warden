@@ -1,4 +1,5 @@
 clickable_minimum_required: 7.1.2
+framework: ubuntu-sdk-20.04
 builder: custom
 build: $SRC_DIR/build.sh
 kill: webapp-container*
