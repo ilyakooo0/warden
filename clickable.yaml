@@ -1,17 +1,17 @@
 clickable_minimum_required: 7.1.2
-framework: ubuntu-sdk-20.04
 builder: custom
 build: $SRC_DIR/build.sh
 kill: webapp-container*
 image_setup:
-  env: {}
-    # DEB_URL: http://archive.ubuntu.com/ubuntu
-    # HOST_ARCH: amd64
-
-    # PATH: /opt/someprogram/bin:$PATH
+  env: 
+    NIX_PATH: nixpkgs=https://github.com/NixOS/nixpkgs/archive/4d2b37a84fad1091b9de401eb450aae66f1a741e.tar.gz
+    HOME: /home/phablet
+    PATH: /home/phablet/.nix-profile/bin:$PATH
   run:
-
-  - (cd /tmp && curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && gunzip elm.gz && chmod +x elm && mv elm /usr/local/bin/)
-  - npm install -g spago esbuild purescript terser --unsafe-perm=true
+  - mkdir -m 0755 /nix && chown phablet /nix
+  - curl -L https://nixos.org/nix/install >/tmp/install-nix.sh
+  - su -l -m phablet -s /bin/bash -c "sh /tmp/install-nix.sh --no-daemon --yes --no-channel-add"
+  - echo "export PATH=/home/phablet/.nix-profile/bin:\$PATH" >>/home/phablet/.profile
+  - su -l -m phablet -s /bin/bash -c "nix-env -f \"<nixpkgs>\" -iA purescript elmPackages.elm nodePackages.terser esbuild spago"
 
 restrict_arch: all
