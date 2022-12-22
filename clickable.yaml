@@ -10,6 +10,7 @@ image_setup:
   run:
   - mkdir -m 0755 /nix && chown phablet /nix
   - curl -L https://nixos.org/nix/install >/tmp/install-nix.sh
+  - su -l -m phablet -s /bin/bash -c "mkdir -p /home/phablet/.config/nix; echo \"sandbox = false\" >/home/phablet/.config/nix/nix.conf"
   - su -l -m phablet -s /bin/bash -c "sh /tmp/install-nix.sh --no-daemon --yes --no-channel-add --no-modify-profile"
   - echo "export PATH=/home/phablet/.nix-profile/bin:\$PATH" >>/home/phablet/.profile
   - su -l -m phablet -s /bin/bash -c "nix-env -f \"<nixpkgs>\" -iA purescript elmPackages.elm nodePackages.terser esbuild spago"
