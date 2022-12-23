@@ -335,6 +335,13 @@ encodeCipher
     , reprompt
     }
 
+-- | Check if the cipher is supported by Warden.
+supportedCipher :: CipherResponse -> Boolean
+-- We do not support organizations since that requires managing a separate set of 
+-- encryption keys
+supportedCipher { organizationId } | Just _ <- JNullable.toMaybe organizationId = false
+supportedCipher _ = true
+
 decodeCipher
   :: forall r
    . CipherResponse
@@ -345,7 +352,9 @@ decodeCipher
        , effect :: Effect
        | r
        )
-       Bridge.FullCipher
+       (Maybe Bridge.FullCipher)
+decodeCipher cipher | not (supportedCipher cipher) =
+  pure $ Nothing
 decodeCipher cipher = do
   name <- decrypt cipher.name
   cipherType <- case cipher.type of
@@ -429,7 +438,7 @@ decodeCipher cipher = do
                     , username
                     }
     n -> liftEffect $ throwError $ error $ "Unsupported cipher type: " <> show n
-  pure
+  pure $ Just
     $ wrap
         { cipher: cipherType
         , name

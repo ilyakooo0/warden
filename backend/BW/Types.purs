@@ -48,7 +48,7 @@ type ProfileResponse =
   , email :: String
   , emailVerified :: Boolean
   , masterPasswordHint :: JNullable String
-  , premiumPersonally :: Boolean
+  -- , premiumPersonally :: Boolean
   -- , premiumFromOrganization :: Boolean
   , culture :: JNullable String
   , twoFactorEnabled :: Boolean
@@ -57,7 +57,7 @@ type ProfileResponse =
   , securityStamp :: JNullable String
   , forcePasswordReset :: Boolean
   , usesKeyConnector :: Boolean
-  , organizations :: Array ProfileOrganizationResponse
+  -- , organizations :: Array ProfileOrganizationResponse
   , providers :: Array ProfileProviderResponse
   , providerOrganizations :: Array ProfileProviderOrganizationResponse
   }
