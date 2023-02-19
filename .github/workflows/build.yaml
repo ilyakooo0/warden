@@ -71,7 +71,7 @@ jobs:
         shell: bash
         run: |
           cd build/all/app/install/
-          zip . ../../../../dist.zip
+          zip -r ../../../../dist.zip . 
 
       - name: Upload dist to release
         if: github.event_name == 'release'
