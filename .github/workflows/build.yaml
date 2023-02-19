@@ -88,3 +88,4 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build/all/app/*.click
           tag: ${{ github.ref }}
+          file_glob: true
