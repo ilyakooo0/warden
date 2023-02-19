@@ -5,6 +5,8 @@ on:
     branches: ["master"]
   pull_request:
     branches: ["master"]
+  release:
+    types: [prereleased]
 
 jobs:
   build:
@@ -61,3 +63,28 @@ jobs:
         with:
           name: playwright-report
           path: tests/playwright-report/
+
+      # Upload release
+
+      - name: Zip Release Assets
+        if: github.event_name == 'release'
+        shell: bash
+        run: |
+          cd build/all/app/install/
+          zip . ../../../../dist.zip
+
+      - name: Upload dist to release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@2.4.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist.zip
+          tag: ${{ github.ref }}
+
+      - name: Upload click to release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@2.4.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/all/app/*.click
+          tag: ${{ github.ref }}
