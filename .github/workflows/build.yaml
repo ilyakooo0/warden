@@ -32,8 +32,13 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: warden
+          name: click
           path: dist/*
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: build/all/app/install/
 
       # Tests
 
