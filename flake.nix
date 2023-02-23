@@ -24,17 +24,16 @@
         spagoPkgs = pkgs.callPackage ./spago-packages.nix { };
         easy-ps = pkgs.callPackage inputs.easy-ps { };
         nix-filter = import inputs.nix-filter;
+
       in {
         packages = rec {
           bw = pkgs.buildNpmPackage {
             pname = "bw";
-            version = "";
+            version = "latest";
             npmDepsHash = "sha256-i6HVuyAODrjxGrWfhC6Pa6mwjALshKgsHQZKO7nq5Mo=";
             makeCacheWritable = true;
-            # npmFlags = [ "--legacy-peer-deps" ];
             src = inputs.bw;
             nativeBuildInputs = [ pkgs.python3 ];
-            # buildInputs = [ pkgs.libsecret.dev pkgs.pkgconfig ];
             buildPhase = ''
               (cd libs/common/ && rm -r spec && find . -name "*.spec.ts" -exec rm {} \; && npm exec -c "tsc -m es2020 -t es2018") '';
             installPhase = ''
@@ -45,6 +44,18 @@
             '';
             ELECTRON_SKIP_BINARY_DOWNLOAD = 1;
           };
+
+          backendBuildScript = pkgs.writeScript "build-backend.sh" ''
+            workdir=$(mktemp -d)
+            (
+              cd $workdir
+              cp -r $1 ./backend
+              cp -r ${bw} ./bw
+              cp ${./backend-main.js} backend.js
+              ${pkgs.esbuild}/bin/esbuild backend.js  --bundle --external:fs --external:path --loader:.wasm=base64 --outfile=$out 
+            )
+
+          '';
           backend-js = pkgs.stdenv.mkDerivation {
             name = "backend-js";
             buildInputs =
@@ -66,8 +77,6 @@
             '';
             buildPhase = ''
               build-spago-style "./backend/**/*.purs"
-              # spago bundle-app --no-install --no-build --global-cache=skip  # --source-maps --purs-args "-g sourcemaps" 
-              # spago build --no-install
             '';
             installPhase = ''
               mkdir $out
@@ -77,11 +86,7 @@
 
           backend =
             pkgs.runCommand "backend.js" { buildInputs = [ pkgs.esbuild ]; } ''
-              cp -r ${backend-js} ./backend
-              cp -r ${bw} ./bw
-              cp ${./backend.js} backend.js
-              esbuild backend.js  --bundle --external:fs --external:path --loader:.wasm=base64 --outfile=$out 
-
+              ${backendBuildScript} ${backend-js}
             '';
 
           frontend = pkgs.callPackage ./frontend.nix { };

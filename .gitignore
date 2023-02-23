@@ -17,3 +17,4 @@ node_modules/
 generated-docs
 backend.js.map
 .spago2nix
+backend.js
