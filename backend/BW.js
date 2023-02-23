@@ -5,7 +5,7 @@ import { AppIdService } from "../../bw/services/appId.service";
 import { ConsoleLogService } from "../../bw/services/consoleLog.service";
 import { EnvironmentService } from "../../bw/services/environment.service";
 import { StateMigrationService } from "../../bw/services/stateMigration.service";
-import { TokenService } from "../../bw/auth/services/token.service";
+import { TokenService } from "../../bw/services/token.service";
 import { WebCryptoFunctionService } from "../../bw/services/webCryptoFunction.service";
 import { Account, AccountProfile, AccountTokens } from "../../bw/models/domain/account";
 import {MemoryStorageService} from "../../bw/services/memoryStorage.service"
@@ -15,8 +15,8 @@ import { CryptoService } from "../../bw/services/crypto.service";
 
 import { I18nService } from "../../bw/services/i18n.service";
 import { StateService as BaseStateService } from "../../bw/services/state.service";
-import { PasswordTokenRequest } from "../../bw/auth/models/request/identity-token/password-token.request";
-import { TokenTwoFactorRequest} from "../../bw/auth/models/request/identity-token/token-two-factor.request";
+import { PasswordTokenRequest } from "../../bw/models/request/identity-token/password-token.request";
+import { TokenTwoFactorRequest} from "../../bw/models/request/identity-token/token-two-factor.request";
 import { CipherRequest } from "../../bw/vault/models/request/cipher.request";
 import { CipherCreateRequest } from "../../bw/vault/models/request/cipher-create.request";
 import { Cipher } from "../../bw/vault/models/domain/cipher";

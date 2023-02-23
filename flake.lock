@@ -3,16 +3,17 @@
     "bw": {
       "flake": false,
       "locked": {
-        "lastModified": 1677099785,
-        "narHash": "sha256-S+h2MbhrWeHaNGn8QazWIuA4prPHkKmN6YBFD08akB8=",
+        "lastModified": 1675446731,
+        "narHash": "sha256-IbFjYNYZep6W9c+dztJ9CXrwQ0cep3EKb6qnEvv4pj4=",
         "owner": "bitwarden",
         "repo": "clients",
-        "rev": "80c2f20f587c4a62c633a0ec134863a4a4713303",
+        "rev": "ff143760d4f527f2349333ee4b3004eeda68fac5",
         "type": "github"
       },
       "original": {
         "owner": "bitwarden",
         "repo": "clients",
+        "rev": "ff143760d4f527f2349333ee4b3004eeda68fac5",
         "type": "github"
       }
     },
