@@ -1,4 +1,4 @@
-import { EncString } from "../../deps/bw/libs/shared/dist/src/models/domain/encString"
+import { EncString } from "../../bw/models/domain/enc-string"
 
 export function fromString(str) {
   const x = new EncString(str)

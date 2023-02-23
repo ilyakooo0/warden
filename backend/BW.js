@@ -1,27 +1,28 @@
-import { StateFactory } from "../../deps/bw/libs/shared/dist/src/factories/stateFactory";
-import { GlobalState } from "../../deps/bw/libs/shared/dist/src/models/domain/globalState";
-import { ApiService } from "../../deps/bw/libs/shared/dist/src/services/api.service";
-import { AppIdService } from "../../deps/bw/libs/shared/dist/src/services/appId.service";
-import { ConsoleLogService } from "../../deps/bw/libs/shared/dist/src/services/consoleLog.service";
-import { EnvironmentService } from "../../deps/bw/libs/shared/dist/src/services/environment.service";
-import { StateMigrationService } from "../../deps/bw/libs/shared/dist/src/services/stateMigration.service";
-import { TokenService } from "../../deps/bw/libs/shared/dist/src/services/token.service";
-import { WebCryptoFunctionService } from "../../deps/bw/libs/shared/dist/src/services/webCryptoFunction.service";
-import { Account, AccountProfile, AccountTokens } from "../../deps/bw/libs/shared/dist/src/models/domain/account";
+import { StateFactory } from "../../bw/factories/stateFactory";
+import { GlobalState } from "../../bw/models/domain/global-state";
+import { ApiService } from "../../bw/services/api.service";
+import { AppIdService } from "../../bw/services/appId.service";
+import { ConsoleLogService } from "../../bw/services/consoleLog.service";
+import { EnvironmentService } from "../../bw/services/environment.service";
+import { StateMigrationService } from "../../bw/services/stateMigration.service";
+import { TokenService } from "../../bw/auth/services/token.service";
+import { WebCryptoFunctionService } from "../../bw/services/webCryptoFunction.service";
+import { Account, AccountProfile, AccountTokens } from "../../bw/models/domain/account";
+import {MemoryStorageService} from "../../bw/services/memoryStorage.service"
 
-// import BrowserStorageService from "../../../../deps/bw/libs/shared/dist/src/services/browserStorage.service";
-import { CryptoService } from "../../deps/bw/libs/shared/dist/src/services/crypto.service";
+// import BrowserStorageService from "../../../../bw/services/browserStorage.service";
+import { CryptoService } from "../../bw/services/crypto.service";
 
-import { I18nService } from "../../deps/bw/libs/shared/dist/src/services/i18n.service";
-import { StateService as BaseStateService } from "../../deps/bw/libs/shared/dist/src/services/state.service";
-import { PasswordTokenRequest } from "../../deps/bw/libs/shared/dist/src/models/request/identityToken/passwordTokenRequest";
-import { TokenRequestTwoFactor } from "../../deps/bw/libs/common/src/models/request/identityToken/tokenRequestTwoFactor";
-import { CipherRequest } from "../../deps/bw/libs/common/src/models/request/cipherRequest";
-import { CipherCreateRequest } from "../../deps/bw/libs/common/src/models/request/cipherCreateRequest";
-import { Cipher } from "../../deps/bw/libs/common/src/models/domain/cipher";
-import { CipherData } from "../../deps/bw/libs/common/src/models/data/cipherData";
-import { PasswordGenerationService } from "../../deps/bw/libs/common/src/services/passwordGeneration.service";
-import { TotpService } from "../../deps/bw/libs/shared/dist/src/services/totp.service"
+import { I18nService } from "../../bw/services/i18n.service";
+import { StateService as BaseStateService } from "../../bw/services/state.service";
+import { PasswordTokenRequest } from "../../bw/auth/models/request/identity-token/password-token.request";
+import { TokenTwoFactorRequest} from "../../bw/auth/models/request/identity-token/token-two-factor.request";
+import { CipherRequest } from "../../bw/vault/models/request/cipher.request";
+import { CipherCreateRequest } from "../../bw/vault/models/request/cipher-create.request";
+import { Cipher } from "../../bw/vault/models/domain/cipher";
+import { CipherData } from "../../bw/vault/models/data/cipher.data";
+import { PasswordGenerationService } from "../../bw/services/passwordGeneration.service";
+import { TotpService } from "../../bw/services/totp.service"
 
 function sanitize(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -73,7 +74,7 @@ export function getServices() {
             req.email,
             req.masterPasswordHash,
             req.captchaResponse,
-            new TokenRequestTwoFactor(
+            new TokenTwoFactorRequest(
               req.twoFactor.provider,
               req.twoFactor.token,
               req.twoFactor.remember
@@ -131,6 +132,7 @@ class MainBackground {
       new StateFactory(GlobalState, Account)
     );
     this.stateService = new StateService(
+      this.storageService,
       this.storageService,
       this.storageService,
       this.logService,
@@ -203,34 +205,6 @@ class MainBackground {
     ]);
 
     await this.stateService.clean({ userId: userId });
-  }
-}
-
-class MemoryStorageService {
-
-  constructor() {
-    this.storage = {};
-  }
-
-  async get(key) {
-    return this.storage[key]
-  }
-
-  async has(key) {
-    return key in this.storage;
-  }
-
-  async save(key, obj) {
-    if (obj == null) {
-      this.remove(key)
-      return
-    }
-
-    this.storage[key] = obj
-  }
-
-  async remove(key) {
-    delete this.storage[key]
   }
 }
 
@@ -314,7 +288,7 @@ class BrowserPlatformUtilsService {
   saveFile(win, blobData, blobOptions, fileName) {
     // BrowserApi.downloadFile(win, blobData, blobOptions, fileName);
   }
-  getApplicationVersion() {
+  getApplicationVersionNumber() {
     // return Promise.resolve(BrowserApi.getApplicationVersion());
   }
   supportsWebAuthn(win) {

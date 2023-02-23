@@ -125,7 +125,7 @@ in  upstream
       ]
     , repo =
         "https://github.com/ilyakooo0/purescript-argonaut-aeson-generic.git"
-    , version = "purescript-0.14"
+    , version = "3e388500811ef4b6718fc776789f3be050ad7b57"
     }
   with untagged-union =
     { dependencies =
@@ -147,7 +147,7 @@ in  upstream
     }
   with literals =
     { repo = "https://github.com/ilyakooo0/purescript-literals.git"
-    , version = "iko/_null"
+    , version = "6875fb28026595cfb780318305a77e79b098bb01"
     , dependencies =
       [ "assert"
       , "effect"
