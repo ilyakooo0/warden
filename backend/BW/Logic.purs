@@ -38,18 +38,21 @@ makePreloginKey
   -> Email
   -> Password
   -> Run
-       ( crypto ::
-           Reader CryptoService
+       ( crypto :: Reader CryptoService
        , effect :: Effect
        , aff :: Aff
        | r
        )
        SymmetricCryptoKey
-makePreloginKey { kdf, kdfIterations } (Email email') password = do
+makePreloginKey { kdf, kdfIterations, kdfMemory, kdfParallelism } (Email email') password = do
   crypto <- askAt (Proxy :: _ "crypto")
   let
     email = (String.trim >>> String.toLower) email'
-  liftPromise $ runFn4 crypto.makeKey password email kdf kdfIterations
+  liftPromise $ runFn4 crypto.makeKey password email kdf
+    { iterations: kdfIterations
+    , memory: kdfMemory
+    , parallelism: kdfParallelism
+    }
 
 makeDecryptionKey
   :: forall r

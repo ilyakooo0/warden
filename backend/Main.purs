@@ -132,7 +132,10 @@ main = do
                               }
                       pure $ Right resp
                   )
-                  (const $ pure $ Left unit)
+                  ( \err -> do
+                      log $ show err
+                      pure $ Left unit
+                  )
           case map (toEither1 >>> map toEither1) $ loginResponse of
             Left _ -> send Bridge.WrongPassword
             Right (Left { siteKey }) -> send $ Bridge.NeedsCaptcha siteKey

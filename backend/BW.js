@@ -23,6 +23,7 @@ import { Cipher } from "../../bw/vault/models/domain/cipher";
 import { CipherData } from "../../bw/vault/models/data/cipher.data";
 import { PasswordGenerationService } from "../../bw/services/passwordGeneration.service";
 import { TotpService } from "../../bw/services/totp.service"
+import { EncryptServiceImplementation } from "../../bw/services/cryptography/encrypt.service.implementation"
 
 function sanitize(obj) {
   return JSON.parse(JSON.stringify(obj));
@@ -163,8 +164,13 @@ class MainBackground {
     );
     this.i18nService = new I18nService("en");
     this.cryptoFunctionService = new WebCryptoFunctionService(window);
+    this.encryptService = new EncryptServiceImplementation(
+      this.cryptoFunctionService,
+      this.logService
+    );
     this.cryptoService = new BrowserCryptoService(
       this.cryptoFunctionService,
+      this.encryptService,
       this.platformUtilsService,
       this.logService,
       this.stateService

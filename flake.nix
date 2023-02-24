@@ -89,7 +89,7 @@
             ${backendBuildScript} ${backend-js}
           '';
 
-        frontend = pkgs.callPackage ./frontend.nix { };
+        frontend = pkgs.callPackage ./frontend.nix { inherit nix-filter; };
 
         warden-src = pkgs.runCommand "warden-src" { } ''
           mkdir -p $out
@@ -98,16 +98,28 @@
           cp -r ${frontend}/Main.min.js $out/elm.js
           cp ${./index.html} $out/index.html
           cp ${./style.css} $out/style.css
-          cp -r ${vanilla} $out/vanilla
+          cp -r ${inputs.vanilla} $out/vanilla
+        '';
+
+        warden-click-src = pkgs.runCommand "warden-click-src" { } ''
+          mkdir -p $out
+
+          cp ${./warden.apparmor} $out/warden.apparmor
+          cp ${./warden.desktop} $out/warden.desktop
+          cp ${./manifest.json} $out/manifest.json
+          cp ${./logo.png} $out/logo.png
+          cp -r ${warden-src}/* $out/
         '';
 
         warden = pkgs.writeScript "warden" ''
           ${pkgs.electron}/bin/electron ${warden-src}/index.html
         '';
 
-        vanilla = inputs.vanilla.outPath;
       in {
-        packages = { inherit bw frontend warden-src; };
+        packages = {
+          inherit bw frontend warden-src backendBuildScript warden-click-src;
+          vanilla = inputs.vanilla.outPath;
+        };
         apps = {
           inherit (spago2nix.apps.${system}) spago2nix;
           warden = {

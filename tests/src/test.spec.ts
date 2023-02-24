@@ -108,7 +108,7 @@ function cipherPage(name: string) {
 }
 
 test.beforeEach(async ({ page }) => {
-  await page.goto(`file://${__dirname}/../../build/all/app/install/index.html`);
+  await page.goto(`file://${__dirname}/../../result/index.html`);
   await page.addStyleTag({ content: '.hide-in-test {opacity: 0;}' })
 })
 

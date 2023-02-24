@@ -1,4 +1,4 @@
-{ pkgs }:
+{ pkgs, nix-filter }:
 with pkgs;
 
 let
@@ -38,7 +38,10 @@ let
 in mkDerivation {
   name = "frontend";
   srcs = ./elm-srcs.nix;
-  src = ./.;
+  src = nix-filter {
+    root = ./.;
+    include = [ (nix-filter.inDirectory ./frontend) ./elm.json ];
+  };
   targets = [ "Main" ];
   srcdir = "./frontend";
   outputJavaScript = true;
