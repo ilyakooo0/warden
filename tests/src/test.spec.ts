@@ -85,7 +85,7 @@ async function screenshot(page: Page) {
     await page.locator('.p-icon--spinner.u-animation--spin.spinner').waitFor({ state: "hidden" })
     await screenshot(page)
   } else {
-    await expect.soft(page).toHaveScreenshot({ animations: "disabled", fullPage: true })
+    await expect.soft(page).toHaveScreenshot({ animations: "disabled", fullPage: true, maxDiffPixelRatio: 0.001 })
   }
 }
 
