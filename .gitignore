@@ -19,3 +19,4 @@ backend.js.map
 .spago2nix
 backend.js
 vanilla
+dist
