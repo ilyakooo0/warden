@@ -10,6 +10,7 @@ import Data.Int as Int
 import Data.JNullable (JNullable)
 import Data.JOpt (JOpt)
 import Data.Maybe (Maybe(..))
+import Data.Nullable (Nullable)
 import Data.ShowableJson (ShowableJson)
 import Data.Timestamp (Timestamp)
 import Data.Traversable (for)
@@ -30,12 +31,21 @@ derive newtype instance EncodeJson EncryptedString
 derive newtype instance DecodeJson EncryptedString
 
 kdfPBKDF2_SHA256 = 0 :: KDF
+kdfArgon2id = 1 :: KDF
 
 type KDF = Int
 
 type PreloginResponse =
   { kdf :: KDF
   , kdfIterations :: Int
+  , kdfMemory :: JNullable Int
+  , kdfParallelism :: JNullable Int
+  }
+
+type KdfConfig =
+  { iterations :: Int
+  , memory :: JNullable Int
+  , parallelism :: JNullable Int
   }
 
 type PreloginRequest =

@@ -17,31 +17,31 @@ import Effect (Effect)
 import Effect.Unsafe (unsafePerformEffect)
 import Untagged.Union (type (|+|))
 
-type TotpService
-  = { getCode :: String -> Promise String
-    , getTimeInterval :: String -> Int
-    }
+type TotpService =
+  { getCode :: String -> Promise String
+  , getTimeInterval :: String -> Int
+  }
 
-type CryptoService
-  = { makeKey :: Fn4 Password String KDF Int (Promise SymmetricCryptoKey)
-    , hashPassword :: Fn3 Password SymmetricCryptoKey (JNullable HashPurpose) (Promise StringHash)
-    , decryptToUtf8 :: Fn2 EncString SymmetricCryptoKey (Promise String)
-    , decryptToBytes :: Fn2 EncString SymmetricCryptoKey (Promise ArrayBuffer)
-    , encrypt :: Fn2 String SymmetricCryptoKey (Promise EncString)
-    , stretchKey :: SymmetricCryptoKey -> Promise SymmetricCryptoKey
-    }
+type CryptoService =
+  { makeKey :: Fn4 Password String KDF KdfConfig (Promise SymmetricCryptoKey)
+  , hashPassword :: Fn3 Password SymmetricCryptoKey (JNullable HashPurpose) (Promise StringHash)
+  , decryptToUtf8 :: Fn2 EncString SymmetricCryptoKey (Promise String)
+  , decryptToBytes :: Fn2 EncString SymmetricCryptoKey (Promise ArrayBuffer)
+  , encrypt :: Fn2 String SymmetricCryptoKey (Promise EncString)
+  , stretchKey :: SymmetricCryptoKey -> Promise SymmetricCryptoKey
+  }
 
-type ApiService
-  = { postPrelogin :: PreloginRequest -> Promise PreloginResponse
-    , getProfile :: Unit -> Promise ProfileResponse
-    -- TODO: There can really be more request and response types. Maybe handle this later.
-    , postIdentityToken :: PasswordTokenRequest -> Promise (IdentityCaptchaResponse |+| IdentityTwoFactorResponse |+| IdentityTokenResponse)
-    , getSync :: Unit -> Promise SyncResponse
-    , postCipherCreate :: CipherResponse -> Promise CipherResponse
-    , putCipher :: CipherResponse -> Promise CipherResponse
-    , deleteCipher :: String -> Promise Unit
-    , postTwoFactorEmail :: TwoFactorEmailRequest -> Promise Unit
-    }
+type ApiService =
+  { postPrelogin :: PreloginRequest -> Promise PreloginResponse
+  , getProfile :: Unit -> Promise ProfileResponse
+  -- TODO: There can really be more request and response types. Maybe handle this later.
+  , postIdentityToken :: PasswordTokenRequest -> Promise (IdentityCaptchaResponse |+| IdentityTwoFactorResponse |+| IdentityTokenResponse)
+  , getSync :: Unit -> Promise SyncResponse
+  , postCipherCreate :: CipherResponse -> Promise CipherResponse
+  , putCipher :: CipherResponse -> Promise CipherResponse
+  , deleteCipher :: String -> Promise Unit
+  , postTwoFactorEmail :: TwoFactorEmailRequest -> Promise Unit
+  }
 
 type PasswordGeneration =
   { generatePassword :: Bridge.PasswordGeneratorConfig -> Promise String
@@ -55,15 +55,13 @@ cryptoFunctionsTypeSha512 = "sha512" :: CryptoFunctionsType
 
 cryptoFunctionsTypeMd5 = "md5" :: CryptoFunctionsType
 
-type CryptoFunctionsType
-  = String
+type CryptoFunctionsType = String
 
-type CryptoFunctions
-  = { hash :: Fn2 String CryptoFunctionsType (Promise Hash)
-    }
+type CryptoFunctions =
+  { hash :: Fn2 String CryptoFunctionsType (Promise Hash)
+  }
 
-newtype Hash
-  = Hash (ArrayBuffer)
+newtype Hash = Hash (ArrayBuffer)
 
 hashToArray :: Hash -> Array Int
 hashToArray (Hash buf) =
@@ -86,12 +84,12 @@ instance EncodeJson Hash where
 instance DecodeJson Hash where
   decodeJson = decodeJson >>> map arrayToHash
 
-type Services
-  = { crypto :: CryptoService
-    , getApi :: Urls -> JNullable IdentityTokenResponse -> Promise ApiService
-    , cryptoFunctions :: CryptoFunctions
-    , passwordGeneration :: PasswordGeneration
-    , totpService :: TotpService
-    }
+type Services =
+  { crypto :: CryptoService
+  , getApi :: Urls -> JNullable IdentityTokenResponse -> Promise ApiService
+  , cryptoFunctions :: CryptoFunctions
+  , passwordGeneration :: PasswordGeneration
+  , totpService :: TotpService
+  }
 
 foreign import getServices :: Effect Services

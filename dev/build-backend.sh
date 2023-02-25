@@ -1,3 +1,9 @@
 #!/bin/sh
 
-spago bundle-app --source-maps --purs-args "-g sourcemaps" --to backend.js
+set -e
+
+spago build
+
+export out="$(pwd)/backend.js"
+
+$(nix build .#backendBuildScript --print-out-paths) "$(pwd)/output"

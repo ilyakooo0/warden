@@ -7,7 +7,6 @@ static/backend.js
 .spago
 output
 .psc-ide-port
-backend.js
 elm.js
 output-es
 elm-stuff
@@ -17,3 +16,7 @@ node_modules/
 /tests/playwright/.cache/
 generated-docs
 backend.js.map
+.spago2nix
+backend.js
+vanilla
+dist
