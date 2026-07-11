@@ -15,6 +15,7 @@ import Data.JNullable as JNullable
 import Data.JOpt (JOpt(..), fromJOpt)
 import Data.Maybe (Maybe(..), fromMaybe, maybe)
 import Data.Newtype (class Newtype, unwrap, wrap)
+import Data.Number.Format as Number
 import Data.String as String
 import Data.SymmetricCryptoKey (SymmetricCryptoKey)
 import Data.SymmetricCryptoKey as SymmetricCryptoKey
@@ -26,10 +27,14 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
 import Effect.Exception (error)
 import Effect.Exception as Exc
+import Effect.Random (random)
+import Localstorage as Storage
 import Run (Run)
 import Run.Reader (Reader, askAt)
+import Storage (DeviceIDKey(..))
 import Type.Prelude (Proxy(..))
 import Untagged.Union (type (|+|))
+import Web.Storage.Storage (Storage)
 
 -- | Creates the master key
 makePreloginKey
@@ -96,6 +101,7 @@ getLogInRequestToken
        , crypto :: Reader CryptoService
        , effect :: Effect
        , aff :: Aff
+       , storage :: Reader Storage
        | r
        )
        (IdentityCaptchaResponse |+| IdentityTwoFactorResponse |+| IdentityTokenResponse)
@@ -106,6 +112,8 @@ getLogInRequestToken
   , captchaResponse
   , secondFactor: Bridge.Cmd_Login_secondFactor_Maybe secondFactor
   } = do
+  key <- makePreloginKey prelogin email password
+  crypto <- askAt (Proxy :: _ "crypto")
   let
     twoFactor =
       maybe
@@ -117,7 +125,11 @@ getLogInRequestToken
             x { provider = bridgeToSecondFactorType provider }
         )
         secondFactor
-  StringHash hashedPassword <- bwPasswordStringHash prelogin email password
+  _localHashedPassword <-
+    liftPromise
+      $ runFn3 crypto.hashPassword password key (nullify hashPurposeLocalAuthorization)
+  StringHash hashedPassword <- liftPromise $ runFn3 crypto.hashPassword password key jnull
+  deviceId <- getDeviceID
   api :: ApiService <- askAt (Proxy :: _ "api")
   liftPromise
     $ api.postIdentityToken
@@ -128,7 +140,7 @@ getLogInRequestToken
         , device:
             { type: deviceTypeUnknownBrowser
             , name: "Ubuntu Touch"
-            , identifier: "42"
+            , identifier: deviceId
             , pushToken: jnull
             }
         }
@@ -480,3 +492,21 @@ encryptNullable
 encryptNullable x = case unwrap x of
   Nothing -> pure jnull
   Just y -> nullify <$> encrypt y
+
+getDeviceID ::
+  forall r.
+  Run
+    ( effect :: Effect
+    , storage :: Reader Storage
+    | r
+    )
+    String
+getDeviceID = do
+  storage <- askAt (Proxy :: _ "storage")
+  maybeId <- liftEffect $ Storage.get storage DeviceIDKey
+  case maybeId of
+    Just id -> pure id
+    Nothing -> do
+      id <- map Number.toString $ liftEffect $ random
+      liftEffect $ Storage.store storage DeviceIDKey id
+      pure id

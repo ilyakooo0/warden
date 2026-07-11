@@ -2,7 +2,7 @@ module Storage where
 
 import Prelude
 
-import BW (Hash(..))
+import BW (Hash)
 import BW.Types (IdentityTokenResponse, SyncResponse, PreloginResponse)
 import Localstorage (class StorageKey)
 
@@ -35,3 +35,9 @@ data MasterPasswordHashKey
 
 instance StorageKey MasterPasswordHashKey Hash where
   storageKey MasterPasswordHashKey = "master-password-hash"
+
+data DeviceIDKey
+  = DeviceIDKey
+
+instance StorageKey DeviceIDKey String where
+  storageKey DeviceIDKey = "device-uuid"
