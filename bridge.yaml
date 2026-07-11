@@ -1,129 +1,159 @@
 Sub:
-- NeedsLogin
-- NeedsCaptcha: String
-- CaptchaDone
-- Error: String
-- LoadCiphers:
-    List:
+  - NeedsLogin
+  - NeedsCaptcha: String
+  - NeedsSecondFactor: { List: TwoFactorProviderType }
+  - CaptchaDone
+  - Error: String
+  - LoadCiphers:
+      List:
         name: String
         date: String
         id: String
         cipherType: CipherType
-- LoginSuccessful
-- WrongPassword
-- NeedsMasterPassword:
-    server: String
-    login: String
-- Reset
-- LoadCipher: FullCipher
-- RecieveEmail: String
-- CipherChanged: FullCipher
-- GeneratedPassword: String
-- CipherDeleted: FullCipher
+  - LoginSuccessful
+  - WrongPassword
+  - NeedsMasterPassword:
+      server: String
+      login: String
+  - Reset
+  - LoadCipher: FullCipher
+  - RecieveEmail: String
+  - CipherChanged: FullCipher
+  - GeneratedPassword: String
+  - CipherDeleted: FullCipher
+  - Totp:
+      source: String
+      code: String
+      interval: Int
 
 Cmd:
-- Init
-- Login:
-    email: String
-    server: String
-    password: String
-- NeedCiphersList
-- SendMasterPassword: String
-- NeedsReset
-- RequestCipher: String
-- NeedEmail
-- Copy: String
-- Open: String
-- UpdateCipher: FullCipher
-- CreateCipher: FullCipher
-- GeneratePassword: PasswordGeneratorConfig
-- DeleteCipher: FullCipher
+  - Init
+  - Login:
+      email: String
+      server: String
+      password: String
+      secondFactor:
+        Maybe:
+          provider: TwoFactorProviderType
+          token: String
+          remember: Bool
+  - ChooseSecondFactor:
+      factor: TwoFactorProviderType
+      email: String
+      server: String
+      password: String
+      requestFromServer: Bool
+  - NeedCiphersList
+  - SendMasterPassword: String
+  - NeedsReset
+  - RequestCipher: String
+  - NeedEmail
+  - Copy: String
+  - Open: String
+  - UpdateCipher: FullCipher
+  - CreateCipher: FullCipher
+  - GeneratePassword: PasswordGeneratorConfig
+  - DeleteCipher: FullCipher
+  - RequestTotp: String
 
 FullCipher:
-    reprompt: Int
-    favorite: Bool
-    id: String
-    name: String
-    cipher: Cipher
+  reprompt: Int
+  favorite: Bool
+  id: String
+  name: String
+  cipher: Cipher
+  collectionIds: { List: String }
 
 Cipher:
-- LoginCipher:
-    uris: {List: String}
-    username:
+  - LoginCipher:
+      uris: { List: String }
+      username:
         Maybe: String
-    password:
+      password:
         Maybe: String
-- NoteCipher: String
-- CardCipher:
-    cardholderName:
+      totp:
         Maybe: String
-    brand:
+  - NoteCipher: String
+  - CardCipher:
+      cardholderName:
         Maybe: String
-    number:
+      brand:
         Maybe: String
-    expMonth:
+      number:
         Maybe: String
-    expYear:
+      expMonth:
         Maybe: String
-    code:
+      expYear:
         Maybe: String
-- IdentityCipher:
-    title:
+      code:
         Maybe: String
-    firstName:
+  - IdentityCipher:
+      title:
         Maybe: String
-    middleName:
+      firstName:
         Maybe: String
-    lastName:
+      middleName:
         Maybe: String
-    address1:
+      lastName:
         Maybe: String
-    address2:
+      address1:
         Maybe: String
-    address3:
+      address2:
         Maybe: String
-    city:
+      address3:
         Maybe: String
-    state:
+      city:
         Maybe: String
-    postalCode:
+      state:
         Maybe: String
-    country:
+      postalCode:
         Maybe: String
-    company:
+      country:
         Maybe: String
-    email:
+      company:
         Maybe: String
-    phone:
+      email:
         Maybe: String
-    ssn:
+      phone:
         Maybe: String
-    username:
+      ssn:
         Maybe: String
-    passportNumber:
+      username:
         Maybe: String
-    licenseNumber:
+      passportNumber:
+        Maybe: String
+      licenseNumber:
         Maybe: String
 
 CipherType:
-- LoginType
-- CardType
-- NoteType
-- IdentityType
+  - LoginType
+  - CardType
+  - NoteType
+  - IdentityType
 
 PasswordGeneratorConfig:
-    length: Int
-    ambiguous: Bool
-    number: Bool
-    minNumber: Int
-    uppercase: Bool
-    minUppercase: Int
-    lowercase: Bool
-    minLowercase: Int
-    special: Bool
-    minSpecial: Int
-    type: String
-    numWords: Int
-    wordSeparator: String
-    capitalize: Bool
-    includeNumber: Bool
+  length: Int
+  ambiguous: Bool
+  number: Bool
+  minNumber: Int
+  uppercase: Bool
+  minUppercase: Int
+  lowercase: Bool
+  minLowercase: Int
+  special: Bool
+  minSpecial: Int
+  type: String
+  numWords: Int
+  wordSeparator: String
+  capitalize: Bool
+  includeNumber: Bool
+
+TwoFactorProviderType:
+  - Authenticator
+  - Email
+  - Duo
+  - Yubikey
+  - U2f
+  - Remember
+  - OrganizationDuo
+  - WebAuthn

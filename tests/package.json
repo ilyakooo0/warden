@@ -1,0 +1,9 @@
+{
+  "name": "warden-tests",
+  "version": "1.0.0",
+  "scripts": {},
+  "keywords": [],
+  "devDependencies": {
+    "@playwright/test": "^1.27.1"
+  }
+}

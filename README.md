@@ -5,7 +5,7 @@
 <h1 align="center">Warden</h1>
 
 <p align="center">
-  <a href="https://open-store.io/app/soy.iko.warden"><img src="https://open-store.io/badges/en_US.svg" alt="OpenStore" style="width: 100px;" /></a>
+  <a href="https://open-store.io/app/soy.iko.warden"><img src="https://open-store.io/badges/en_US.svg" alt="OpenStore" style="width: 150px;" /></a>
 </p>
 
 
@@ -23,6 +23,15 @@ Warden is a [Bitwarden](https://bitwarden.com)/[Vaultwarden](https://github.com/
 
 1. View and edit: passwords, contact, secure notes and credit cards
 2. Generate passwords
+
+## Support the project
+
+I fund the development of Warden out of my own pocket. If you find the project useful and don't want it to die, please consider donating what you think the app is worth to you.
+
+<p align="center">
+  <a href="https://iko.soy/donate"><img src="img/donate.png" alt="Donate" style="width: 150px;" /></a>
+</p>
+
 
 ## Porting
 

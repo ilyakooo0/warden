@@ -1,16 +1,8 @@
 clickable_minimum_required: 7.1.2
+framework: ubuntu-sdk-20.04
 builder: custom
 build: $SRC_DIR/build.sh
 kill: webapp-container*
-image_setup:
-  env: {}
-    # DEB_URL: http://archive.ubuntu.com/ubuntu
-    # HOST_ARCH: amd64
-
-    # PATH: /opt/someprogram/bin:$PATH
-  run:
-
-  - (cd /tmp && curl -L -o elm.gz https://github.com/elm/compiler/releases/download/0.19.1/binary-for-linux-64-bit.gz && gunzip elm.gz && chmod +x elm && mv elm /usr/local/bin/)
-  - npm install -g spago esbuild purescript terser --unsafe-perm=true
+docker_image: clickable/amd64-20.04-amd64
 
 restrict_arch: all

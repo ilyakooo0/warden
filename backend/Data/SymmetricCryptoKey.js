@@ -1,6 +1,5 @@
-import { SymmetricCryptoKey } from '../../deps/bw/libs/shared/dist/src/models/domain/symmetricCryptoKey.js';
+import { SymmetricCryptoKey } from '../../bw/models/domain/symmetric-crypto-key.js'
 
 export function fromArrayBuffer(arr) {
-  console.log("fromArrayBuffer " + arr)
   return new SymmetricCryptoKey(arr)
 }

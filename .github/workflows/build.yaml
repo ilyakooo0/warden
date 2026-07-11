@@ -2,32 +2,96 @@ name: CI
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
+  release:
+    types: [prereleased]
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: cachix/install-nix-action@v19
+
+      - name: Cachix
+        uses: cachix/cachix-action@v12
+        with:
+          name: iko
+          authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+
       - uses: actions/checkout@v3
         with:
           submodules: recursive
 
       - name: Install clickable
         run: |
+          docker --version
           sudo apt install adb git python3 python3-pip python3-setuptools
-          pip3 install --user clickable-ut --upgrade
+          pip3 install --user clickable-ut==7.10.0 --upgrade
           echo 'export PATH="$PATH:$HOME/.local/bin"' >> ~/.bashrc
 
-      - name: Build bw libraries
-        run: ./dev/build-bw.sh
+      - name: Build artifacts
+        run: ./dev/build.sh
 
       - name: Build Warden
-        run: clickable build --output dist
+        run: clickable build --output click
 
       - uses: actions/upload-artifact@v3
         with:
-          name: warden
-          path: dist/*
+          name: click
+          path: click/*
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+
+      # Tests
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install test dependencies
+        working-directory: tests
+        run: |
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Run tests
+        working-directory: tests
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: tests/playwright-report/
+
+      # Upload release
+
+      - name: Zip Release Assets
+        if: github.event_name == 'release'
+        shell: bash
+        run: |
+          cd dist/
+          zip -r ../../../../dist.zip . 
+
+      - name: Upload dist to release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@2.4.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist.zip
+          tag: ${{ github.ref }}
+
+      - name: Upload click to release
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@2.4.1
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/all/app/*.click
+          tag: ${{ github.ref }}
+          file_glob: true

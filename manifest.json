@@ -1,15 +1,15 @@
 {
     "name": "soy.iko.warden",
-    "description": "A simple bitwarden client",
+    "description": "A simple Bitwarden client",
     "architecture": "@CLICK_ARCH@",
     "title": "Warden",
     "hooks": {
-        "appname": {
-            "apparmor": "appname.apparmor",
-            "desktop": "appname.desktop"
+        "warden": {
+            "apparmor": "warden.apparmor",
+            "desktop": "warden.desktop"
         }
     },
-    "version": "1.0.0",
-    "maintainer": "Ilia Kostiuchenko <email@iko.soy>",
+    "version": "1.2.4",
+    "maintainer": "Ilia Kostiuchenko <mail@iko.soy>",
     "framework": "@CLICK_FRAMEWORK@"
 }

@@ -1,6 +1,21 @@
+function searchForInit(obj) {
+  if (obj.init) {
+    return obj.init
+  } else {
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        const result = searchForInit(obj[key])
+        if (result) {
+          return result
+        }
+      }
+    }
+  }
+}
+
 export function startElm(element) {
   return function () {
-    return Elm.Main.init({
+    return searchForInit(Elm)({
       node: document.getElementById(element)
     })
   }
